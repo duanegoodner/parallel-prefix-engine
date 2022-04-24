@@ -43,4 +43,6 @@ int main(int argc, char *argv[])
 
     // free(arr);
     MPI_Finalize();
+
+
 }
