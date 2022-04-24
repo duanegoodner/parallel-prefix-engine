@@ -1,0 +1,6 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/duane/dproj/UIUC-CS484/mp4'
+make: Leaving directory '/home/duane/dproj/UIUC-CS484/mp4'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+
