@@ -33,14 +33,14 @@ int main(int argc, char *argv[])
         arr[i].value = rand();
     }
 
-    // print_global_vals(myrank, nprocs, N, arr);
+    print_global_vals(myrank, nprocs, N, arr);
 
     int count;
     item* result;
     my_sort(N, arr, &count, &result);
 
-    print_global_vals(myrank, nprocs, count, result);
+    // print_global_vals(myrank, nprocs, count, result);
 
-    free(arr);
+    // free(arr);
     MPI_Finalize();
 }
