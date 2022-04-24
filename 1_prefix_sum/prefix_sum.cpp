@@ -52,6 +52,7 @@ void my_prefix_sum(int local_n, int *sum_matrix)
     int row_comm_buff[local_n];
     int row_comm_storage[local_n];
 
+    // should be able to replace this with fill
     for (int storage_row = 0; storage_row < local_n; storage_row++) {
         row_comm_storage[storage_row] = 0;
     }
@@ -74,13 +75,13 @@ void my_prefix_sum(int local_n, int *sum_matrix)
             for (int local_row = 0; local_row < local_n; local_row++) {
                 row_comm_storage[local_row] += row_comm_buff[local_row];
             }
-            std::cout << "Process " << my_proc_row << ", " << my_proc_col
-                << " just received "
-                << row_comm_buff[0] << ", " << row_comm_buff[1] << ", " << row_comm_buff[2]
-                << " from column " << sending_proc_col
-                << " updated incoming totals are "
-                << row_comm_storage[0] << ", " << row_comm_storage[1] << ", " << row_comm_storage[2]
-                << std::endl;
+            // std::cout << "Process " << my_proc_row << ", " << my_proc_col
+            //     << " just received "
+            //     << row_comm_buff[0] << ", " << row_comm_buff[1] << ", " << row_comm_buff[2]
+            //     << " from column " << sending_proc_col
+            //     << " updated incoming totals are "
+            //     << row_comm_storage[0] << ", " << row_comm_storage[1] << ", " << row_comm_storage[2]
+            //     << std::endl;
         }
         MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -91,9 +92,53 @@ void my_prefix_sum(int local_n, int *sum_matrix)
         }
     }
 
-    // int col_comm_buff[local_n];
-    // int col_comm_storage[p * local_n];
-    // std::fill(col_comm_storage, row_comm_storage + local_n, 0);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    int col_comm_buff[local_n];
+    int col_comm_storage[local_n];
+
+    // should be able to replace this with fill
+    for (int storage_col = 0; storage_col < local_n; storage_col++) {
+        col_comm_storage[storage_col] = 0;
+    }
+
+    for (int sending_proc_row = 0; sending_proc_row < p - 1; sending_proc_row++) {
+        if (sending_proc_row == my_proc_row) {
+            for (int local_col = 0; local_col < local_n; local_col++) {
+                col_comm_buff[local_col] = sum_matrix[(local_n - 1) * local_n + local_col];
+            }
+
+            // std::cout << "Process " << my_proc_row << ", " << my_proc_col
+            //     << " just wrote the following to col_comm_buff: "
+            //     << col_comm_buff[0] << ", " << col_comm_buff[1] << ", " << col_comm_buff[2]
+            //     << std::endl;
+        }
+
+        MPI_Bcast(col_comm_buff, local_n, MPI_INT, sending_proc_row, comm_col);
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        if (my_proc_row > sending_proc_row) {
+            for (int local_col = 0; local_col < local_n; local_col++) {
+                col_comm_storage[local_col] += col_comm_buff[local_col];
+            }
+
+            std::cout << "Process " << my_proc_row << ", " << my_proc_col
+                << " just received "
+                << col_comm_buff[0] << ", " << col_comm_buff[1] << ", " << col_comm_buff[2]
+                << " from row " << sending_proc_row
+                << " updated incoming totals are "
+                << col_comm_storage[0] << ", " << col_comm_storage[1] << ", " << col_comm_storage[2]
+                << std::endl;
+
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    for (int local_row = 0; local_row < local_n; local_row++) {
+            for (int local_col = 0; local_col < local_n; local_col++) {
+                sum_matrix[local_row * local_n + local_col] += col_comm_storage[local_col];
+            }
+        }
 
     // for (int sending_proc_row = 0; sending_proc_row < p - 1; sending_proc_row++) {
     //     if (sending_proc_row == my_proc_row) {
