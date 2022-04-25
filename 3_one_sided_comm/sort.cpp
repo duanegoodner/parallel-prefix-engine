@@ -90,25 +90,28 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
 
 
     myResult = (item **) malloc(*nOut * sizeof(item));
+    std::cout << "Process " << rank << " allocated space for " << *nOut << " items in myResult"
+        << std::endl;
 
-    // item** local_result = malloc(*nOut * sizeof(item));
+
+    item* my_simple_result = (item *) malloc(*nOut * sizeof(item));
 
     // debug print OUTGOING BUFFER KEYS
     for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
         for (int outgoing_index = 0; outgoing_index < my_counts[dest_proc]; outgoing_index++) {
-            std::cout << "Proces  " << rank << " has item with key "
-                << outgoing_buffer[dest_proc][outgoing_index]->key
-                << " for process " << dest_proc << std::endl;
+            // std::cout << "Proces  " << rank << " has item with key "
+            //     << outgoing_buffer[dest_proc][outgoing_index]->key
+            //     << " for process " << dest_proc << std::endl;
         }
     }
 
-    // int first_dest_index = my_prefix_counts[rank];
+    // SELF COPY WITH SINGLE POINTER RESULT
+    // int first_simple_dest_index = my_prefix_counts[rank];
     // for (int self_copy_buf_idx = 0; self_copy_buf_idx < my_counts[rank]; self_copy_buf_idx++) {
-    //     local_result[first_dest_index + self_copy_buf_idx] = outgoing_buffer[rank][self_copy_buf_idx];
-    //     std::cout << "Process " << rank << " just placed item with key = "
-    //         << myResult[first_dest_index + self_copy_buf_idx]->key << " at its Results index "
-    //         << first_dest_index + self_copy_buf_idx << std::endl;
-
+    //     my_simple_result[first_simple_dest_index + self_copy_buf_idx] = *outgoing_buffer[rank][self_copy_buf_idx];
+    // }
+    // for (int simple_result_index = 0; simple_result_index < *nOut; simple_result_index++) {
+    //     std::cout <<  my_simple_result[simple_result_index].key << std::endl;
     // }
 
 
@@ -122,9 +125,9 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
 
     }
 
-    for (int result_index = 0; result_index < *nOut; result_index++) {
-        std::cout <<  myResult[0][result_index].key << std::endl;
-    }
+    // for (int result_index = 0; result_index < *nOut; result_index++) {
+    //     std::cout <<  myResult[result_index]->key << std::endl;
+    // }
 
     MPI_Datatype item_type;
     MPI_Type_contiguous(2, MPI_INT, &item_type);
@@ -133,20 +136,18 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
     MPI_Win win;
 
     MPI_Win_create(
-        myResult,
-        *nOut * sizeof(item),
-        sizeof(item),
+        *myResult,
+        *nOut * (int) sizeof(item),
+        (int) sizeof(item),
         MPI_INFO_NULL,
         MPI_COMM_WORLD,
         &win);
 
-
-    for (int result_index = 0; result_index < *nOut; result_index++) {
-        std::cout <<  myResult[0][result_index].key << std::endl;
-    }
+    // for (int result_index = 0; result_index < *nOut; result_index++) {
+    //     std::cout <<  myResult[0][result_index].key << std::endl;
+    // }
 
     MPI_Win_fence(0, win);
-
 
 
     for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
@@ -154,67 +155,40 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
             // std::cout << " Process " << rank << " has data to put in process "
             //     << dest_proc << std::endl;
 
-            MPI_Put(
-                outgoing_buffer[dest_proc],
-                my_counts[dest_proc],
-                item_type,
-                dest_proc,
-                my_prefix_counts[dest_proc],
-                my_counts[dest_proc],
-                MPI_INT,
-                win);
-        }
+    //         MPI_Put(
+    //             outgoing_buffer[dest_proc],
+    //             my_counts[dest_proc],
+    //             item_type,
+    //             dest_proc,
+    //             my_prefix_counts[dest_proc],
+    //             my_counts[dest_proc],
+    //             MPI_INT,
+    //             win);
+    //     }
     }
 
     MPI_Win_fence(0, win);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    //  for (int result_index = 0; result_index < *nOut; result_index++) {
-    //     std::cout <<  myResult[0][result_index].key << std::endl;
+
+    }
+
+    if (rank == 0) {
+        std::cout << "Process " << rank << " has key value of " <<
+            myResult[0]->key << " at index 0" << std::endl;
+    }
+
+    //     if (rank == 0) {
+    //     std::cout << "Process " << rank << " has key value of " <<
+    //         myResult[1]->key << " at index 1" << std::endl;
+    // }
+
+    //     if (rank == 0) {
+    //     std::cout << "Process " << rank << " has key value of " <<
+    //         myResult[2]->key << " at index 2" << std::endl;
     // }
 
 
 
-
-
-
-
-
-
-
-
-    // for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
-    //     if (dest_proc == rank) {
-    //         int copy_dest_index = my_prefix_counts[dest_proc];
-    //         for (int item_to_me = 0; item_to_me < my_counts[dest_proc]; item_to_me++) {
-    //             myResult[copy_dest_index] = outgoing_buffer[dest_proc][copy_dest_index];
-
-    //             std::cout << "Process " << rank << "just copied value with key "
-    //                 << myResult[copy_dest_index]->key << " to its index # "
-    //                 << copy_dest_index << std::endl;
-
-
-    //             copy_dest_index++;
-
-
-    //         }
-    //     }
-    //     // else {
-    //     //     MPI_Put(
-    //     //         outgoing_buffer[dest_proc],
-    //     //         my_counts[dest_proc],
-    //     //         MPI_LONG,
-    //     //         dest_proc,
-    //     //         my_prefix_counts[dest_proc],
-    //     //         my_counts[dest_proc],
-    //     //         MPI_LONG,
-    //     //         win);
-    //     // }
-    // }
-
-
-
-    // for (int result_entry = 0; result_entry < *nOut; result_entry++) {
-    //     std::cout << rank << " has entry with " << myItems[result_entry].key << std::endl;
-    // }
 
 }
