@@ -12,41 +12,27 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    // get quantity of each key type
     int my_counts[nprocs];
-    for (int count_index = 0; count_index < nprocs; count_index++) {
-        my_counts[count_index] = 0;
-    }
-
-    for (int my_item_index = 0; my_item_index < N; my_item_index++) {
+    std::fill(my_counts, my_counts + nprocs, 0);
+    for (auto my_item_index = 0; my_item_index < N; my_item_index++) {
         my_counts[myItems[my_item_index].key] += 1;
     }
 
-    // std::cout << "Process " << rank << "'s key_value counts are "
-    //     << my_counts[0] << ", "
-    //     << my_counts[1] << ", "
-    //     << my_counts[2]
-    //     << std::endl;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    item** outgoing_buffer[nprocs];
-
+    // copy each item to appropriate outgoing buffer
+    item** outgoing_buffers[nprocs];
     for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
         int outgoing_counts = 0;
-        outgoing_buffer[dest_proc] = (item**) malloc(my_counts[dest_proc] * sizeof(item*));
+        outgoing_buffers[dest_proc] = (item**) malloc(my_counts[dest_proc] * sizeof(item*));
         for (int my_item_index = 0; my_item_index < N; my_item_index++) {
             if (myItems[my_item_index].key == dest_proc) {
-                outgoing_buffer[dest_proc][outgoing_counts] = &myItems[my_item_index];
+                outgoing_buffers[dest_proc][outgoing_counts] = &myItems[my_item_index];
                 outgoing_counts++;
             }
         }
     }
 
-    int my_prefix_counts[nprocs];
-    for (int prefix_count_index = 0; prefix_count_index < nprocs; prefix_count_index++) {
-        my_prefix_counts[prefix_count_index] = 0;
-    }
-
+    // each process gets total number of items with key == its rank value
     for (int receiving_rank = 0; receiving_rank < nprocs; receiving_rank++) {
         MPI_Reduce(&my_counts[receiving_rank],
         nOut,
@@ -57,8 +43,12 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         MPI_COMM_WORLD);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    /*
+    Each process learns # of items of each key val in lower rank prcesses. Will
+    used this info to know where to place items in results buffers.
+     */
+    int my_prefix_counts[nprocs];
+    std::fill(my_prefix_counts, my_prefix_counts + nprocs, 0);
     for (int prefix_count_index = 0; prefix_count_index < nprocs; prefix_count_index++) {
         MPI_Exscan(&my_counts[prefix_count_index],
         &my_prefix_counts[prefix_count_index],
@@ -66,35 +56,24 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         MPI_INT,
         MPI_SUM,
         MPI_COMM_WORLD);
-
-        MPI_Barrier(MPI_COMM_WORLD);
     }
 
+    // allocate memory for storing all items with key == rank
     item * result = (item *) malloc(*nOut * sizeof(item));
 
-    // directly copy items from self (no MPI_Put needed)
+    // items already on processor get directly copied to result memory
     int self_copy_dest_idx = my_prefix_counts[rank];
     for (int source_buf_idx = 0; source_buf_idx < my_counts[rank]; source_buf_idx++) {
-        result[self_copy_dest_idx + source_buf_idx] = *outgoing_buffer[rank][source_buf_idx];
+        result[self_copy_dest_idx + source_buf_idx] = *outgoing_buffers[rank][source_buf_idx];
     }
 
+    // custom MPI Datatype to be used during MPI_Put
     MPI_Datatype item_type;
-    int lengths[2] = {1, 1};
-    MPI_Aint displacements[2];
-    struct item dummy_item;
-    MPI_Aint base_address;
-    MPI_Get_address(&dummy_item, &base_address);
-    MPI_Get_address(&dummy_item.key, &displacements[0]);
-    MPI_Get_address(&dummy_item.value, &displacements[1]);
-    displacements[0] = MPI_Aint_diff(displacements[0], base_address);
-    displacements[1] = MPI_Aint_diff(displacements[1], base_address);
-
-    MPI_Datatype types[2] = {MPI_INT, MPI_INT};
-    MPI_Type_create_struct(2, lengths, displacements, types, &item_type);
+    MPI_Type_contiguous(2, MPI_INT, &item_type);
     MPI_Type_commit(&item_type);
 
+    // expose result memory for one-sided communication
     MPI_Win win;
-
     MPI_Win_create(
         result,
         *nOut * (int) sizeof(item),
@@ -105,12 +84,13 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
 
     MPI_Win_fence(0, win);
 
+    // Couldn't get multi-item Put to work, so use loop and Put one at a time
     for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
         if ((dest_proc != rank)) {
             int dest_index = my_prefix_counts[dest_proc];
             for (int outgoing_index = 0; outgoing_index < my_counts[dest_proc]; outgoing_index++) {
                 MPI_Put(
-                    outgoing_buffer[dest_proc][outgoing_index],
+                    outgoing_buffers[dest_proc][outgoing_index],
                     1,
                     item_type,
                     dest_proc,
@@ -120,19 +100,10 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
                     win
                 );
             }
-
-        MPI_Barrier(MPI_COMM_WORLD);
         }
-        MPI_Barrier(MPI_COMM_WORLD);
     }
 
     MPI_Win_fence(0, win);
-
-    for (int result_idx = 0; result_idx < *nOut; result_idx++) {
-        std::cout << "Proces " << rank << " has item with index = "
-            << result[result_idx].key << " as its element #" << result_idx
-            << std::endl;
-    }
 
     *myResult = result;
 }
