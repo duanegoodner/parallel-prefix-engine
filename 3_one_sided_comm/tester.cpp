@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     item* result;
     my_sort(N, arr, &count, &result);
 
-    // print_global_vals(myrank, nprocs, count, result);
+    print_global_vals(myrank, nprocs, count, result);
 
     // free(arr);
     MPI_Finalize();

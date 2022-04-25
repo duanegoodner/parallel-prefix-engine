@@ -37,13 +37,7 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         for (int my_item_index = 0; my_item_index < N; my_item_index++) {
             if (myItems[my_item_index].key == dest_proc) {
                 outgoing_buffer[dest_proc][outgoing_counts] = &myItems[my_item_index];
-
-                // std::cout << "Process " << rank << " just add item with key value "
-                //     << outgoing_buffer[dest_proc][outgoing_counts]->key << " to its buffer for "
-                //     << dest_proc << std::endl;
-
                 outgoing_counts++;
-
             }
         }
     }
@@ -65,11 +59,6 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    std::cout << "Process " << rank << " needs to allocate space for "
-        << *nOut << " items"
-        << std::endl;
-
-
     for (int prefix_count_index = 0; prefix_count_index < nprocs; prefix_count_index++) {
         MPI_Exscan(&my_counts[prefix_count_index],
         &my_prefix_counts[prefix_count_index],
@@ -81,16 +70,7 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         MPI_Barrier(MPI_COMM_WORLD);
     }
 
-    // std::cout << "The prefix counts for process " << rank << " are "
-    //     << my_prefix_counts[0] << ", "
-    //     << my_prefix_counts[1] << ", "
-    //     << my_prefix_counts[2]
-    //     << std::endl;
-
-
     item * result = (item *) malloc(*nOut * sizeof(item));
-    //   std::cout << "Process " << rank << " allocated space for " << *nOut << " items in result"
-    //     << std::endl;
 
     // directly copy items from self (no MPI_Put needed)
     int self_copy_dest_idx = my_prefix_counts[rank];
@@ -98,40 +78,19 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         result[self_copy_dest_idx + source_buf_idx] = *outgoing_buffer[rank][source_buf_idx];
     }
 
-    // check what's in results now
-    // for (int result_idx = 0; result_idx < *nOut; result_idx++) {
-    //     std::cout << "Process " << rank << " has item with key = "
-    //         << result[result_idx].key << " at index " << result_idx
-    //         << std::endl;
-    // }
-
-    // myResult = (item **) malloc(*nOut * sizeof(item));
-    // std::cout << "Process " << rank << " allocated space for " << *nOut << " items in myResult"
-    //     << std::endl;
-
-
-    // debug print OUTGOING BUFFER KEYS
-    // for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
-    //     for (int outgoing_index = 0; outgoing_index < my_counts[dest_proc]; outgoing_index++) {
-    //         std::cout << "Proces  " << rank << " has item with key "
-    //             << outgoing_buffer[dest_proc][outgoing_index]->key
-    //             << " for process " << dest_proc << std::endl;
-    //     }
-    // }
-
-
-    // SELF COPY WITH DOUBLE POINTER RESULT
-    // int first_dest_index = my_prefix_counts[rank];
-    // for (int self_copy_buf_idx = 0; self_copy_buf_idx < my_counts[rank]; self_copy_buf_idx++) {
-    //     myResult[first_dest_index + self_copy_buf_idx] = outgoing_buffer[rank][self_copy_buf_idx];
-    //     std::cout << "Process " << rank << " just placed item with key = "
-    //         << myResult[first_dest_index + self_copy_buf_idx]->key << " at its Results index "
-    //         << first_dest_index + self_copy_buf_idx << std::endl;
-
-    // }
-
     MPI_Datatype item_type;
-    MPI_Type_contiguous(2, MPI_INT, &item_type);
+    int lengths[2] = {1, 1};
+    MPI_Aint displacements[2];
+    struct item dummy_item;
+    MPI_Aint base_address;
+    MPI_Get_address(&dummy_item, &base_address);
+    MPI_Get_address(&dummy_item.key, &displacements[0]);
+    MPI_Get_address(&dummy_item.value, &displacements[1]);
+    displacements[0] = MPI_Aint_diff(displacements[0], base_address);
+    displacements[1] = MPI_Aint_diff(displacements[1], base_address);
+
+    MPI_Datatype types[2] = {MPI_INT, MPI_INT};
+    MPI_Type_create_struct(2, lengths, displacements, types, &item_type);
     MPI_Type_commit(&item_type);
 
     MPI_Win win;
@@ -144,28 +103,27 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         MPI_COMM_WORLD,
         &win);
 
-    // for (int result_index = 0; result_index < *nOut; result_index++) {
-    //     std::cout <<  result[result_index].key << std::endl;
-    // }
-
     MPI_Win_fence(0, win);
 
-
     for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
-        if ((dest_proc != rank) & (my_counts[dest_proc] != 0)) {
-            std::cout << " Process " << rank << " has data to put in process "
-                << dest_proc << std::endl;
+        if ((dest_proc != rank)) {
+            int dest_index = my_prefix_counts[dest_proc];
+            for (int outgoing_index = 0; outgoing_index < my_counts[dest_proc]; outgoing_index++) {
+                MPI_Put(
+                    outgoing_buffer[dest_proc][outgoing_index],
+                    1,
+                    item_type,
+                    dest_proc,
+                    my_prefix_counts[dest_proc] + outgoing_index,
+                    1,
+                    item_type,
+                    win
+                );
+            }
 
-            MPI_Put(
-                *outgoing_buffer[dest_proc],
-                my_counts[dest_proc],
-                item_type,
-                dest_proc,
-                my_prefix_counts[dest_proc],
-                my_counts[dest_proc],
-                item_type,
-                win);
+        MPI_Barrier(MPI_COMM_WORLD);
         }
+        MPI_Barrier(MPI_COMM_WORLD);
     }
 
     MPI_Win_fence(0, win);
@@ -175,30 +133,6 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
             << result[result_idx].key << " as its element #" << result_idx
             << std::endl;
     }
+
+    *myResult = result;
 }
-
-    // MPI_Win_fence(0, win);
-    // MPI_Barrier(MPI_COMM_WORLD);
-
-
-
-
-    // if (rank == 0) {
-    //     std::cout << "Process " << rank << " has key value of " <<
-    //         myResult[0]->key << " at index 0" << std::endl;
-    // }
-
-    //     if (rank == 0) {
-    //     std::cout << "Process " << rank << " has key value of " <<
-    //         myResult[1]->key << " at index 1" << std::endl;
-    // }
-
-    //     if (rank == 0) {
-    //     std::cout << "Process " << rank << " has key value of " <<
-    //         myResult[2]->key << " at index 2" << std::endl;
-    // }
-
-
-
-
-// }
