@@ -103,7 +103,23 @@ void my_sort(int N, item *myItems, int *nOut, item **myResult)
         }
     }
 
-    MPI_Win_fence(0, win);
+    // Seems like this should send multiple items correctly, but doesn't work
+    //
+    // for (int dest_proc = 0; dest_proc < nprocs; dest_proc++) {
+    //     if ((dest_proc != rank)) {
+    //         MPI_Put(
+    //                 *outgoing_buffers[dest_proc],
+    //                 my_counts[dest_proc],
+    //                 item_type,
+    //                 dest_proc,
+    //                 my_prefix_counts[dest_proc],
+    //                 my_counts[dest_proc],
+    //                 item_type,
+    //                 win
+    //             );
+    //     }
+    // }
 
+    MPI_Win_fence(0, win);
     *myResult = result;
 }
