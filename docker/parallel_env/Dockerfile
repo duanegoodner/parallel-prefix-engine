@@ -17,6 +17,8 @@ WORKDIR ${BUILD_DIR}
 RUN sudo apt-get update && \
     sudo apt-get install -y --no-install-recommends \
     build-essential \
+    mpich \
+    libmpich-dev \
     ca-certificates \
     libpq-dev \
     git \
@@ -24,6 +26,7 @@ RUN sudo apt-get update && \
     wget \
     zsh \
     nano \
+    clang-format \
     && sudo rm -rf /var/lib/apt/lists/*
 
 COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
@@ -37,15 +40,12 @@ RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
     && source ~/miniconda3/bin/activate \
     && conda init --all
 
-# Install Poetry (as PRIMARY_USER)
-# RUN curl -sSL https://install.python-poetry.org | python3 -
+COPY ./env.yml /home/${PRIMARY_USER}
+RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /home/${PRIMARY_USER}/env.yml
+RUN echo "conda activate project_env" >> ~/.bashrc
+RUN echo "conda activate project_env" >> ~/.zshrc
 
-# # Ensure Poetry is in PRIMARY_USER's PATH
-# ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
 
-# # Persist Poetry's path in user's profile for interactive sessions
-# RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
-#     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
 
 RUN sudo mkdir /home/${PRIMARY_USER}/project
 WORKDIR /home/${PRIMARY_USER}/project
