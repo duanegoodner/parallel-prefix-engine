@@ -86,8 +86,8 @@ message(STATUS "Building with compile options: ${CMAKE_CXX_FLAGS}")
 # ===========================
 
 set (SRC_FILES
-    src/prefix_sum/mpi_prefix_sum.cpp
-    src/prefix_sum/mpi_tester.cpp
+    src/mpi_prefix_sum/mpi_prefix_sum.cpp
+    src/mpi_prefix_sum/mpi_tester.cpp
 )
 
 add_executable(prefix_sum_mpi ${SRC_FILES})
