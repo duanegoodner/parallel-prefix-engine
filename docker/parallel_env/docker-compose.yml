@@ -28,10 +28,51 @@ services:
     volumes:
       - ${LOCAL_PROJECT_ROOT}:/home/gen_user/project
       - /etc/localtime:/etc/localtime:ro
+    # ports:
+    #   - "127.0.0.1:8888:8888"
+    init: true
+    stdin_open: true
+    tty: true
+  
 
-    ports:
-      - "127.0.0.1:8888:8888"
+  hpc_mpich:
+    image: hpc_mpich
+    build:
+      context: ../
+      dockerfile: ./parallel_env/Dockerfile.hpc_mpich
+      args:
+        - PRIMARY_UID=${UID}
+        - PRIMARY_GID=${GID}
+        - PRIMARY_USER=gen_user
+    container_name: hpc_mpich
+    entrypoint:
+      [ "/bin/bash", "/usr/local/entrypoints/entrypoint_simple_persistence.sh" ]
+    volumes:
+      - ${LOCAL_PROJECT_ROOT}:/home/gen_user/project
+      - /etc/localtime:/etc/localtime:ro
+    # ports:
+    #   - "127.0.0.1:8888:8888"
+    init: true
+    stdin_open: true
+    tty: true
 
+  hpc_openmpi:
+    image: hpc_openmpi
+    build:
+      context: ../
+      dockerfile: ./parallel_env/Dockerfile.hpc_openmpi
+      args:
+        - PRIMARY_UID=${UID}
+        - PRIMARY_GID=${GID}
+        - PRIMARY_USER=gen_user
+    container_name: hpc_openmpi
+    entrypoint:
+      [ "/bin/bash", "/usr/local/entrypoints/entrypoint_simple_persistence.sh" ]
+    volumes:
+      - ${LOCAL_PROJECT_ROOT}:/home/gen_user/project
+      - /etc/localtime:/etc/localtime:ro
+    # ports:
+    #   - "127.0.0.1:8888:8888"
     init: true
     stdin_open: true
     tty: true
