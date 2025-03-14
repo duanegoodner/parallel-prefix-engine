@@ -1,9 +1,9 @@
 
 services:
-  hpc_app:
+  hpc_base:
     env_file:
       - .env
-    image: hpc_app
+    image: hpc_base
     deploy:
       resources:
         reservations:
@@ -13,13 +13,13 @@ services:
               capabilities: [ gpu ]
     build:
       context: ../
-      dockerfile: ./parallel_env/Dockerfile
+      dockerfile: ./parallel_env/Dockerfile.hpc_base
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
         - PRIMARY_USER=gen_user
 
-    container_name: hpc_app
+    container_name: hpc_base
     entrypoint:
       [
         "/bin/bash",
