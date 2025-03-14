@@ -1,4 +1,5 @@
 #include "mpi.h"
+#include "mpi_prefix_sum.hpp"
 #include <cmath>
 #include <bits/stdc++.h>
 

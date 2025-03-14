@@ -19,6 +19,7 @@ RUN sudo apt-get update && \
     build-essential \
     # mpich \
     # libmpich-dev \
+    cmake \
     ca-certificates \
     libpq-dev \
     git \

@@ -1,6 +1,7 @@
+#include "mpi.h"
 #include <iostream>
 #include <string>
-#include "prefix_sum.cpp"
+#include "mpi_prefix_sum.hpp"
 
 // NOTE: this code will be overwritten by the grader's version, so any changes you make will not persist in grading
 
