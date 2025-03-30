@@ -7,9 +7,10 @@
 //   mpirun -n <num_procs> ./prefix_sum_mpi <local_n> [seed]
 //
 // ARGUMENTS:
-//   <num_procs>   Number of MPI processes (must be a perfect square, e.g., 4, 9, 16)
-//   <local_n>     Size of each block's local matrix (matrix is local_n x local_n)
-//   [seed]        Optional random seed; if provided, will be offset per rank
+//   <num_procs>   Number of MPI processes (must be a perfect square, e.g., 4,
+//   9, 16) <local_n>     Size of each block's local matrix (matrix is local_n
+//   x local_n) [seed]        Optional random seed; if provided, will be offset
+//   per rank
 //
 // EXAMPLE:
 //   mpirun -n 4 ./prefix_sum_mpi 2 1234
@@ -19,20 +20,23 @@
 //   and performs a distributed prefix sum across the global 4x4 matrix.
 //
 // OUTPUT:
-//   Printed before/after matrices gathered and shown in rank order by process 0.
+//   Printed before/after matrices gathered and shown in rank order by process
+//   0.
 //
 // -----------------------------------------------------------------------------
 
-
-#include "mpi.h"
 #include "common/matrix_init.hpp"
+#include "common/prefix_sum_solver.hpp"
+#include "mpi.h"
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_environment.hpp"
 #include "mpi_prefix_sum/mpi_prefix_sum.hpp"
+#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
 
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 int main(int argc, char *argv[]) {
   // Initialize MPI and get rank/size info
@@ -53,8 +57,12 @@ int main(int argc, char *argv[]) {
       "Before prefix sum:"
   );
 
+  std::unique_ptr<PrefixSumSolver> solver =
+      std::make_unique<MpiPrefixSumSolver>(mpi, args);
+
   // Perform distributed 2D prefix sum
-  MyPrefixSum(mpi, args, local_mat);
+  // MyPrefixSum(mpi, args, local_mat);
+  solver->Compute(local_mat);
 
   // Synchronize before printing results
   MPI_Barrier(MPI_COMM_WORLD);
