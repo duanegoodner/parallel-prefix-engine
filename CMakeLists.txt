@@ -87,6 +87,7 @@ message(STATUS "Building with compile options: ${CMAKE_CXX_FLAGS}")
 
 set (SRC_FILES
     src/mpi_prefix_sum/prefix_sum_block_matrix.cpp
+    src/mpi_prefix_sum/prefix_sum_distributor.cpp
     src/mpi_prefix_sum/mpi_prefix_sum.cpp
     src/mpi_prefix_sum/mpi_utils.cpp
     src/mpi_prefix_sum/mpi_tester.cpp

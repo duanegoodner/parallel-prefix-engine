@@ -1,5 +1,6 @@
 #include "mpi_prefix_sum/mpi_prefix_sum.hpp"
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
+#include "mpi_prefix_sum/prefix_sum_distributor.hpp"
 #include <cmath>
 #include <mpi.h>
 #include <vector>
@@ -29,8 +30,12 @@ void MyPrefixSum(int local_n, std::vector<int>& sum_matrix) {
   matrix.data() = sum_matrix;
 
   matrix.ComputeLocalPrefixSum();
-  matrix.BroadcastRowPrefixSums(comm_row, my_proc_col, p);
-  matrix.BroadcastColPrefixSums(comm_col, my_proc_row, p);
+
+  PrefixSumDistributor distributor(matrix, my_proc_row, my_proc_col, p);
+  distributor.Distribute(comm_row, comm_col);
+
+  // matrix.BroadcastRowPrefixSums(comm_row, my_proc_col, p);
+  // matrix.BroadcastColPrefixSums(comm_col, my_proc_row, p);
 
   sum_matrix = matrix.data();
 }
