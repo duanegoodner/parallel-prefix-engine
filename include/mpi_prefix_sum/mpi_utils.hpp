@@ -5,13 +5,13 @@
 #include <iostream>
 #include <vector>
 
-void PrintLocalMat(int rank, int local_n, const std::vector<int> &local_mat);
-void PrintGlobalMat(
-    int rank,
-    int procs,
-    int local_n,
-    const std::vector<int> &local_mat
-);
+// void PrintLocalMat(int rank, int local_n, const std::vector<int> &local_mat);
+// void PrintGlobalMat(
+//     int rank,
+//     int procs,
+//     int local_n,
+//     const std::vector<int> &local_mat
+// );
 
 template <typename T>
 inline T &
