@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-  auto args = get_args(argc, argv, myrank);
+  auto args = GetArgs(argc, argv, myrank);
 
   // Modern random number generation
   std::mt19937 rng(args.seed);  // Mersenne Twister RNG
@@ -30,14 +30,14 @@ int main(int argc, char* argv[]) {
 
   if (myrank == 0)
     std::cout << "Before prefix sum:\n";
-  print_global_mat(myrank, nprocs, args.local_n, local_mat);
+  PrintGlobalMat(myrank, nprocs, args.local_n, local_mat);
 
-  my_prefix_sum(args.local_n, local_mat);
+  MyPrefixSum(args.local_n, local_mat);
 
   MPI_Barrier(MPI_COMM_WORLD);
   if (myrank == 0)
     std::cout << "After prefix sum:\n";
-  print_global_mat(myrank, nprocs, args.local_n, local_mat);
+  PrintGlobalMat(myrank, nprocs, args.local_n, local_mat);
 
   MPI_Finalize();
   return 0;
