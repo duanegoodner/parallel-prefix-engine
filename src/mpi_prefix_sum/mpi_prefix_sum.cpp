@@ -1,17 +1,20 @@
 #include "mpi_prefix_sum/mpi_prefix_sum.hpp"
 #include "mpi.h"
+#include "mpi_prefix_sum/mpi_utils.hpp"
 #include <bits/stdc++.h>
 #include <cmath>
+#include <iostream>
 
 // sum_val for process with rank 0 will be the sum of all my_val’s
-void my_prefix_sum(int local_n, int *sum_matrix) {
+void my_prefix_sum(int local_n, std::vector<int> &sum_matrix) {
   // update sum_vals to be the prefix sum
   int myrank, nprocs; // add any other variables you need
 
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-  int p = (int)round(std::sqrt(nprocs));
+  // int p = (int)round(std::sqrt(nprocs));
+  int p = static_cast<int>(std::round(std::sqrt(nprocs)));
 
   int dimsize[2] = {p, p};
   int periodic[2] = {0, 0};
@@ -27,8 +30,8 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
   for (int local_row = 0; local_row < local_n; local_row++) {
     for (int local_col = 0; local_col < local_n; local_col++) {
       if (local_col != 0) {
-        sum_matrix[local_row * local_n + local_col] +=
-            sum_matrix[local_row * local_n + local_col - 1];
+        value_at(sum_matrix, local_row, local_col, local_n) +=
+            value_at(sum_matrix, local_row, local_col - 1, local_n);
       }
     }
   }
@@ -37,8 +40,8 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
   for (int local_col = 0; local_col < local_n; local_col++) {
     for (int local_row = 0; local_row < local_n; local_row++) {
       if (local_row != 0) {
-        sum_matrix[local_row * local_n + local_col] +=
-            sum_matrix[local_row * local_n + local_col - local_n];
+        value_at(sum_matrix, local_row, local_col, local_n) +=
+            value_at(sum_matrix, local_row - 1, local_col, local_n);
       }
     }
   }
@@ -53,14 +56,17 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
   int row_comm_storage[local_n];
 
   // should be able to replace this with fill
-  for (int storage_row = 0; storage_row < local_n; storage_row++) {
-    row_comm_storage[storage_row] = 0;
-  }
+  // for (int storage_row = 0; storage_row < local_n; storage_row++) {
+  //   row_comm_storage[storage_row] = 0;
+  // }
+  std::fill(row_comm_storage, row_comm_storage + local_n, 0);
 
-  for (int sending_proc_col = 0; sending_proc_col < p - 1; sending_proc_col++) {
+  for (int sending_proc_col = 0; sending_proc_col < p - 1;
+       sending_proc_col++) {
     if (sending_proc_col == my_proc_col) {
       for (int local_row = 0; local_row < local_n; local_row++) {
-        row_comm_buff[local_row] = sum_matrix[local_row * local_n + local_n - 1];
+        row_comm_buff[local_row] =
+            sum_matrix[local_row * local_n + local_n - 1];
       }
     }
 
@@ -77,7 +83,8 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
 
   for (int local_col = 0; local_col < local_n; local_col++) {
     for (int local_row = 0; local_row < local_n; local_row++) {
-      sum_matrix[local_row * local_n + local_col] += row_comm_storage[local_row];
+      sum_matrix[local_row * local_n + local_col] +=
+          row_comm_storage[local_row];
     }
   }
 
@@ -87,14 +94,17 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
   int col_comm_storage[local_n];
 
   // should be able to replace this with fill
-  for (int storage_col = 0; storage_col < local_n; storage_col++) {
-    col_comm_storage[storage_col] = 0;
-  }
+  // for (int storage_col = 0; storage_col < local_n; storage_col++) {
+  //   col_comm_storage[storage_col] = 0;
+  // }
+  std::fill(col_comm_storage, col_comm_storage + local_n, 0);
 
-  for (int sending_proc_row = 0; sending_proc_row < p - 1; sending_proc_row++) {
+  for (int sending_proc_row = 0; sending_proc_row < p - 1;
+       sending_proc_row++) {
     if (sending_proc_row == my_proc_row) {
       for (int local_col = 0; local_col < local_n; local_col++) {
-        col_comm_buff[local_col] = sum_matrix[(local_n - 1) * local_n + local_col];
+        col_comm_buff[local_col] =
+            sum_matrix[(local_n - 1) * local_n + local_col];
       }
     }
 
@@ -111,7 +121,8 @@ void my_prefix_sum(int local_n, int *sum_matrix) {
 
   for (int local_row = 0; local_row < local_n; local_row++) {
     for (int local_col = 0; local_col < local_n; local_col++) {
-      sum_matrix[local_row * local_n + local_col] += col_comm_storage[local_col];
+      sum_matrix[local_row * local_n + local_col] +=
+          col_comm_storage[local_col];
     }
   }
 }

@@ -3,6 +3,7 @@
 #include "mpi_prefix_sum/mpi_utils.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 // usage: mpirun -n <procs> ./tester <n per proc> <seed>
 // seed is optional
@@ -19,7 +20,8 @@ int main(int argc, char *argv[]) {
   }
 
   int local_n = atoi(argv[1]);
-  int *local_mat = (int *)malloc(sizeof(int) * local_n * local_n);
+  // int *local_mat = (int *)malloc(sizeof(int) * local_n * local_n);
+  std::vector<int> local_mat(local_n * local_n);
   // NOTE: index [i][j] is index i*local_mat+j
 
   if (argc > 2) {
@@ -41,6 +43,6 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "After prefix sum:\n");
   print_global_mat(myrank, nprocs, local_n, local_mat);
 
-  free(local_mat);
+  // free(local_mat);
   MPI_Finalize();
 }
