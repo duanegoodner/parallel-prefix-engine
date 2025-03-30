@@ -30,7 +30,7 @@
 #include "mpi.h"
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_environment.hpp"
-#include "mpi_prefix_sum/mpi_prefix_sum.hpp"
+// #include "mpi_prefix_sum/mpi_prefix_sum.hpp"
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
 
@@ -61,7 +61,6 @@ int main(int argc, char *argv[]) {
       std::make_unique<MpiPrefixSumSolver>(mpi, args);
 
   // Perform distributed 2D prefix sum
-  // MyPrefixSum(mpi, args, local_mat);
   solver->Compute(local_mat);
 
   // Synchronize before printing results
