@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   );
 
   // Perform distributed 2D prefix sum
-  MyPrefixSum(args.local_n(), local_mat);
+  MyPrefixSum(mpi, args, local_mat);
 
   // Synchronize before printing results
   MPI_Barrier(MPI_COMM_WORLD);

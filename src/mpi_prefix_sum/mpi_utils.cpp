@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-ProgramArgs ProgramArgs::Parse(int argc, char *argv[], int rank) {
+ProgramArgs ProgramArgs::Parse(int argc, char* const argv[], int rank) {
   ProgramArgs args;
 
   if (argc < 2) {
@@ -44,41 +44,3 @@ void PrintLocalMat(int rank, int local_n, const std::vector<int> &local_mat) {
   }
   fprintf(stdout, "%s\n", output.c_str());
 }
-
-// void PrintGlobalMat(
-//     int rank,
-//     int procs,
-//     int local_n,
-//     const std::vector<int> &local_mat
-// ) {
-//   // NOTE: sending everything to rank 0 to print is not efficient in terms of
-//   // scalability but ensures everything will be printed and flushed in order.
-//   // This is a debugging tool and not a performance level tool.
-//   if (rank == 0) {
-//     PrintLocalMat(rank, local_n, local_mat);
-//     std::vector<int> recv_val(local_n * local_n);
-//     MPI_Status status;
-//     for (int i = 1; i < procs; i++) {
-//       // TODO: receive from each and print
-//       MPI_Recv(
-//           recv_val.data(),
-//           local_n * local_n,
-//           MPI_INT,
-//           i,
-//           0,
-//           MPI_COMM_WORLD,
-//           &status
-//       );
-//       PrintLocalMat(i, local_n, recv_val);
-//     }
-//   } else {
-//     MPI_Send(
-//         local_mat.data(),
-//         local_n * local_n,
-//         MPI_INT,
-//         0,
-//         0,
-//         MPI_COMM_WORLD
-//     );
-//   }
-// }
