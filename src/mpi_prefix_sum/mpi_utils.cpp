@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include <string>
 
-ProgramArgs GetArgs(int argc, char* argv[], int rank) {
-  ProgramArgs args{};
+ProgramArgs ProgramArgs::Parse(int argc, char* argv[], int rank) {
+  ProgramArgs args;
 
   if (argc < 2) {
     if (rank == 0) {
@@ -16,22 +16,16 @@ ProgramArgs GetArgs(int argc, char* argv[], int rank) {
   }
 
   try {
-    args.local_n = std::stoi(argv[1]);
+    args.set_local_n(std::stoi(argv[1]));
 
     if (argc > 2) {
-      args.seed = std::stoi(argv[2]) + rank;
-    } else {
-      args.seed = 1234;
+      args.set_seed(std::stoi(argv[2]) + rank);
     }
   } catch (const std::invalid_argument&) {
-    if (rank == 0) {
-      std::cerr << "Error: Invalid numeric argument.\n";
-    }
+    if (rank == 0) std::cerr << "Invalid numeric argument.\n";
     std::exit(1);
   } catch (const std::out_of_range&) {
-    if (rank == 0) {
-      std::cerr << "Error: Argument out of range.\n";
-    }
+    if (rank == 0) std::cerr << "Argument out of range.\n";
     std::exit(1);
   }
 

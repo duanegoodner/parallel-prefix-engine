@@ -33,9 +33,23 @@ ValueAt(const std::vector<T> &array, int row_idx, int col_idx, int stride) {
   return array[row_idx * stride + col_idx];
 }
 
-struct ProgramArgs {
-  int local_n;
-  int seed;
-};
+class ProgramArgs {
+private:
+  int local_n_ = 0;
+  int seed_ = 1234;
 
-ProgramArgs GetArgs(int argc, char *argv[], int rank);
+public:
+  ProgramArgs() = default;
+
+  ProgramArgs(int local_n, int seed)
+      : local_n_(local_n)
+      , seed_(seed) {}
+
+  static ProgramArgs Parse(int argc, char *argv[], int rank);
+
+  int local_n() { return local_n_; }
+  void set_local_n(int value) { local_n_ = value; }
+
+  int seed() { return seed_; }
+  void set_seed(int value) { seed_ = value; }
+};

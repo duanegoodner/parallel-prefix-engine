@@ -17,27 +17,27 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-  auto args = GetArgs(argc, argv, myrank);
+  auto args = ProgramArgs::Parse(argc, argv, myrank);
 
   // Modern random number generation
-  std::mt19937 rng(args.seed);  // Mersenne Twister RNG
+  std::mt19937 rng(args.seed());  // Mersenne Twister RNG
   std::uniform_int_distribution<int> dist(-100, 99);
 
-  std::vector<int> local_mat(args.local_n * args.local_n);
+  std::vector<int> local_mat(args.local_n() * args.local_n());
   for (int& val : local_mat) {
     val = dist(rng);
   }
 
   if (myrank == 0)
     std::cout << "Before prefix sum:\n";
-  PrintGlobalMat(myrank, nprocs, args.local_n, local_mat);
+  PrintGlobalMat(myrank, nprocs, args.local_n(), local_mat);
 
-  MyPrefixSum(args.local_n, local_mat);
+  MyPrefixSum(args.local_n(), local_mat);
 
   MPI_Barrier(MPI_COMM_WORLD);
   if (myrank == 0)
     std::cout << "After prefix sum:\n";
-  PrintGlobalMat(myrank, nprocs, args.local_n, local_mat);
+  PrintGlobalMat(myrank, nprocs, args.local_n(), local_mat);
 
   MPI_Finalize();
   return 0;
