@@ -1,6 +1,42 @@
 #include "mpi_prefix_sum/mpi_utils.hpp"
 #include "mpi.h"
+#include <iostream>
+#include <stdexcept>
+#include <cstdlib>
 #include <string>
+
+ProgramArgs get_args(int argc, char* argv[], int rank) {
+  ProgramArgs args{};
+
+  if (argc < 2) {
+    if (rank == 0) {
+      std::cerr << "Usage: " << argv[0] << " <local_n> [seed]\n";
+    }
+    std::exit(1);
+  }
+
+  try {
+    args.local_n = std::stoi(argv[1]);
+
+    if (argc > 2) {
+      args.seed = std::stoi(argv[2]) + rank;
+    } else {
+      args.seed = 1234;
+    }
+  } catch (const std::invalid_argument&) {
+    if (rank == 0) {
+      std::cerr << "Error: Invalid numeric argument.\n";
+    }
+    std::exit(1);
+  } catch (const std::out_of_range&) {
+    if (rank == 0) {
+      std::cerr << "Error: Argument out of range.\n";
+    }
+    std::exit(1);
+  }
+
+  return args;
+}
 
 void print_local_mat(int rank, int local_n, const std::vector<int> &local_mat) {
   std::string output = "rank " + std::to_string(rank) + ": \n";
