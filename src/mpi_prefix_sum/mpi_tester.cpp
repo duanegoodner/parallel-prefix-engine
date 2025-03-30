@@ -10,7 +10,9 @@
 #include <random>      // for mt19937 and uniform_int_distribution
 
 
+
 int main(int argc, char* argv[]) {
+  
   MPI_Init(&argc, &argv);
 
   int myrank, nprocs;
