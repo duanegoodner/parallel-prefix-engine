@@ -6,7 +6,7 @@
 #include <iostream>
 
 // sum_val for process with rank 0 will be the sum of all my_val’s
-void my_prefix_sum(int local_n, std::vector<int> &sum_matrix) {
+void MyPrefixSum(int local_n, std::vector<int> &sum_matrix) {
   // update sum_vals to be the prefix sum
   int myrank, nprocs; // add any other variables you need
 
@@ -30,8 +30,8 @@ void my_prefix_sum(int local_n, std::vector<int> &sum_matrix) {
   for (int local_row = 0; local_row < local_n; local_row++) {
     for (int local_col = 0; local_col < local_n; local_col++) {
       if (local_col != 0) {
-        value_at(sum_matrix, local_row, local_col, local_n) +=
-            value_at(sum_matrix, local_row, local_col - 1, local_n);
+        ValueAt(sum_matrix, local_row, local_col, local_n) +=
+            ValueAt(sum_matrix, local_row, local_col - 1, local_n);
       }
     }
   }
@@ -40,8 +40,8 @@ void my_prefix_sum(int local_n, std::vector<int> &sum_matrix) {
   for (int local_col = 0; local_col < local_n; local_col++) {
     for (int local_row = 0; local_row < local_n; local_row++) {
       if (local_row != 0) {
-        value_at(sum_matrix, local_row, local_col, local_n) +=
-            value_at(sum_matrix, local_row - 1, local_col, local_n);
+        ValueAt(sum_matrix, local_row, local_col, local_n) +=
+            ValueAt(sum_matrix, local_row - 1, local_col, local_n);
       }
     }
   }
