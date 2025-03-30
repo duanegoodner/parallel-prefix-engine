@@ -34,8 +34,5 @@ void MyPrefixSum(int local_n, std::vector<int>& sum_matrix) {
   PrefixSumDistributor distributor(matrix, my_proc_row, my_proc_col, p);
   distributor.Distribute(comm_row, comm_col);
 
-  // matrix.BroadcastRowPrefixSums(comm_row, my_proc_col, p);
-  // matrix.BroadcastColPrefixSums(comm_col, my_proc_row, p);
-
   sum_matrix = matrix.data();
 }

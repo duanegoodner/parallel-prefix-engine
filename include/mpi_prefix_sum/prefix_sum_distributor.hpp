@@ -1,5 +1,4 @@
-#ifndef MPI_PREFIX_SUM_PREFIX_SUM_DISTRIBUTOR_H_
-#define MPI_PREFIX_SUM_PREFIX_SUM_DISTRIBUTOR_H_
+#pragma once
 
 #include "prefix_sum_block_matrix.hpp"
 #include <mpi.h>
@@ -19,5 +18,3 @@ class PrefixSumDistributor {
   int proc_col_;
   int p_;
 };
-
-#endif  // MPI_PREFIX_SUM_PREFIX_SUM_DISTRIBUTOR_H_

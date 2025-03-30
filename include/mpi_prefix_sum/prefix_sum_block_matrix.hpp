@@ -13,9 +13,6 @@ class PrefixSumBlockMatrix {
 
   void ComputeLocalPrefixSum();
 
-//   void BroadcastRowPrefixSums(MPI_Comm row_comm, int my_proc_col, int p);
-//   void BroadcastColPrefixSums(MPI_Comm col_comm, int my_proc_row, int p);
-
   std::vector<int>& data() { return data_; }
   const std::vector<int>& data() const { return data_; }
 
