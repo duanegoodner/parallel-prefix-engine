@@ -1,5 +1,4 @@
-#ifndef MPI_PREFIX_SUM_MATRIX_IO_H_
-#define MPI_PREFIX_SUM_MATRIX_IO_H_
+#pragma once
 
 #include <vector>
 #include <mpi.h>
@@ -18,9 +17,15 @@ template <>
 inline MPI_Datatype GetMpiDatatype<double>() { return MPI_DOUBLE; }
 
 template <typename T>
-void PrintDistributedMatrix(int rank, int size, int local_n, const std::vector<T>& local_mat) {
+void PrintDistributedMatrix(int rank, int size, int local_n,
+                            const std::vector<T>& local_mat,
+                            const std::string& header = "") {
   if (rank == 0) {
+    if (!header.empty()) {
+      PrintMatrix(header);  // Print the header line before matrix output
+    }
     PrintMatrix(FormatMatrix(rank, local_n, local_mat));
+
     std::vector<T> recv_buf(local_n * local_n);
     MPI_Status status;
     for (int i = 1; i < size; ++i) {
@@ -32,4 +37,3 @@ void PrintDistributedMatrix(int rank, int size, int local_n, const std::vector<T
   }
 }
 
-#endif  // MPI_PREFIX_SUM_MATRIX_IO_H_
