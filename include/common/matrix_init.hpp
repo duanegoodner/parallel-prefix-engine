@@ -1,0 +1,25 @@
+#pragma once
+
+#include <random>
+#include <type_traits>
+#include <vector>
+
+
+template <typename T>
+std::vector<T> GenerateRandomMatrix(int size, int seed, T low = T(-100), T high = T(100)) {
+    std::mt19937 rng(seed);
+
+  std::vector<T> mat(size * size);
+
+  if constexpr (std::is_integral_v<T>) {
+    std::uniform_int_distribution<T> dist(low, high - 1);
+    for (T& val : mat) val = dist(rng);
+  } else if constexpr (std::is_floating_point_v<T>) {
+    std::uniform_real_distribution<T> dist(low, high);
+    for (T& val : mat) val = dist(rng);
+  } else {
+    static_assert(std::is_arithmetic_v<T>, "GenerateRandomMatrix requires an arithmetic type.");
+  }
+
+  return mat;
+}

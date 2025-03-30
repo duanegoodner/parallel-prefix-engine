@@ -1,5 +1,4 @@
-#ifndef MPI_PREFIX_SUM_MPI_ENVIRONMENT_H_
-#define MPI_PREFIX_SUM_MPI_ENVIRONMENT_H_
+#pragma once
 
 #include <mpi.h>
 
@@ -15,5 +14,3 @@ class MpiEnvironment {
   int rank_ = -1;
   int size_ = -1;
 };
-
-#endif  // MPI_PREFIX_SUM_MPI_ENVIRONMENT_H_
