@@ -1,5 +1,5 @@
-#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
+#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
 #include <CLI/CLI.hpp>
 #include <utility> // for std::move
@@ -8,15 +8,6 @@ ProgramArgs::ProgramArgs(int local_n, int seed, std::string backend)
     : local_n_(local_n)
     , seed_(seed)
     , backend_(std::move(backend)) {}
-
-void ProgramArgs::PrintUsage(std::ostream &os) {
-  os << "Usage:\n"
-     << "  ./prefix_sum_mpi <local_n> [seed] [--backend=mpi|cuda]\n\n"
-     << "Arguments:\n"
-     << "  <local_n>   Size of each local submatrix (NxN per rank)\n"
-     << "  [seed]      Optional seed for random generation\n"
-     << "  [--backend] Backend to use (default: mpi)\n";
-}
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
@@ -28,9 +19,8 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   app.add_option("local_n", local_n, "Size of local matrix")->required();
   app.add_option("seed", seed, "Optional seed");
   app.add_option("--backend", backend, "Backend to use")
-   ->check(CLI::IsMember({"mpi"}))
-   ->default_val("mpi");
-
+      ->check(CLI::IsMember({"mpi"}))
+      ->default_val("mpi");
 
   try {
     app.parse(argc, argv);
@@ -41,7 +31,10 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   return ProgramArgs(local_n, seed, backend);
 }
 
-std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(int argc, char* argv[]) const {
+std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(
+    int argc,
+    char *argv[]
+) const {
   // CLI11 guarantees this is valid
   if (backend_ == "mpi") {
     return std::make_unique<MpiPrefixSumSolver>(argc, argv);

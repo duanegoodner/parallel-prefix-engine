@@ -11,7 +11,6 @@ class ProgramArgs {
   ProgramArgs(int local_n, int seed, std::string backend);
 
   static ProgramArgs Parse(int argc, char* const argv[]);
-  static void PrintUsage(std::ostream& os);
 
   [[nodiscard]] int local_n() const { return local_n_; }
   [[nodiscard]] int seed() const { return seed_; }
