@@ -1,8 +1,16 @@
+// ----------------------------------------------------------------------------
+// prefix_sum_solver.hpp
+//
+// Prefix sum solver definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <string>
 #include <vector>
 
+// Class PrefixSumSolver: Abstract interface for performing 2D prefix sums using different backends (MPI, CUDA, etc).
 class PrefixSumSolver {
 public:
   virtual ~PrefixSumSolver() = default;

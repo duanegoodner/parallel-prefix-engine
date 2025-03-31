@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// mpi_environment.cpp
+//
+// Mpi environment implementation.
+// ----------------------------------------------------------------------------
+
 #include "mpi_prefix_sum/mpi_environment.hpp"
 
 MpiEnvironment::MpiEnvironment(int &argc, char **&argv) {

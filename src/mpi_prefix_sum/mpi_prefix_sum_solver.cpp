@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// mpi_prefix_sum_solver.cpp
+//
+// Mpi prefix sum solver implementation.
+// ----------------------------------------------------------------------------
+
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
 #include <mpi.h>

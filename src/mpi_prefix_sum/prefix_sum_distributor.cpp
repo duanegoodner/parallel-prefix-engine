@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// prefix_sum_distributor.cpp
+//
+// Prefix sum distributor implementation.
+// ----------------------------------------------------------------------------
+
 #include "mpi_prefix_sum/prefix_sum_distributor.hpp"
 
 PrefixSumDistributor::PrefixSumDistributor(

@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// prefix_sum_block_matrix.cpp
+//
+// Prefix sum block matrix implementation.
+// ----------------------------------------------------------------------------
+
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 
 PrefixSumBlockMatrix::PrefixSumBlockMatrix(int local_n)

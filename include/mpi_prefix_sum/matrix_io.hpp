@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// matrix_io.hpp
+//
+// Matrix io definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <mpi.h>

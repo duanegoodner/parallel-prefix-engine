@@ -1,9 +1,17 @@
+// ----------------------------------------------------------------------------
+// prefix_sum_distributor.hpp
+//
+// Prefix sum distributor definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include "prefix_sum_block_matrix.hpp"
 
 #include <mpi.h>
 
+// Class PrefixSumDistributor: Handles communication between processes for computing global prefix sums in a distributed setting.
 class PrefixSumDistributor {
 public:
   PrefixSumDistributor(

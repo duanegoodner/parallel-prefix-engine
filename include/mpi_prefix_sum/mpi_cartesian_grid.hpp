@@ -1,7 +1,15 @@
+// ----------------------------------------------------------------------------
+// mpi_cartesian_grid.hpp
+//
+// Mpi cartesian grid definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <mpi.h>
 
+// Class MpiCartesianGrid:
 class MpiCartesianGrid {
 public:
   MpiCartesianGrid(int rank, int size);

@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// program_args.hpp
+//
+// Program args definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <iostream>
@@ -6,6 +13,7 @@
 
 #include "common/prefix_sum_solver.hpp"
 
+// Class ProgramArgs: Parses and stores command-line arguments such as local matrix size, seed, and backend.
 class ProgramArgs {
 public:
   ProgramArgs() = default;

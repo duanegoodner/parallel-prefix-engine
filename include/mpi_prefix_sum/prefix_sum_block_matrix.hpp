@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// prefix_sum_block_matrix.hpp
+//
+// Prefix sum block matrix definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <mpi.h>
@@ -5,6 +12,7 @@
 #include <cassert>
 #include <vector>
 
+// Class PrefixSumBlockMatrix: Represents a local matrix block in the global 2D grid for prefix sum computation.
 class PrefixSumBlockMatrix {
 public:
   explicit PrefixSumBlockMatrix(int local_n);

@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// mpi_utils.hpp
+//
+// Mpi utils definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <cassert>

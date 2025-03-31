@@ -14,6 +14,7 @@
 
 enum class LogLevel { INFO, DEBUG, ERROR };
 
+// Class Logger: Lightweight utility for conditional logging based on verbosity flag.
 class Logger {
 public:
   static void SetVerbose(bool enabled) { verbose_enabled_ = enabled; }

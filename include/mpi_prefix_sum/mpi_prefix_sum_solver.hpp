@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// mpi_prefix_sum_solver.hpp
+//
+// Mpi prefix sum solver definitions.
+// This header is part of the prefix sum project.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <chrono>
@@ -8,6 +15,7 @@
 #include "mpi_prefix_sum/mpi_environment.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
 
+// Class MpiPrefixSumSolver: MPI-specific implementation of PrefixSumSolver. Coordinates distributed computation.
 class MpiPrefixSumSolver : public PrefixSumSolver {
 public:
   MpiPrefixSumSolver(int argc, char *argv[]);
