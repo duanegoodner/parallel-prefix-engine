@@ -6,8 +6,15 @@
 #include <memory>
 #include <vector>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   ProgramArgs args = ProgramArgs::Parse(argc, argv);
+
+  if (args.verbose()) {
+    std::cout << "Parsed options:\n"
+              << "  local_n : " << args.local_n() << "\n"
+              << "  seed    : " << args.seed() << "\n"
+              << "  backend : " << args.backend() << "\n";
+  }
 
   auto solver = args.MakeSolver(argc, argv);
   auto local_mat = GenerateRandomMatrix<int>(args.local_n(), args.seed());

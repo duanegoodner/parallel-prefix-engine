@@ -4,10 +4,16 @@
 #include <CLI/CLI.hpp>
 #include <utility> // for std::move
 
-ProgramArgs::ProgramArgs(int local_n, int seed, std::string backend)
+ProgramArgs::ProgramArgs(
+    int local_n,
+    int seed,
+    std::string backend,
+    bool verbose
+)
     : local_n_(local_n)
     , seed_(seed)
-    , backend_(std::move(backend)) {}
+    , backend_(std::move(backend))
+    , verbose_(verbose) {}
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
@@ -16,6 +22,13 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   int seed = 1234;
   std::string backend = "mpi";
 
+  bool verbose = false;
+
+  app.add_flag(
+      "-v,--verbose",
+      verbose,
+      "Enable verbose output of parsed arguments"
+  );
   app.add_option("local_n", local_n, "Size of local matrix")->required();
   app.add_option("seed", seed, "Optional seed");
   app.add_option("--backend", backend, "Backend to use")
@@ -28,7 +41,7 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
     std::exit(app.exit(e)); // will print error and help message
   }
 
-  return ProgramArgs(local_n, seed, backend);
+  return ProgramArgs(local_n, seed, backend, verbose);
 }
 
 std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(
