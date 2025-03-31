@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:trixie
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
