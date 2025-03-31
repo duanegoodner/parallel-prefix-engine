@@ -14,5 +14,6 @@ target_link_libraries(prefix_sum
     PRIVATE
         prefix_sum_common
         prefix_sum_mpi
+        prefix_sum_cuda
         MPI::MPI_CXX
 )

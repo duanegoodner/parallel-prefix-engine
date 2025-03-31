@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(PrefixSumCompare CXX)
+project(PrefixSumCompare CXX CUDA)
+
+# Enable CUDA
+enable_language(CUDA)
 
 
 # ===========================
@@ -103,6 +106,8 @@ FetchContent_MakeAvailable(CLI11)
 # ===========================
 add_subdirectory(src/common)
 add_subdirectory(src/mpi_prefix_sum)
+add_subdirectory(src/cuda_prefix_sum)
+
 
 
 

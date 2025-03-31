@@ -12,6 +12,8 @@
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+
 ProgramArgs::ProgramArgs(
     int local_n,
     int seed,
@@ -39,8 +41,12 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   );
   app.add_option("local_n", local_n, "Size of local matrix")->required();
   app.add_option("seed", seed, "Optional seed");
-  app.add_option("--backend", backend, "Backend to use")
-      ->check(CLI::IsMember({"mpi"}))
+  app.add_option(
+         "--backend",
+         backend,
+         "Prefix sum backend to use (one of: mpi, cuda)"
+  )
+      ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
 
   try {
@@ -56,12 +62,11 @@ std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(
     int argc,
     char *argv[]
 ) const {
-  // CLI11 guarantees this is valid
   if (backend_ == "mpi") {
     return std::make_unique<MpiPrefixSumSolver>(argc, argv);
+  } else if (backend_ == "cuda") {
+    return std::make_unique<CudaPrefixSumSolver>(argc, argv);
+  } else {
+    throw std::runtime_error("Unsupported backend: " + backend_);
   }
-
-  // This path should never happen if CLI11 is working correctly
-  std::cerr << "Unexpected backend: " << backend_ << std::endl;
-  std::exit(2);
 }
