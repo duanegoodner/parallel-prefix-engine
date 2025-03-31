@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/matrix_output.hpp"
-
 #include <mpi.h>
 
 #include <vector>
+
+#include "common/matrix_output.hpp"
 
 template <typename T>
 MPI_Datatype GetMpiDatatype();

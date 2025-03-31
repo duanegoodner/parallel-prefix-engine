@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mpi.h>
-
 #include "prefix_sum_block_matrix.hpp"
+
+#include <mpi.h>
 
 class PrefixSumDistributor {
 public:

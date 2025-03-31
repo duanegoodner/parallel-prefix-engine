@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/prefix_sum_solver.hpp"
-
 #include <iostream>
 #include <memory>
 #include <string>
+
+#include "common/prefix_sum_solver.hpp"
 
 class ProgramArgs {
 public:

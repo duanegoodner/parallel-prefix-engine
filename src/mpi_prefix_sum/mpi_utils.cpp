@@ -1,10 +1,11 @@
 #include "mpi_prefix_sum/mpi_utils.hpp"
-#include "mpi.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
+#include "mpi.h"
 
 void PrintLocalMat(int rank, int local_n, const std::vector<int> &local_mat) {
   std::string output = "rank " + std::to_string(rank) + ": \n";

@@ -1,11 +1,11 @@
+#include <iostream>
+#include <memory>
+#include <vector>
+
 #include "common/logger.hpp"
 #include "common/matrix_init.hpp"
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
-
-#include <iostream>
-#include <memory>
-#include <vector>
 
 int main(int argc, char *argv[]) {
   ProgramArgs args = ProgramArgs::Parse(argc, argv);

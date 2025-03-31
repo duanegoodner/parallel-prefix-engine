@@ -1,9 +1,9 @@
 #include "common/program_args.hpp"
 
-#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
-
 #include <CLI/CLI.hpp>
 #include <utility> // for std::move
+
+#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
 ProgramArgs::ProgramArgs(
     int local_n,

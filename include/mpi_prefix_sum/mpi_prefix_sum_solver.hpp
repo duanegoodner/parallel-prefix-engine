@@ -1,12 +1,12 @@
 #pragma once
 
+#include <chrono>
+
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
 
 #include "mpi_prefix_sum/mpi_environment.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
-
-#include <chrono>
 
 class MpiPrefixSumSolver : public PrefixSumSolver {
 public:

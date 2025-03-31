@@ -3,7 +3,7 @@
 #include <mpi.h>
 
 class MpiCartesianGrid {
- public:
+public:
   MpiCartesianGrid(int rank, int size);
   ~MpiCartesianGrid();
 
@@ -16,7 +16,7 @@ class MpiCartesianGrid {
 
   int grid_dim() const { return p_; }
 
- private:
+private:
   int p_;
   int proc_row_;
   int proc_col_;
