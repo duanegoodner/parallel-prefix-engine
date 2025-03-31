@@ -1,13 +1,13 @@
-#include "common/program_args.hpp"
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
+#include "common/program_args.hpp"
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 #include "mpi_prefix_sum/prefix_sum_distributor.hpp"
 
-MpiPrefixSumSolver::MpiPrefixSumSolver(int argc, char* argv[])
-    : mpi_(argc, argv),
-      args_(ProgramArgs::ParseForMPI(argc, argv, mpi_.rank())) {}
+MpiPrefixSumSolver::MpiPrefixSumSolver(int argc, char *argv[])
+    : mpi_(argc, argv)
+    , args_(ProgramArgs::Parse(argc, argv)) {}
 
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   MpiCartesianGrid grid(mpi_.rank(), mpi_.size());

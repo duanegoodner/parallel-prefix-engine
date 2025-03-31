@@ -1,29 +1,37 @@
 // -----------------------------------------------------------------------------
 // main.cpp
 //
-// Entry point for distributed 2D prefix sum computation.
-// Backend-agnostic: selects implementation via --backend flag.
+// Entry point for distributed 2D prefix sum computation. This program supports
+// multiple parallel backends (currently MPI) and cleanly separates algorithm
+// logic from CLI and orchestration via a PrefixSumSolver interface.
+//
+// This file is backend-agnostic. It parses command-line arguments, dispatches
+// to the appropriate solver implementation, and manages input/output for
+// matrix generation and result visualization.
 //
 // USAGE:
 //   mpirun -n <num_procs> ./prefix_sum_mpi <local_n> [seed] [--backend=mpi]
 //
 // ARGUMENTS:
-//   <local_n>        Size of each process's local submatrix (NxN block)
-//   [seed]           Optional seed for matrix generation
-//   [--backend=...]  Select backend: mpi (default), cuda (future)
+//   <local_n>        Size of each rank's local matrix (NxN block)
+//   [seed]           Optional seed for reproducible random values
+//   [--backend=...]  Parallel backend to use (default: mpi)
 //
 // EXAMPLES:
 //   mpirun -n 4 ./prefix_sum_mpi 2 --backend=mpi
+//     → 4 MPI processes arranged as 2x2 grid, each with a 2x2 matrix block.
 //
-//   This runs a 2x2 process grid with each process using a 2x2 matrix.
-//   A global 4x4 prefix sum will be computed using the MPI backend.
+// BACKENDS:
+//   - mpi    Uses MPI for distributed prefix sum (default)
+//   - cuda   (Planned) GPU implementation using CUDA
 //
 // OUTPUT:
-//   Matrices printed in process rank order by rank 0 before and after computation.
+//   Matrix state before and after prefix sum, printed in rank order via rank 0.
 //
 // NOTES:
-//   - Number of processes must form a perfect square (e.g., 4, 9, 16)
-//   - This tool assumes a block-cyclic data layout across ranks
+//   - Number of processes must be a perfect square (e.g., 4, 9, 16)
+//   - Backend implementations must inherit from PrefixSumSolver interface
+//
 // -----------------------------------------------------------------------------
 
 
@@ -37,10 +45,8 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
-  // Parse arguments (independent of backend)
   ProgramArgs args = ProgramArgs::Parse(argc, argv);
 
-  // Dynamically choose backend
   std::unique_ptr<PrefixSumSolver> solver;
 
   if (args.backend() == "mpi") {
@@ -51,7 +57,6 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // Generate input matrix
   auto local_mat = GenerateRandomMatrix<int>(args.local_n(), args.seed());
 
   solver->PrintMatrix(local_mat, "Before prefix sum:");

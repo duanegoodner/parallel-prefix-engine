@@ -82,6 +82,23 @@ message(STATUS "Building with compile options: ${CMAKE_CXX_FLAGS}")
 
 
 # ===========================
+# FETCH CLI11
+# ===========================
+
+
+include(FetchContent)
+
+FetchContent_Declare(
+  CLI11
+  GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+  GIT_TAG        v2.3.2  # Stable version
+)
+
+FetchContent_MakeAvailable(CLI11)
+
+
+
+# ===========================
 # BUILD TARGET
 # ===========================
 
@@ -110,5 +127,6 @@ target_include_directories(prefix_sum PRIVATE include ${MPI_INCLUDE_PATH})
 # LINK MPI LIBRARY (Fix Undefined References)
 # ===========================
 target_link_libraries(prefix_sum PRIVATE MPI::MPI_CXX)
+target_link_libraries(prefix_sum PRIVATE CLI11::CLI11)
 
 

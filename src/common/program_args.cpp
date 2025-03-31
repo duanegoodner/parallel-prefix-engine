@@ -1,8 +1,7 @@
 #include "common/program_args.hpp"
-#include "mpi_prefix_sum/mpi_utils.hpp"
-#include <iostream>
-#include <string>
-#include <cstdlib>
+
+#include <CLI/CLI.hpp>
+#include <utility>  // for std::move
 
 ProgramArgs::ProgramArgs(int local_n, int seed, std::string backend)
     : local_n_(local_n), seed_(seed), backend_(std::move(backend)) {}
@@ -11,35 +10,30 @@ void ProgramArgs::PrintUsage(std::ostream& os) {
   os << "Usage:\n"
      << "  ./prefix_sum_mpi <local_n> [seed] [--backend=mpi|cuda]\n\n"
      << "Arguments:\n"
-     << "  <local_n>   Size of each local submatrix (e.g., 2, 4)\n"
-     << "  [seed]      Optional seed for random matrix init\n"
-     << "  [--backend=...]  Optional backend selection (default: mpi)\n";
+     << "  <local_n>   Size of each local submatrix (NxN per rank)\n"
+     << "  [seed]      Optional seed for random generation\n"
+     << "  [--backend] Backend to use (default: mpi)\n";
 }
 
 ProgramArgs ProgramArgs::Parse(int argc, char* const argv[]) {
-  if (argc < 2) {
-    PrintUsage(std::cerr);
-    std::exit(1);
-  }
+  CLI::App app{"Distributed prefix sum runner"};
 
-  int local_n = std::stoi(argv[1]);
-  int seed = (argc >= 3 && argv[2][0] != '-') ? std::stoi(argv[2]) : 1234;
-
+  int local_n;
+  int seed = 1234;
   std::string backend = "mpi";
-  for (int i = 1; i < argc; ++i) {
-    std::string arg = argv[i];
-    if (arg.rfind("--backend=", 0) == 0) {
-      backend = arg.substr(10);
+
+  app.add_option("local_n", local_n, "Size of local matrix")->required();
+  app.add_option("seed", seed, "Optional seed");
+  app.add_option("--backend", backend, "Backend to use")
+     ->check(CLI::IsMember({"mpi"}))
+     ->default_val("mpi");
+
+     try {
+      app.parse(argc, argv);
+    } catch (const CLI::ParseError& e) {
+      std::exit(app.exit(e));  // will print error and help message
     }
-  }
+    
 
   return ProgramArgs(local_n, seed, backend);
-}
-
-ProgramArgs ProgramArgs::ParseForMPI(int argc, char* const argv[], int rank) {
-  if (argc < 2) {
-    if (rank == 0) PrintUsage(std::cerr);
-    std::exit(1);
-  }
-  return Parse(argc, argv);
 }
