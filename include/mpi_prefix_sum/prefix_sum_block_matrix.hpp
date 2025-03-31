@@ -1,30 +1,31 @@
 #pragma once
 
-#include <vector>
-#include <cassert>
 #include <mpi.h>
 
+#include <cassert>
+#include <vector>
+
 class PrefixSumBlockMatrix {
- public:
+public:
   explicit PrefixSumBlockMatrix(int local_n);
 
-  int& ValueAt(int row, int col);
-  const int& ValueAt(int row, int col) const;
+  int &ValueAt(int row, int col);
+  const int &ValueAt(int row, int col) const;
 
   void ComputeLocalPrefixSum();
 
-  std::vector<int>& data() { return data_; }
-  const std::vector<int>& data() const { return data_; }
+  std::vector<int> &data() { return data_; }
+  const std::vector<int> &data() const { return data_; }
 
   int local_n() const { return local_n_; }
 
   std::vector<int> ExtractRightEdge() const;
   std::vector<int> ExtractBottomEdge() const;
 
-  void AddRowwiseOffset(const std::vector<int>& offsets);
-  void AddColwiseOffset(const std::vector<int>& offsets);
+  void AddRowwiseOffset(const std::vector<int> &offsets);
+  void AddColwiseOffset(const std::vector<int> &offsets);
 
- private:
+private:
   int local_n_;
   std::vector<int> data_;
 };

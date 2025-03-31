@@ -1,4 +1,5 @@
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+
 #include <cmath>
 
 MpiCartesianGrid::MpiCartesianGrid(int rank, int size) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/prefix_sum_solver.hpp"
+
 #include <iostream>
 #include <memory>
 #include <string>

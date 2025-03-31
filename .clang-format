@@ -81,8 +81,36 @@ ForEachMacros:
   - BOOST_FOREACH
 IfMacros:
   - KJ_IF_MAYBE
-IncludeBlocks:   Preserve
+IncludeBlocks:   Regroup
 IncludeCategories:
+  - Regex: '^"[^/]+\.hpp"$'        # Matching header (first block, managed separately)
+    Priority: 0
+    SortPriority: 0
+
+  - Regex: '^<mpi.h>$'             # Special-case mpi.h
+    Priority: 1
+    SortPriority: 1
+
+  - Regex: '^<.*\.h>$'             # C system headers
+    Priority: 2
+    SortPriority: 2
+
+  - Regex: '^<.*>$'                # C++ stdlib headers
+    Priority: 3
+    SortPriority: 3
+
+  - Regex: '^"common/.*"'         # Shared/common project headers
+    Priority: 4
+    SortPriority: 4
+
+  - Regex: '^"mpi_prefix_sum/.*"' # Project headers (MPI-specific)
+    Priority: 5
+    SortPriority: 5
+
+  - Regex: '.*'                   # Catch-all
+    Priority: 6
+    SortPriority: 6
+
   - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
     Priority:        2
     SortPriority:    0
@@ -91,10 +119,10 @@ IncludeCategories:
     Priority:        3
     SortPriority:    0
     CaseSensitive:   false
-  - Regex:           '.*'
-    Priority:        1
-    SortPriority:    0
-    CaseSensitive:   false
+  # - Regex:           '.*'
+  #   Priority:        1
+  #   SortPriority:    0
+  #   CaseSensitive:   false
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -137,7 +165,7 @@ ReflowComments:  true
 RemoveBracesLLVM: false
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
-SortIncludes:    CaseSensitive
+SortIncludes:    true
 SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false

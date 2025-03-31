@@ -23,4 +23,4 @@ ValueAt(const std::vector<T> &array, int row_idx, int col_idx, int stride) {
       static_cast<size_t>(row_idx * stride + col_idx) < array.size()
   );
   return array[row_idx * stride + col_idx];
-} 
+}

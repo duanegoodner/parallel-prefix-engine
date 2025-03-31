@@ -9,7 +9,8 @@
 
 int main(int argc, char *argv[]) {
   ProgramArgs args = ProgramArgs::Parse(argc, argv);
-  // Logger::SetVerbose(args.verbose()); // 👈 enable debug messages if requested
+  // Logger::SetVerbose(args.verbose()); // 👈 enable debug messages if
+  // requested
 
   // Logger::Log(
   //     LogLevel::INFO,
@@ -20,7 +21,8 @@ int main(int argc, char *argv[]) {
     std::cout << "Parsed options:\n"
               << "  local_n : " << args.local_n() << "\n"
               << "  seed    : " << args.seed() << "\n"
-              << "  backend : " << args.backend() << "\n" << std::endl;
+              << "  backend : " << args.backend() << "\n"
+              << std::endl;
   }
 
   auto solver = args.MakeSolver(argc, argv);

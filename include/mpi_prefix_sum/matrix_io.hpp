@@ -1,39 +1,65 @@
 #pragma once
 
-#include <vector>
-#include <mpi.h>
 #include "common/matrix_output.hpp"
+
+#include <mpi.h>
+
+#include <vector>
 
 template <typename T>
 MPI_Datatype GetMpiDatatype();
 
 template <>
-inline MPI_Datatype GetMpiDatatype<int>() { return MPI_INT; }
+inline MPI_Datatype GetMpiDatatype<int>() {
+  return MPI_INT;
+}
 
 template <>
-inline MPI_Datatype GetMpiDatatype<float>() { return MPI_FLOAT; }
+inline MPI_Datatype GetMpiDatatype<float>() {
+  return MPI_FLOAT;
+}
 
 template <>
-inline MPI_Datatype GetMpiDatatype<double>() { return MPI_DOUBLE; }
+inline MPI_Datatype GetMpiDatatype<double>() {
+  return MPI_DOUBLE;
+}
 
 template <typename T>
-void PrintDistributedMatrix(int rank, int size, int local_n,
-                            const std::vector<T>& local_mat,
-                            const std::string& header = "") {
+void PrintDistributedMatrix(
+    int rank,
+    int size,
+    int local_n,
+    const std::vector<T> &local_mat,
+    const std::string &header = ""
+) {
   if (rank == 0) {
     if (!header.empty()) {
-      PrintMatrix(header);  // Print the header line before matrix output
+      PrintMatrix(header); // Print the header line before matrix output
     }
     PrintMatrix(FormatMatrix(rank, local_n, local_mat));
 
     std::vector<T> recv_buf(local_n * local_n);
     MPI_Status status;
     for (int i = 1; i < size; ++i) {
-      MPI_Recv(recv_buf.data(), local_n * local_n, GetMpiDatatype<T>(), i, 0, MPI_COMM_WORLD, &status);
+      MPI_Recv(
+          recv_buf.data(),
+          local_n * local_n,
+          GetMpiDatatype<T>(),
+          i,
+          0,
+          MPI_COMM_WORLD,
+          &status
+      );
       PrintMatrix(FormatMatrix(i, local_n, recv_buf));
     }
   } else {
-    MPI_Send(local_mat.data(), local_n * local_n, GetMpiDatatype<T>(), 0, 0, MPI_COMM_WORLD);
+    MPI_Send(
+        local_mat.data(),
+        local_n * local_n,
+        GetMpiDatatype<T>(),
+        0,
+        0,
+        MPI_COMM_WORLD
+    );
   }
 }
-
