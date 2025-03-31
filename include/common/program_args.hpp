@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/prefix_sum_solver.hpp"
+#include <memory>
 #include <string>
 #include <iostream>
 
@@ -14,6 +16,9 @@ class ProgramArgs {
   [[nodiscard]] int local_n() const { return local_n_; }
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string& backend() const { return backend_; }
+
+  std::unique_ptr<PrefixSumSolver> MakeSolver(int argc, char* argv[]) const;
+
 
  private:
   int local_n_ = 0;
