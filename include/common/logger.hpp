@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// logger.hpp
+//
+// Minimal logging utility for optional verbose output. Currently unused but
+// available for future debug or profiling expansion.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <chrono>

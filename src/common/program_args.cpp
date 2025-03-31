@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// program_args.cpp
+//
+// Implements argument parsing using CLI11. Parses CLI options such as backend,
+// local matrix size, and optional seed value.
+// ----------------------------------------------------------------------------
+
 #include "common/program_args.hpp"
 
 #include <CLI/CLI.hpp>

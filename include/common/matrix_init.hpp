@@ -1,3 +1,10 @@
+// ----------------------------------------------------------------------------
+// matrix_init.hpp
+//
+// Provides a templated function to generate a square matrix of random values,
+// useful for both integral and floating point types. Used in test drivers.
+// ----------------------------------------------------------------------------
+
 #pragma once
 
 #include <random>
