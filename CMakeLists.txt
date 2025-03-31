@@ -99,34 +99,43 @@ FetchContent_MakeAvailable(CLI11)
 
 
 # ===========================
-# BUILD TARGET
+# INCLUDE DIRECTORIES WITH TARGETS
 # ===========================
-
-set (SRC_FILES
-    src/common/main.cpp
-    src/common/program_args.cpp
-    src/mpi_prefix_sum/mpi_cartesian_grid.cpp
-    src/mpi_prefix_sum/mpi_environment.cpp
-    src/mpi_prefix_sum/mpi_prefix_sum_solver.cpp
-    src/mpi_prefix_sum/mpi_utils.cpp
-    src/mpi_prefix_sum/prefix_sum_block_matrix.cpp
-    src/mpi_prefix_sum/prefix_sum_distributor.cpp
-)
-
-add_executable(prefix_sum ${SRC_FILES})
+add_subdirectory(src/common)
+add_subdirectory(src/mpi_prefix_sum)
 
 
-# ===========================
-# INCLUDE DIRECTORIES
-# ===========================
-
-target_include_directories(prefix_sum PRIVATE include ${MPI_INCLUDE_PATH})
 
 
-# ===========================
-# LINK MPI LIBRARY (Fix Undefined References)
-# ===========================
-target_link_libraries(prefix_sum PRIVATE MPI::MPI_CXX)
-target_link_libraries(prefix_sum PRIVATE CLI11::CLI11)
+# # ===========================
+# # BUILD TARGET
+# # ===========================
+
+# set (SRC_FILES
+#     src/common/main.cpp
+#     src/common/program_args.cpp
+#     src/mpi_prefix_sum/mpi_cartesian_grid.cpp
+#     src/mpi_prefix_sum/mpi_environment.cpp
+#     src/mpi_prefix_sum/mpi_prefix_sum_solver.cpp
+#     src/mpi_prefix_sum/mpi_utils.cpp
+#     src/mpi_prefix_sum/prefix_sum_block_matrix.cpp
+#     src/mpi_prefix_sum/prefix_sum_distributor.cpp
+# )
+
+# add_executable(prefix_sum ${SRC_FILES})
+
+
+# # ===========================
+# # INCLUDE DIRECTORIES
+# # ===========================
+
+# target_include_directories(prefix_sum PRIVATE include ${MPI_INCLUDE_PATH})
+
+
+# # ===========================
+# # LINK MPI LIBRARY (Fix Undefined References)
+# # ===========================
+# target_link_libraries(prefix_sum PRIVATE MPI::MPI_CXX)
+# target_link_libraries(prefix_sum PRIVATE CLI11::CLI11)
 
 

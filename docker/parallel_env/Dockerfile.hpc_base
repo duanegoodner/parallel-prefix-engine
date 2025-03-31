@@ -1,4 +1,4 @@
-FROM debian:trixie
+FROM nvidia/cuda:12.8.1-devel-ubuntu24.04
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
@@ -6,9 +6,13 @@ ARG COMPONENTS=./image_resources/components
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
-COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
-RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
-    && sudo rm -rf /tmp/create_sudo_user
+# COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
+# RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
+#     && sudo rm -rf /tmp/create_sudo_user
+
+RUN apt-get update && apt-get install -y sudo \
+ && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 
 USER ${PRIMARY_USER}
 ARG BUILD_DIR=/home/${PRIMARY_USER}/docker_build
