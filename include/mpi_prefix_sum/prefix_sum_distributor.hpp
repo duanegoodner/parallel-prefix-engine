@@ -11,7 +11,8 @@
 
 #include <mpi.h>
 
-// Class PrefixSumDistributor: Handles communication between processes for computing global prefix sums in a distributed setting.
+// Class PrefixSumDistributor: Handles communication between processes for
+// computing global prefix sums in a distributed setting.
 class PrefixSumDistributor {
 public:
   PrefixSumDistributor(

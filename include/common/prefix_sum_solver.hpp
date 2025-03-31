@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-// Class PrefixSumSolver: Abstract interface for performing 2D prefix sums using different backends (MPI, CUDA, etc).
+// Class PrefixSumSolver: Abstract interface for performing 2D prefix sums
+// using different backends (MPI, CUDA, etc).
 class PrefixSumSolver {
 public:
   virtual ~PrefixSumSolver() = default;

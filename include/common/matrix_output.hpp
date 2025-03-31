@@ -1,7 +1,8 @@
 // ----------------------------------------------------------------------------
 // matrix_output.hpp
 //
-// Declares functions to format and print local matrices and distributed matrices.
+// Declares functions to format and print local matrices and distributed
+// matrices.
 // ----------------------------------------------------------------------------
 
 #pragma once

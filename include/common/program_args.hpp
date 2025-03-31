@@ -13,7 +13,8 @@
 
 #include "common/prefix_sum_solver.hpp"
 
-// Class ProgramArgs: Parses and stores command-line arguments such as local matrix size, seed, and backend.
+// Class ProgramArgs: Parses and stores command-line arguments such as local
+// matrix size, seed, and backend.
 class ProgramArgs {
 public:
   ProgramArgs() = default;

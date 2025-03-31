@@ -8,19 +8,22 @@
 // CLI11 for argument parsing.
 //
 // USAGE (runnng from project root):
-//   mpirun -n <num_procs> ./build/bin/prefix_sum <local_n> [--seed <int>] [--backend <backend_name>]
+//   mpirun -n <num_procs> ./build/bin/prefix_sum <local_n> [--seed <int>]
+//   [--backend <backend_name>]
 //
 // ARGUMENTS:
 //   <local_n>             Size of each local matrix block (NxN)
 //   --seed <int>          Optional seed for reproducible random generation
-//   --backend <string>    Backend to use (e.g., "mpi"). Currently only "mpi" is supported.
+//   --backend <string>    Backend to use (e.g., "mpi"). Currently only "mpi"
+//   is supported.
 //
 // EXAMPLES  (runnng from project root):
 //   mpirun -n 4 ./build/bin/prefix_sum 2
 //   mpirun -n 4 ./build/bin/prefix_sum 4 --seed 42 --backend mpi
 //
 // OUTPUT:
-//   Printed matrices before and after prefix sum (rank-ordered output from rank 0).
+//   Printed matrices before and after prefix sum (rank-ordered output from
+//   rank 0).
 //
 // -----------------------------------------------------------------------------
 

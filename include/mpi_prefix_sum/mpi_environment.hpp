@@ -9,7 +9,8 @@
 
 #include <mpi.h>
 
-// Class MpiEnvironment: Encapsulates MPI initialization and finalization using RAII. Manages rank and size.
+// Class MpiEnvironment: Encapsulates MPI initialization and finalization using
+// RAII. Manages rank and size.
 class MpiEnvironment {
 public:
   MpiEnvironment(int &argc, char **&argv);
