@@ -86,6 +86,7 @@ message(STATUS "Building with compile options: ${CMAKE_CXX_FLAGS}")
 # ===========================
 
 set (SRC_FILES
+    src/common/program_args.cpp
     src/mpi_prefix_sum/mpi_cartesian_grid.cpp
     src/mpi_prefix_sum/mpi_environment.cpp
     src/mpi_prefix_sum/mpi_prefix_sum_solver.cpp
