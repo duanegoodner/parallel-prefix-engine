@@ -1,35 +1,28 @@
+// cuda_prefix_sum_solver.hpp
+//
+// Declares the CudaPrefixSumSolver class for performing distributed prefix
+// sum using CUDA. Implements the PrefixSumSolver interface.
+
 #pragma once
 
-/**
- * @file cuda_prefix_sum_solver.hpp
- * @brief CUDA implementation of the 2D prefix sum solver interface.
- */
-
+#include <chrono>
 #include <string>
 #include <vector>
 
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
 
-/**
- * @class CudaPrefixSumSolver
- * @brief Performs 2D prefix sum using CUDA (GPU backend).
- */
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
-  /**
-   * @brief Construct a new CudaPrefixSumSolver using parsed CLI args.
-   * @param argc Command-line argument count.
-   * @param argv Command-line argument values.
-   */
-  CudaPrefixSumSolver(int argc, char *argv[]);
+  explicit CudaPrefixSumSolver(int argc, char *argv[]);
 
   void Compute(std::vector<int> &local_matrix) override;
-
   void PrintMatrix(
       const std::vector<int> &local_matrix,
       const std::string &header
   ) const override;
+
+  const ProgramArgs &args() const;
 
   void StartTimer() override;
   void StopTimer() override;
@@ -37,5 +30,6 @@ public:
 
 private:
   ProgramArgs args_;
-  float execution_time_ms_ = 0.0f;
+  std::chrono::steady_clock::time_point start_time_;
+  std::chrono::steady_clock::time_point stop_time_;
 };
