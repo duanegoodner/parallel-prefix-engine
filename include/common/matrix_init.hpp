@@ -13,7 +13,7 @@
 
 template <typename T>
 std::vector<T>
-GenerateRandomMatrix(int size, int seed, T low = T(-100), T high = T(100)) {
+GenerateRandomMatrix(int size, int seed, T low = T(-10), T high = T(10)) {
   std::mt19937 rng(seed);
 
   std::vector<T> mat(size * size);
