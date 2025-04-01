@@ -115,11 +115,11 @@ void MpiPrefixSumSolver::ReportTime() const {
     double total_time = global_end - global_start;
 
     std::cout << "\n=== Runtime Report ===\n";
-    std::cout << "Total runtime (wall clock): " << total_time << " seconds\n";
+    std::cout << "Total runtime (wall clock): " << total_time * 1000 << " ms\n";
 
     std::cout << "\nPer-rank execution times:\n";
     for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": " << all_durations[i] << " seconds\n";
+      std::cout << "  Rank " << i << ": " << all_durations[i] * 1000 << " ms\n";
     }
     std::cout << std::endl;
   }
