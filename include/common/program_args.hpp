@@ -33,6 +33,8 @@ public:
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
   bool verbose() const { return verbose_; }
+  [[nodiscard]] int orig_argc() const { return orig_argc_; }
+  [[nodiscard]] char **orig_argv() const { return orig_argv_; }
 
   std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 

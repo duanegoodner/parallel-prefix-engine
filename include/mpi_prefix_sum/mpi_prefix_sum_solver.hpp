@@ -19,7 +19,7 @@
 // Coordinates distributed computation.
 class MpiPrefixSumSolver : public PrefixSumSolver {
 public:
-  MpiPrefixSumSolver(int argc, char *argv[]);
+  MpiPrefixSumSolver(const ProgramArgs &program_args);
 
   void Compute(std::vector<int> &local_matrix) override;
 
@@ -28,8 +28,24 @@ public:
       const std::string &header = ""
   ) const override;
 
-  const ProgramArgs &args() const { return args_; }
-  const MpiEnvironment &mpi() const { return mpi_environment_; }
+  void StartTimer() override;
+  void StopTimer() override;
+  void ReportTime() const override;
+
+private:
+  MpiEnvironment mpi_environment_;
+  ProgramArgs program_args_;
+  std::chrono::steady_clock::time_point start_time_, end_time_;
+};
+
+
+class MpiPrefixSumSolverNew : public PrefixSumSolverNew {
+public:
+  MpiPrefixSumSolverNew(const ProgramArgs &program_args);
+
+  void Compute() override;
+
+  void PrintMatrix(const std::string &header = "") const override;
 
   void StartTimer() override;
   void StopTimer() override;
@@ -37,28 +53,6 @@ public:
 
 private:
   MpiEnvironment mpi_environment_;
-  ProgramArgs args_;
-  std::chrono::steady_clock::time_point start_time_, end_time_;
-};
-
-
-class MpiPrefixSumSolverNew : public PrefixSumSolverNew {
-public:
-  MpiPrefixSumSolverNew(int argc, char *argv[]);
-
-  void Compute() override;
-
-  void PrintMatrix(const std::string &header = "") const override;
-
-  const ProgramArgs &args() const { return args_; }
-  const MpiEnvironment &mpi() const { return mpi_; }
-
-  void StartTimer() override;
-  void StopTimer() override;
-  void ReportTime() const override;
-
-private:
-  MpiEnvironment mpi_;
-  ProgramArgs args_;
+  ProgramArgs program_args_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
 };

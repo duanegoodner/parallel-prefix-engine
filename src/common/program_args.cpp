@@ -69,14 +69,11 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   );
 }
 
-std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(
-    // int argc,
-    // char *argv[]
-) const {
+std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver() const {
   if (backend_ == "mpi") {
-    return std::make_unique<MpiPrefixSumSolver>(orig_argc_, orig_argv_);
+    return std::make_unique<MpiPrefixSumSolver>(*this);
   } else if (backend_ == "cuda") {
-    return std::make_unique<CudaPrefixSumSolver>(orig_argc_, orig_argv_);
+    return std::make_unique<CudaPrefixSumSolver>(*this);
   } else {
     throw std::runtime_error("Unsupported backend: " + backend_);
   }

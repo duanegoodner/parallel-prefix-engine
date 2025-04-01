@@ -37,7 +37,7 @@
 #include "common/program_args.hpp"
 
 int main(int argc, char *argv[]) {
-  ProgramArgs args = ProgramArgs::Parse(argc, argv);
+  ProgramArgs program_args = ProgramArgs::Parse(argc, argv);
   // Logger::SetVerbose(args.verbose()); // 👈 enable debug messages if
   // requested
 
@@ -51,16 +51,16 @@ int main(int argc, char *argv[]) {
     std::cout << "argv[" << idx << "] = " << argv[idx] << std::endl;
   }
 
-  if (args.verbose()) {
+  if (program_args.verbose()) {
     std::cout << "Parsed options:\n"
-              << "  local_n : " << args.local_n() << "\n"
-              << "  seed    : " << args.seed() << "\n"
-              << "  backend : " << args.backend() << "\n"
+              << "  local_n : " << program_args.local_n() << "\n"
+              << "  seed    : " << program_args.seed() << "\n"
+              << "  backend : " << program_args.backend() << "\n"
               << std::endl;
   }
 
-  auto solver = args.MakeSolver();
-  auto local_mat = GenerateRandomMatrix<int>(args.local_n(), args.seed());
+  auto solver = program_args.MakeSolver();
+  auto local_mat = GenerateRandomMatrix<int>(program_args.local_n(), program_args.seed());
 
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
 
