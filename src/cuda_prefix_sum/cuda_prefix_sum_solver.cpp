@@ -76,4 +76,6 @@ void CudaPrefixSumSolver::ReportTime() const {
   std::cout << "CUDA Execution time: " << time_ms << " ms" << std::endl;
 }
 
-const ProgramArgs &CudaPrefixSumSolver::program_args() const { return program_args_; }
+const ProgramArgs &CudaPrefixSumSolver::program_args() const {
+  return program_args_;
+}

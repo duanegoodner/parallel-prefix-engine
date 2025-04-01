@@ -38,7 +38,6 @@ private:
   std::chrono::steady_clock::time_point start_time_, end_time_;
 };
 
-
 class MpiPrefixSumSolverNew : public PrefixSumSolverNew {
 public:
   MpiPrefixSumSolverNew(const ProgramArgs &program_args);
