@@ -2,4 +2,4 @@
 #pragma once
 #include <cuda_runtime.h>
 
-void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream = 0);
+void LaunchPrefixSumKernel(int *d_data, int tile_dim, cudaStream_t stream = 0);
