@@ -29,6 +29,28 @@ public:
   ) const override;
 
   const ProgramArgs &args() const { return args_; }
+  const MpiEnvironment &mpi() const { return mpi_environment_; }
+
+  void StartTimer() override;
+  void StopTimer() override;
+  void ReportTime() const override;
+
+private:
+  MpiEnvironment mpi_environment_;
+  ProgramArgs args_;
+  std::chrono::steady_clock::time_point start_time_, end_time_;
+};
+
+
+class MpiPrefixSumSolverNew : public PrefixSumSolverNew {
+public:
+  MpiPrefixSumSolverNew(int argc, char *argv[]);
+
+  void Compute() override;
+
+  void PrintMatrix(const std::string &header = "") const override;
+
+  const ProgramArgs &args() const { return args_; }
   const MpiEnvironment &mpi() const { return mpi_; }
 
   void StartTimer() override;

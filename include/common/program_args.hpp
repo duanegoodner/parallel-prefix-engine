@@ -18,7 +18,14 @@
 class ProgramArgs {
 public:
   ProgramArgs() = default;
-  ProgramArgs(int local_n, int seed, std::string backend, bool verbose);
+  ProgramArgs(
+      int local_n,
+      int seed,
+      std::string backend,
+      bool verbose,
+      int orig_argc,
+      char **orig_argv
+  );
 
   static ProgramArgs Parse(int argc, char *const argv[]);
 
@@ -27,11 +34,13 @@ public:
   [[nodiscard]] const std::string &backend() const { return backend_; }
   bool verbose() const { return verbose_; }
 
-  std::unique_ptr<PrefixSumSolver> MakeSolver(int argc, char *argv[]) const;
+  std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 
 private:
   int local_n_ = 0;
   int seed_ = 1234;
   std::string backend_ = "mpi";
   bool verbose_ = false;
+  int orig_argc_ = 0;
+  char **orig_argv_ = nullptr;
 };

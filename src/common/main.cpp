@@ -46,6 +46,11 @@ int main(int argc, char *argv[]) {
   //     "Creating solver for backend: " + args.backend()
   // );
 
+  std::cout << "argc " << argc << std::endl;
+  for (auto idx = 0; idx < argc; ++idx) {
+    std::cout << "argv[" << idx << "] = " << argv[idx] << std::endl;
+  }
+
   if (args.verbose()) {
     std::cout << "Parsed options:\n"
               << "  local_n : " << args.local_n() << "\n"
@@ -54,7 +59,7 @@ int main(int argc, char *argv[]) {
               << std::endl;
   }
 
-  auto solver = args.MakeSolver(argc, argv);
+  auto solver = args.MakeSolver();
   auto local_mat = GenerateRandomMatrix<int>(args.local_n(), args.seed());
 
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");

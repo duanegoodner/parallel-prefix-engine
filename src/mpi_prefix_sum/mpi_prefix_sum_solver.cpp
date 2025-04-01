@@ -21,11 +21,11 @@
 #include "mpi_prefix_sum/prefix_sum_distributor.hpp"
 
 MpiPrefixSumSolver::MpiPrefixSumSolver(int argc, char *argv[])
-    : mpi_(argc, argv)
+    : mpi_environment_(argc, argv)
     , args_(ProgramArgs::Parse(argc, argv)) {}
 
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
-  MpiCartesianGrid grid(mpi_.rank(), mpi_.size());
+  MpiCartesianGrid grid(mpi_environment_.rank(), mpi_environment_.size());
 
   PrefixSumBlockMatrix matrix(args_.local_n());
   matrix.data() = local_matrix;
@@ -46,8 +46,8 @@ void MpiPrefixSumSolver::PrintMatrix(
   MPI_Barrier(MPI_COMM_WORLD);
 
   PrintDistributedMatrix(
-      mpi_.rank(),
-      mpi_.size(),
+      mpi_environment_.rank(),
+      mpi_environment_.size(),
       args_.local_n(),
       local_matrix,
       header
@@ -70,8 +70,8 @@ void MpiPrefixSumSolver::ReportTime() const {
   double local_elapsed =
       std::chrono::duration<double>(end_time_ - start_time_).count();
 
-  int rank = mpi_.rank();
-  int size = mpi_.size();
+  int rank = mpi_environment_.rank();
+  int size = mpi_environment_.size();
 
   std::vector<double> all_starts(size);
   std::vector<double> all_ends(size);
