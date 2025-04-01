@@ -28,3 +28,5 @@ public:
   virtual void StopTimer() = 0;
   virtual void ReportTime() const = 0;
 };
+
+
