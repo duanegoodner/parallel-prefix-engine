@@ -1,25 +1,32 @@
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include <cuda_runtime.h> // Required for cudaStream_t
 
-#include <cuda_runtime.h>  // Required for cudaStream_t
 #include <iostream>
 
-// Ensure proper linkage between C++ and CUDA code
-// void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream = 0);
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 
-CudaPrefixSumSolver::CudaPrefixSumSolver(int argc, char* argv[])
+// Ensure proper linkage between C++ and CUDA code
+// void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream =
+// 0);
+
+CudaPrefixSumSolver::CudaPrefixSumSolver(int argc, char *argv[])
     : args_(ProgramArgs::Parse(argc, argv)) {}
 
-void CudaPrefixSumSolver::Compute(std::vector<int>& local_matrix) {
+void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   int tile_dim = args_.local_n();
   int total_elements = tile_dim * tile_dim;
 
-  int* d_data = nullptr;
+  int *d_data = nullptr;
 
   // Allocate device memory
   cudaMalloc(&d_data, total_elements * sizeof(int));
-  cudaMemcpy(d_data, local_matrix.data(), total_elements * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(
+      d_data,
+      local_matrix.data(),
+      total_elements * sizeof(int),
+      cudaMemcpyHostToDevice
+  );
 
   start_time_ = std::chrono::steady_clock::now();
 
@@ -30,13 +37,20 @@ void CudaPrefixSumSolver::Compute(std::vector<int>& local_matrix) {
   stop_time_ = std::chrono::steady_clock::now();
 
   // Copy results back
-  cudaMemcpy(local_matrix.data(), d_data, total_elements * sizeof(int), cudaMemcpyDeviceToHost);
+  cudaMemcpy(
+      local_matrix.data(),
+      d_data,
+      total_elements * sizeof(int),
+      cudaMemcpyDeviceToHost
+  );
 
   cudaFree(d_data);
 }
 
-void CudaPrefixSumSolver::PrintMatrix(const std::vector<int>& local_matrix,
-                                      const std::string& header) const {
+void CudaPrefixSumSolver::PrintMatrix(
+    const std::vector<int> &local_matrix,
+    const std::string &header
+) const {
   std::cout << header << "\n";
   int local_n = args_.local_n();
   for (int i = 0; i < local_n; ++i) {
@@ -56,10 +70,10 @@ void CudaPrefixSumSolver::StopTimer() {
 }
 
 void CudaPrefixSumSolver::ReportTime() const {
-  double time_ms = std::chrono::duration<double, std::milli>(stop_time_ - start_time_).count();
+  double time_ms =
+      std::chrono::duration<double, std::milli>(stop_time_ - start_time_)
+          .count();
   std::cout << "CUDA Execution time: " << time_ms << " ms" << std::endl;
 }
 
-const ProgramArgs& CudaPrefixSumSolver::args() const {
-  return args_;
-}
+const ProgramArgs &CudaPrefixSumSolver::args() const { return args_; }
