@@ -1,10 +1,12 @@
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+
 #include <cuda_runtime.h>  // Required for cudaStream_t
 #include <iostream>
 
 // Ensure proper linkage between C++ and CUDA code
-extern "C" void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream = 0);
+// void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream = 0);
 
 CudaPrefixSumSolver::CudaPrefixSumSolver(int argc, char* argv[])
     : args_(ProgramArgs::Parse(argc, argv)) {}
