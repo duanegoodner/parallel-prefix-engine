@@ -22,7 +22,6 @@ public:
       const MpiCartesianGrid &grid
   );
 
-  // void Distribute(MPI_Comm comm_row, MPI_Comm comm_col);
   void ShareRightEdges(MPI_Comm row_comm);
   void ShareBottomEdges(MPI_Comm col_comm);
 
