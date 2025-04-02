@@ -43,8 +43,13 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   matrix.data() = local_matrix;
   matrix.ComputeLocalPrefixSum();
 
-  PrefixSumDistributor
-      distributor(matrix, grid.proc_row(), grid.proc_col(), grid.grid_dim());
+  PrefixSumDistributor distributor(
+      matrix,
+      grid_,
+      grid.proc_row(),
+      grid.proc_col(),
+      grid.grid_dim()
+  );
 
   distributor.Distribute(grid.row_comm(), grid.col_comm());
   local_matrix = matrix.data();

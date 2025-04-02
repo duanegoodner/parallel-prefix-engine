@@ -6,13 +6,17 @@
 
 #include "mpi_prefix_sum/prefix_sum_distributor.hpp"
 
+#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+
 PrefixSumDistributor::PrefixSumDistributor(
     PrefixSumBlockMatrix &matrix,
+    const MpiCartesianGrid &grid,
     int proc_row,
     int proc_col,
     int p
 )
     : matrix_(matrix)
+    , grid_(grid)
     , proc_row_(proc_row)
     , proc_col_(proc_col)
     , p_(p) {}
