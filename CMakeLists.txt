@@ -138,7 +138,7 @@ add_subdirectory(test)
 #     src/mpi_prefix_sum/mpi_prefix_sum_solver.cpp
 #     src/mpi_prefix_sum/mpi_utils.cpp
 #     src/mpi_prefix_sum/prefix_sum_block_matrix.cpp
-#     src/mpi_prefix_sum/prefix_sum_distributor.cpp
+#     src/mpi_prefix_sum/block_matrix_mpi_distributor.cpp
 # )
 
 # add_executable(prefix_sum ${SRC_FILES})

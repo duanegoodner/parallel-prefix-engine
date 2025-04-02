@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// prefix_sum_distributor.hpp
+// block_matrix_mpi_distributor.hpp
 //
 // Prefix sum distributor definitions.
 // This header is part of the prefix sum project.
@@ -13,11 +13,11 @@
 
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 
-// Class PrefixSumDistributor: Handles communication between processes for
+// Class BlockMatrixMpiDistributor: Handles communication between processes for
 // computing global prefix sums in a distributed setting.
-class PrefixSumDistributor {
+class BlockMatrixMpiDistributor {
 public:
-  PrefixSumDistributor(
+  BlockMatrixMpiDistributor(
       PrefixSumBlockMatrix &matrix,
       const MpiCartesianGrid &grid
   );

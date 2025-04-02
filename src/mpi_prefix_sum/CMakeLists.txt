@@ -6,7 +6,7 @@ add_library(prefix_sum_mpi
     mpi_prefix_sum_solver.cpp
     mpi_utils.cpp
     prefix_sum_block_matrix.cpp
-    prefix_sum_distributor.cpp
+    block_matrix_mpi_distributor.cpp
 )
 
 target_include_directories(prefix_sum_mpi PUBLIC ${PROJECT_SOURCE_DIR}/include)

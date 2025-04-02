@@ -19,7 +19,7 @@
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
-#include "mpi_prefix_sum/prefix_sum_distributor.hpp"
+#include "mpi_prefix_sum/block_matrix_mpi_distributor.hpp"
 
 MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     : mpi_environment_(MpiEnvironment(program_args))
@@ -48,7 +48,7 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   matrix.data() = local_matrix;
   matrix.ComputeLocalPrefixSum();
 
-  PrefixSumDistributor distributor(
+  BlockMatrixMpiDistributor distributor(
       matrix,
       grid_
   );
