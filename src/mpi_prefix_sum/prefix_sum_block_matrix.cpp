@@ -6,61 +6,76 @@
 
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 
-PrefixSumBlockMatrix::PrefixSumBlockMatrix(int local_n)
-    : local_n_(local_n)
-    , data_(local_n * local_n) {}
+PrefixSumBlockMatrix::PrefixSumBlockMatrix(int square_dim)
+    : num_rows_(square_dim)
+    , num_cols_(square_dim)
+    , data_(square_dim * square_dim) {}
+
+PrefixSumBlockMatrix::PrefixSumBlockMatrix(int num_rows, int num_cols)
+    : num_rows_(num_rows)
+    , num_cols_(num_cols)
+    , data_(num_rows * num_cols) {}
+
+PrefixSumBlockMatrix::PrefixSumBlockMatrix(
+    int num_rows,
+    int num_cols,
+    std::vector<int> data
+)
+    : num_rows_(num_rows)
+    , num_cols_(num_cols)
+    , data_(std::move(data)) {}
 
 int &PrefixSumBlockMatrix::ValueAt(int row, int col) {
-  assert(row >= 0 && col >= 0 && row < local_n_ && col < local_n_);
-  return data_[row * local_n_ + col];
+  assert(row >= 0 && col >= 0 && row < num_rows_ && col < num_cols_);
+  return data_[row * num_cols_ + col];
 }
 
 const int &PrefixSumBlockMatrix::ValueAt(int row, int col) const {
-  assert(row >= 0 && col >= 0 && row < local_n_ && col < local_n_);
-  return data_[row * local_n_ + col];
+  assert(row >= 0 && col >= 0 && row < num_rows_ && col < num_cols_);
+  return data_[row * num_cols_ + col];
 }
 
 void PrefixSumBlockMatrix::ComputeLocalPrefixSum() {
-  for (int row = 0; row < local_n_; ++row) {
-    for (int col = 1; col < local_n_; ++col) {
+  for (int row = 0; row < num_rows_; ++row) {
+    for (int col = 1; col < num_cols_; ++col) {
       ValueAt(row, col) += ValueAt(row, col - 1);
     }
   }
 
-  for (int col = 0; col < local_n_; ++col) {
-    for (int row = 1; row < local_n_; ++row) {
+  for (int col = 0; col < num_cols_; ++col) {
+    for (int row = 1; row < num_rows_; ++row) {
       ValueAt(row, col) += ValueAt(row - 1, col);
     }
   }
 }
 
 std::vector<int> PrefixSumBlockMatrix::ExtractRightEdge() const {
-  std::vector<int> edge(local_n_);
-  for (int row = 0; row < local_n_; ++row) {
-    edge[row] = ValueAt(row, local_n_ - 1);
+  std::vector<int> edge(num_rows_);
+  for (int row = 0; row < num_rows_; ++row) {
+    edge[row] = ValueAt(row, num_cols_ - 1);
   }
   return edge;
 }
 
 std::vector<int> PrefixSumBlockMatrix::ExtractBottomEdge() const {
-  std::vector<int> edge(local_n_);
-  for (int col = 0; col < local_n_; ++col) {
-    edge[col] = ValueAt(local_n_ - 1, col);
+  std::vector<int> edge(num_cols_);
+  for (int col = 0; col < num_cols_; ++col) {
+    edge[col] = ValueAt(num_rows_ - 1, col);
   }
   return edge;
 }
 
 void PrefixSumBlockMatrix::AddRowwiseOffset(const std::vector<int> &offsets) {
-  for (int row = 0; row < local_n_; ++row) {
-    for (int col = 0; col < local_n_; ++col) {
+  for (int row = 0; row < num_rows_; ++row) {
+    for (int col = 0; col < num_cols_; ++col) {
       ValueAt(row, col) += offsets[row];
     }
   }
 }
 
 void PrefixSumBlockMatrix::AddColwiseOffset(const std::vector<int> &offsets) {
-  for (int row = 0; row < local_n_; ++row) {
-    for (int col = 0; col < local_n_; ++col) {
+  for (int row = 0; row < num_rows_; ++row) {
+    for (int col = 0; col < num_cols_; ++col) {
       ValueAt(row, col) += offsets[col];
     }
   }

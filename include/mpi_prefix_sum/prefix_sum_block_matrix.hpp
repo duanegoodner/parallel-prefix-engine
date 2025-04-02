@@ -17,7 +17,13 @@
 class PrefixSumBlockMatrix {
 public:
   PrefixSumBlockMatrix() = default;
-  explicit PrefixSumBlockMatrix(int local_n);
+  explicit PrefixSumBlockMatrix(int square_dim);
+  explicit PrefixSumBlockMatrix(int num_rows, int num_cols);
+  explicit PrefixSumBlockMatrix(
+      int num_rows,
+      int num_cols,
+      std::vector<int> data
+  );
 
   int &ValueAt(int row, int col);
   const int &ValueAt(int row, int col) const;
@@ -27,7 +33,9 @@ public:
   std::vector<int> &data() { return data_; }
   const std::vector<int> &data() const { return data_; }
 
-  int local_n() const { return local_n_; }
+  // int local_n() const { return local_n_; }
+  int num_rows() const { return num_rows_; }
+  int num_cols() const { return num_cols_; }
 
   std::vector<int> ExtractRightEdge() const;
   std::vector<int> ExtractBottomEdge() const;
@@ -36,6 +44,8 @@ public:
   void AddColwiseOffset(const std::vector<int> &offsets);
 
 private:
-  int local_n_;
+  int num_rows_;
+  int num_cols_;
+  // int local_n_;
   std::vector<int> data_;
 };
