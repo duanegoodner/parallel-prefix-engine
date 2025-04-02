@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
               << "  backend : " << program_args.backend() << "\n"
               << std::endl;
   }
-  
+
   auto solver = program_args.MakeSolver();
   auto local_mat =
       GenerateRandomMatrix<int>(program_args.local_n(), program_args.seed());
