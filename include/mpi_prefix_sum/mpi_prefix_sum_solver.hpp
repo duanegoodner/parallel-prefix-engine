@@ -25,6 +25,8 @@ public:
 
   void PopulateFullMatrix() override;
 
+  void DistributeSubMatrices();
+
   void Compute(std::vector<int> &local_matrix) override;
 
   void PrintMatrix(
@@ -40,24 +42,11 @@ private:
   MpiEnvironment mpi_environment_;
   ProgramArgs program_args_;
   MpiCartesianGrid grid_;
+  // PrefixSumBlockMatrix full_matrix_;
+  // PrefixSumBlockMatrix assigned_matrix_;
   std::vector<int> full_matrix_;
+  std::vector<int> assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
-};
 
-class MpiPrefixSumSolverNew : public PrefixSumSolverNew {
-public:
-  MpiPrefixSumSolverNew(const ProgramArgs &program_args);
-
-  void Compute() override;
-
-  void PrintMatrix(const std::string &header = "") const override;
-
-  void StartTimer() override;
-  void StopTimer() override;
-  void ReportTime() const override;
-
-private:
-  MpiEnvironment mpi_environment_;
-  ProgramArgs program_args_;
-  std::chrono::steady_clock::time_point start_time_, end_time_;
+  std::vector<int> CollectSubmatrix(int submatrix_x, int submatrix_y);
 };

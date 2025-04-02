@@ -36,6 +36,11 @@ void MpiPrefixSumSolver::PopulateFullMatrix() {
   }
 }
 
+
+
+
+
+
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   MpiCartesianGrid grid(mpi_environment_.rank(), mpi_environment_.size());
 

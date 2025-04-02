@@ -16,6 +16,7 @@
 // grid for prefix sum computation.
 class PrefixSumBlockMatrix {
 public:
+  PrefixSumBlockMatrix() = default;
   explicit PrefixSumBlockMatrix(int local_n);
 
   int &ValueAt(int row, int col);
