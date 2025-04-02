@@ -15,12 +15,12 @@ BlockMatrixMpiDistributor::BlockMatrixMpiDistributor(
     : matrix_(matrix)
     , grid_(grid) {}
 
-void BlockMatrixMpiDistributor::Distribute(MPI_Comm comm_row, MPI_Comm comm_col) {
-  BroadcastRowPrefixSums(comm_row);
-  BroadcastColPrefixSums(comm_col);
-}
+// void BlockMatrixMpiDistributor::Distribute(MPI_Comm comm_row, MPI_Comm comm_col) {
+//   ShareRightEdges(comm_row);
+//   ShareBottomEdges(comm_col);
+// }
 
-void BlockMatrixMpiDistributor::BroadcastRowPrefixSums(MPI_Comm row_comm) {
+void BlockMatrixMpiDistributor::ShareRightEdges(MPI_Comm row_comm) {
   std::vector<int> buffer(matrix_.num_rows());
   std::vector<int> accum(matrix_.num_rows(), 0);
 
@@ -43,7 +43,7 @@ void BlockMatrixMpiDistributor::BroadcastRowPrefixSums(MPI_Comm row_comm) {
   matrix_.AddRowwiseOffset(accum);
 }
 
-void BlockMatrixMpiDistributor::BroadcastColPrefixSums(MPI_Comm col_comm) {
+void BlockMatrixMpiDistributor::ShareBottomEdges(MPI_Comm col_comm) {
   std::vector<int> buffer(matrix_.num_cols());
   std::vector<int> accum(matrix_.num_cols(), 0);
 

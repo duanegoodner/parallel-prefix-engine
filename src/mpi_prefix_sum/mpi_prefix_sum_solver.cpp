@@ -53,7 +53,8 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
       grid_
   );
 
-  distributor.Distribute(grid.row_comm(), grid.col_comm());
+  distributor.ShareRightEdges(grid.row_comm());
+  distributor.ShareBottomEdges(grid.col_comm());
   local_matrix = matrix.data();
 }
 
