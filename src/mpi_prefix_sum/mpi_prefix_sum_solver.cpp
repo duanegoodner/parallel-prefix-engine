@@ -23,12 +23,14 @@
 
 MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     : mpi_environment_(MpiEnvironment(program_args))
-    , program_args_(program_args) {}
+    , program_args_(program_args)
+    , grid_(MpiCartesianGrid(mpi_environment_.rank(), mpi_environment_.size())
+      ) {}
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
     full_matrix_ = GenerateRandomMatrix<int>(
-        program_args_.local_n(),
+        program_args_.full_matrix_size(),
         program_args_.seed()
     );
   }

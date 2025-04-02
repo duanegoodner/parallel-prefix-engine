@@ -16,8 +16,10 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(const ProgramArgs &program_args)
     : program_args_(program_args) {}
 
 void CudaPrefixSumSolver::PopulateFullMatrix() {
-  full_matrix_ =
-      GenerateRandomMatrix<int>(program_args_.local_n(), program_args_.seed());
+  full_matrix_ = GenerateRandomMatrix<int>(
+      program_args_.full_matrix_size(),
+      program_args_.seed()
+  );
 }
 
 void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {

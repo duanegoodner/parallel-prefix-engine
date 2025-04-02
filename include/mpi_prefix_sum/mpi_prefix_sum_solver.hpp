@@ -12,8 +12,10 @@
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
 
+#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/mpi_environment.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
+#include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 
 // Class MpiPrefixSumSolver: MPI-specific implementation of PrefixSumSolver.
 // Coordinates distributed computation.
@@ -37,6 +39,7 @@ public:
 private:
   MpiEnvironment mpi_environment_;
   ProgramArgs program_args_;
+  MpiCartesianGrid grid_;
   std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
 };

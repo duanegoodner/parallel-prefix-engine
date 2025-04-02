@@ -32,6 +32,7 @@ public:
   [[nodiscard]] int local_n() const { return local_n_; }
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
+  [[nodiscard]] int full_matrix_size() const { return full_matrix_size_; }
   bool verbose() const { return verbose_; }
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
   [[nodiscard]] char **orig_argv() const { return orig_argv_; }
@@ -42,6 +43,7 @@ private:
   int local_n_ = 0;
   int seed_ = 1234;
   std::string backend_ = "mpi";
+  int full_matrix_size_ = 16;
   bool verbose_ = false;
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;
