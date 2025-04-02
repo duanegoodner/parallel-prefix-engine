@@ -11,14 +11,14 @@
 PrefixSumDistributor::PrefixSumDistributor(
     PrefixSumBlockMatrix &matrix,
     const MpiCartesianGrid &grid,
-    int proc_row,
-    int proc_col,
+    // int proc_row,
+    // int proc_col,
     int p
 )
     : matrix_(matrix)
     , grid_(grid)
-    , proc_row_(proc_row)
-    , proc_col_(proc_col)
+    // , proc_row_(proc_row)
+    // , proc_col_(proc_col)
     , p_(p) {}
 
 void PrefixSumDistributor::Distribute(MPI_Comm comm_row, MPI_Comm comm_col) {
@@ -31,14 +31,14 @@ void PrefixSumDistributor::BroadcastRowPrefixSums(MPI_Comm row_comm) {
   std::vector<int> accum(matrix_.local_n(), 0);
 
   for (int sender_col = 0; sender_col < p_ - 1; ++sender_col) {
-    if (sender_col == proc_col_) {
+    if (sender_col == grid_.proc_col()) {
       buffer = matrix_.ExtractRightEdge();
     }
 
     MPI_Bcast(buffer.data(), matrix_.local_n(), MPI_INT, sender_col, row_comm);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (proc_col_ > sender_col) {
+    if (grid_.proc_col() > sender_col) {
       for (int i = 0; i < matrix_.local_n(); ++i) {
         accum[i] += buffer[i];
       }
@@ -54,14 +54,14 @@ void PrefixSumDistributor::BroadcastColPrefixSums(MPI_Comm col_comm) {
   std::vector<int> accum(matrix_.local_n(), 0);
 
   for (int sender_row = 0; sender_row < p_ - 1; ++sender_row) {
-    if (sender_row == proc_row_) {
+    if (sender_row == grid_.proc_row()) {
       buffer = matrix_.ExtractBottomEdge();
     }
 
     MPI_Bcast(buffer.data(), matrix_.local_n(), MPI_INT, sender_row, col_comm);
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (proc_row_ > sender_row) {
+    if (grid_.proc_row() > sender_row) {
       for (int i = 0; i < matrix_.local_n(); ++i) {
         accum[i] += buffer[i];
       }

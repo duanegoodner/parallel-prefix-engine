@@ -46,8 +46,8 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   PrefixSumDistributor distributor(
       matrix,
       grid_,
-      grid.proc_row(),
-      grid.proc_col(),
+      // grid.proc_row(),
+      // grid.proc_col(),
       grid.grid_dim()
   );
 
