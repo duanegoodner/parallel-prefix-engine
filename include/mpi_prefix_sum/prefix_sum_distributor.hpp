@@ -20,9 +20,6 @@ public:
   PrefixSumDistributor(
       PrefixSumBlockMatrix &matrix,
       const MpiCartesianGrid &grid
-      // int proc_row,
-      // int proc_col,
-      // int p
   );
 
   void Distribute(MPI_Comm comm_row, MPI_Comm comm_col);
@@ -33,7 +30,4 @@ private:
 
   PrefixSumBlockMatrix &matrix_;
   const MpiCartesianGrid &grid_;
-  // int proc_row_;
-  // int proc_col_;
-  // int p_;
 };

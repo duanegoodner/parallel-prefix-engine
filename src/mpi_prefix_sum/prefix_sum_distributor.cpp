@@ -11,15 +11,9 @@
 PrefixSumDistributor::PrefixSumDistributor(
     PrefixSumBlockMatrix &matrix,
     const MpiCartesianGrid &grid
-    // int proc_row,
-    // int proc_col,
-    // int p
 )
     : matrix_(matrix)
     , grid_(grid) {}
-    // , proc_row_(proc_row)
-    // , proc_col_(proc_col)
-    // , p_(p) {}
 
 void PrefixSumDistributor::Distribute(MPI_Comm comm_row, MPI_Comm comm_col) {
   BroadcastRowPrefixSums(comm_row);
