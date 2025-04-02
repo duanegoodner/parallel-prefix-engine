@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 
+#include "common/matrix_init.hpp"
 #include "common/program_args.hpp"
 
 #include "mpi_prefix_sum/matrix_io.hpp"
@@ -23,6 +24,15 @@
 MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     : mpi_environment_(MpiEnvironment(program_args))
     , program_args_(program_args) {}
+
+void MpiPrefixSumSolver::PopulateFullMatrix() {
+  if (mpi_environment_.rank() == 0) {
+    full_matrix_ = GenerateRandomMatrix<int>(
+        program_args_.local_n(),
+        program_args_.seed()
+    );
+  }
+}
 
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   MpiCartesianGrid grid(mpi_environment_.rank(), mpi_environment_.size());

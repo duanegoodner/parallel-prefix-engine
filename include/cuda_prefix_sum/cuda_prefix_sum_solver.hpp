@@ -16,6 +16,7 @@ class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
   explicit CudaPrefixSumSolver(const ProgramArgs &program_args);
 
+  void PopulateFullMatrix() override;
   void Compute(std::vector<int> &local_matrix) override;
   void PrintMatrix(
       const std::vector<int> &local_matrix,
@@ -30,6 +31,7 @@ public:
 
 private:
   ProgramArgs program_args_;
+  std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point stop_time_;
 };

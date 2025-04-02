@@ -21,6 +21,8 @@ class MpiPrefixSumSolver : public PrefixSumSolver {
 public:
   MpiPrefixSumSolver(const ProgramArgs &program_args);
 
+  void PopulateFullMatrix() override;
+
   void Compute(std::vector<int> &local_matrix) override;
 
   void PrintMatrix(
@@ -35,6 +37,7 @@ public:
 private:
   MpiEnvironment mpi_environment_;
   ProgramArgs program_args_;
+  std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
 };
 

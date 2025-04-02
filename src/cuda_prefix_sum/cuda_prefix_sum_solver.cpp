@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "common/matrix_init.hpp"
+
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 
 // Ensure proper linkage between C++ and CUDA code
@@ -12,6 +14,11 @@
 
 CudaPrefixSumSolver::CudaPrefixSumSolver(const ProgramArgs &program_args)
     : program_args_(program_args) {}
+
+void CudaPrefixSumSolver::PopulateFullMatrix() {
+  full_matrix_ =
+      GenerateRandomMatrix<int>(program_args_.local_n(), program_args_.seed());
+}
 
 void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   int tile_dim = program_args_.local_n();
