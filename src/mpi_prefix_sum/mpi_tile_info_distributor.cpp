@@ -1,32 +1,32 @@
 // ----------------------------------------------------------------------------
-// block_matrix_mpi_distributor.cpp
+// mpi_tile_info_distributor.cpp
 //
 // Prefix sum distributor implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/block_matrix_mpi_distributor.hpp"
+#include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
 
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 
-BlockMatrixMpiDistributor::BlockMatrixMpiDistributor(
-    PrefixSumBlockMatrix &matrix,
+MpiTileInfoDistributor::MpiTileInfoDistributor(
+    PrefixSumBlockMatrix &tile,
     const MpiCartesianGrid &grid
 )
-    : matrix_(matrix)
+    : tile_(tile)
     , grid_(grid) {}
 
-void BlockMatrixMpiDistributor::ShareRightEdges() {
-  std::vector<int> buffer(matrix_.num_rows());
-  std::vector<int> accum(matrix_.num_rows(), 0);
+void MpiTileInfoDistributor::ShareRightEdges() {
+  std::vector<int> buffer(tile_.num_rows());
+  std::vector<int> accum(tile_.num_rows(), 0);
 
   for (int sender_col = 0; sender_col < grid_.grid_dim() - 1; ++sender_col) {
     if (sender_col == grid_.proc_col()) {
-      buffer = matrix_.ExtractRightEdge();
+      buffer = tile_.ExtractRightEdge();
     }
 
     MPI_Bcast(
         buffer.data(),
-        matrix_.num_rows(),
+        tile_.num_rows(),
         MPI_INT,
         sender_col,
         grid_.row_comm()
@@ -34,28 +34,28 @@ void BlockMatrixMpiDistributor::ShareRightEdges() {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (grid_.proc_col() > sender_col) {
-      for (int i = 0; i < matrix_.num_rows(); ++i) {
+      for (int i = 0; i < tile_.num_rows(); ++i) {
         accum[i] += buffer[i];
       }
     }
     MPI_Barrier(MPI_COMM_WORLD);
   }
 
-  matrix_.AddRowwiseOffset(accum);
+  tile_.AddRowwiseOffset(accum);
 }
 
-void BlockMatrixMpiDistributor::ShareBottomEdges() {
-  std::vector<int> buffer(matrix_.num_cols());
-  std::vector<int> accum(matrix_.num_cols(), 0);
+void MpiTileInfoDistributor::ShareBottomEdges() {
+  std::vector<int> buffer(tile_.num_cols());
+  std::vector<int> accum(tile_.num_cols(), 0);
 
   for (int sender_row = 0; sender_row < grid_.grid_dim() - 1; ++sender_row) {
     if (sender_row == grid_.proc_row()) {
-      buffer = matrix_.ExtractBottomEdge();
+      buffer = tile_.ExtractBottomEdge();
     }
 
     MPI_Bcast(
         buffer.data(),
-        matrix_.num_cols(),
+        tile_.num_cols(),
         MPI_INT,
         sender_row,
         grid_.col_comm()
@@ -63,12 +63,12 @@ void BlockMatrixMpiDistributor::ShareBottomEdges() {
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (grid_.proc_row() > sender_row) {
-      for (int i = 0; i < matrix_.num_cols(); ++i) {
+      for (int i = 0; i < tile_.num_cols(); ++i) {
         accum[i] += buffer[i];
       }
     }
     MPI_Barrier(MPI_COMM_WORLD);
   }
 
-  matrix_.AddColwiseOffset(accum);
+  tile_.AddColwiseOffset(accum);
 }

@@ -16,7 +16,7 @@
 #include "common/matrix_init.hpp"
 #include "common/program_args.hpp"
 
-#include "mpi_prefix_sum/block_matrix_mpi_distributor.hpp"
+#include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
@@ -42,7 +42,7 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
   matrix.data() = local_matrix;
   matrix.ComputeLocalPrefixSum();
 
-  BlockMatrixMpiDistributor distributor(matrix, grid_);
+  MpiTileInfoDistributor distributor(matrix, grid_);
 
   distributor.ShareRightEdges();
   distributor.ShareBottomEdges();
