@@ -25,8 +25,6 @@ public:
 
   void PopulateFullMatrix() override;
 
-  void DistributeSubMatrices();
-
   void Compute(std::vector<int> &local_matrix) override;
 
   void PrintMatrix(

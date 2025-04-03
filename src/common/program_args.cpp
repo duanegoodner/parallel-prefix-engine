@@ -2,13 +2,13 @@
 // program_args.cpp
 //
 // Implements argument parsing using CLI11. Parses CLI options such as backend,
-// local matrix size, and optional seed value.
+// local matrix size, seed, and matrix/grid dimensions.
 // ----------------------------------------------------------------------------
 
 #include "common/program_args.hpp"
 
 #include <CLI/CLI.hpp>
-#include <utility> // for std::move
+#include <utility>
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
@@ -19,6 +19,8 @@ ProgramArgs::ProgramArgs(
     int seed,
     std::string backend,
     bool verbose,
+    std::vector<int> full_matrix_dim,
+    std::vector<int> grid_dim,
     int orig_argc,
     char **orig_argv
 )
@@ -26,37 +28,49 @@ ProgramArgs::ProgramArgs(
     , seed_(seed)
     , backend_(std::move(backend))
     , verbose_(verbose)
+    , full_matrix_dim_(std::move(full_matrix_dim))
+    , grid_dim_(std::move(grid_dim))
     , orig_argc_(orig_argc)
-    , orig_argv_(orig_argv) {}
+    , orig_argv_(orig_argv) {
+  full_matrix_size_ = full_matrix_dim_[0] * full_matrix_dim_[1];
+  num_tile_rows_ = grid_dim_[0];
+  num_tile_cols_ = grid_dim_[1];
+}
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
 
-  int local_n;
+  int local_n = 2;
   int seed = 1234;
   std::string backend = "mpi";
-
   bool verbose = false;
+  std::vector<int> full_matrix_dim = {4, 4};
+  std::vector<int> grid_dim = {2, 2};
 
-  app.add_flag(
-      "-v,--verbose",
-      verbose,
-      "Enable verbose output of parsed arguments"
-  );
-  app.add_option("local_n", local_n, "Size of local matrix")->required();
-  app.add_option("seed", seed, "Optional seed");
-  app.add_option(
-         "--backend",
-         backend,
-         "Prefix sum backend to use (one of: mpi, cuda)"
-  )
+  app.add_option("--local-n", local_n, "Size of local matrix")
+      ->default_val("2");
+  app.add_option("--seed", seed, "Random seed")->default_val("1234");
+  app.add_option("--backend", backend, "Backend to use (mpi or cuda)")
       ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
+  app.add_flag("-v,--verbose", verbose, "Enable verbose output");
+
+  app.add_option(
+         "--full-matrix-dim",
+         full_matrix_dim,
+         "Full matrix size (rows cols)"
+  )
+      ->expected(2)
+      ->default_val(std::vector<std::string>{"4", "4"});
+
+  app.add_option("--grid-size", grid_dim, "Grid dimensions (rows cols)")
+      ->expected(2)
+      ->default_val(std::vector<std::string>{"2", "2"});
 
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    std::exit(app.exit(e)); // will print error and help message
+    std::exit(app.exit(e));
   }
 
   return ProgramArgs(
@@ -64,6 +78,8 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
       seed,
       backend,
       verbose,
+      full_matrix_dim,
+      grid_dim,
       argc,
       const_cast<char **>(argv)
   );
