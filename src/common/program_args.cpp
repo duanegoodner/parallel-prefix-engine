@@ -18,12 +18,16 @@ ProgramArgs::ProgramArgs(
     int local_n,
     int seed,
     std::string backend,
-    bool verbose
+    bool verbose,
+    int orig_argc,
+    char **orig_argv
 )
     : local_n_(local_n)
     , seed_(seed)
     , backend_(std::move(backend))
-    , verbose_(verbose) {}
+    , verbose_(verbose)
+    , orig_argc_(orig_argc)
+    , orig_argv_(orig_argv) {}
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
@@ -55,17 +59,21 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
     std::exit(app.exit(e)); // will print error and help message
   }
 
-  return ProgramArgs(local_n, seed, backend, verbose);
+  return ProgramArgs(
+      local_n,
+      seed,
+      backend,
+      verbose,
+      argc,
+      const_cast<char **>(argv)
+  );
 }
 
-std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver(
-    int argc,
-    char *argv[]
-) const {
+std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver() const {
   if (backend_ == "mpi") {
-    return std::make_unique<MpiPrefixSumSolver>(argc, argv);
+    return std::make_unique<MpiPrefixSumSolver>(*this);
   } else if (backend_ == "cuda") {
-    return std::make_unique<CudaPrefixSumSolver>(argc, argv);
+    return std::make_unique<CudaPrefixSumSolver>(*this);
   } else {
     throw std::runtime_error("Unsupported backend: " + backend_);
   }

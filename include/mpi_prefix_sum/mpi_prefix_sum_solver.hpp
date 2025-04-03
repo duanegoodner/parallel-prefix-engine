@@ -12,14 +12,20 @@
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
 
+#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/mpi_environment.hpp"
 #include "mpi_prefix_sum/mpi_utils.hpp"
+#include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 
 // Class MpiPrefixSumSolver: MPI-specific implementation of PrefixSumSolver.
 // Coordinates distributed computation.
 class MpiPrefixSumSolver : public PrefixSumSolver {
 public:
-  MpiPrefixSumSolver(int argc, char *argv[]);
+  MpiPrefixSumSolver(const ProgramArgs &program_args);
+
+  void PopulateFullMatrix() override;
+
+  void DistributeSubMatrices();
 
   void Compute(std::vector<int> &local_matrix) override;
 
@@ -28,15 +34,19 @@ public:
       const std::string &header = ""
   ) const override;
 
-  const ProgramArgs &args() const { return args_; }
-  const MpiEnvironment &mpi() const { return mpi_; }
-
   void StartTimer() override;
   void StopTimer() override;
   void ReportTime() const override;
 
 private:
-  MpiEnvironment mpi_;
-  ProgramArgs args_;
+  MpiEnvironment mpi_environment_;
+  ProgramArgs program_args_;
+  MpiCartesianGrid grid_;
+  // PrefixSumBlockMatrix full_matrix_;
+  // PrefixSumBlockMatrix assigned_matrix_;
+  std::vector<int> full_matrix_;
+  std::vector<int> assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
+
+  std::vector<int> CollectSubmatrix(int submatrix_x, int submatrix_y);
 };

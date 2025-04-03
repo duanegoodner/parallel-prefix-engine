@@ -88,19 +88,28 @@ message(STATUS "Building with compile options: ${CMAKE_CXX_FLAGS}")
 
 
 # ===========================
-# FETCH CLI11
+# FETCH DEPENDENCIES
 # ===========================
 
 
 include(FetchContent)
+include(CMakeFindDependencyMacro)
 
 FetchContent_Declare(
   CLI11
   GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
   GIT_TAG        v2.3.2  # Stable version
 )
-
 FetchContent_MakeAvailable(CLI11)
+
+FetchContent_Declare(
+        googletest
+        URL
+        https://github.com/google/googletest/archive/ec25eea8f8237cf86c30703f59747e42f34b6f75.zip)
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
 
 
@@ -110,6 +119,8 @@ FetchContent_MakeAvailable(CLI11)
 add_subdirectory(src/common)
 add_subdirectory(src/mpi_prefix_sum)
 add_subdirectory(src/cuda_prefix_sum)
+
+add_subdirectory(test)
 
 
 
@@ -127,7 +138,7 @@ add_subdirectory(src/cuda_prefix_sum)
 #     src/mpi_prefix_sum/mpi_prefix_sum_solver.cpp
 #     src/mpi_prefix_sum/mpi_utils.cpp
 #     src/mpi_prefix_sum/prefix_sum_block_matrix.cpp
-#     src/mpi_prefix_sum/prefix_sum_distributor.cpp
+#     src/mpi_prefix_sum/mpi_tile_info_distributor.cpp
 # )
 
 # add_executable(prefix_sum ${SRC_FILES})

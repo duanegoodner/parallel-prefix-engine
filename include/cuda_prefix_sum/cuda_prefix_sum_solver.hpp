@@ -14,22 +14,24 @@
 
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
-  explicit CudaPrefixSumSolver(int argc, char *argv[]);
+  explicit CudaPrefixSumSolver(const ProgramArgs &program_args);
 
+  void PopulateFullMatrix() override;
   void Compute(std::vector<int> &local_matrix) override;
   void PrintMatrix(
       const std::vector<int> &local_matrix,
       const std::string &header
   ) const override;
 
-  const ProgramArgs &args() const;
+  const ProgramArgs &program_args() const;
 
   void StartTimer() override;
   void StopTimer() override;
   void ReportTime() const override;
 
 private:
-  ProgramArgs args_;
+  ProgramArgs program_args_;
+  std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point stop_time_;
 };
