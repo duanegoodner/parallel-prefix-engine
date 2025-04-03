@@ -45,6 +45,4 @@ private:
   std::vector<int> full_matrix_;
   std::vector<int> assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
-
-  std::vector<int> CollectSubmatrix(int submatrix_x, int submatrix_y);
 };
