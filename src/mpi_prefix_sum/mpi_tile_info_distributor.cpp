@@ -15,6 +15,10 @@ MpiTileInfoDistributor::MpiTileInfoDistributor(
     : tile_(tile)
     , grid_(grid) {}
 
+void MpiTileInfoDistributor::DistributeFullMatrix(
+    const PrefixSumBlockMatrix &full_matrix
+) {}
+
 void MpiTileInfoDistributor::ShareRightEdges() {
   std::vector<int> buffer(tile_.num_rows());
   std::vector<int> accum(tile_.num_rows(), 0);

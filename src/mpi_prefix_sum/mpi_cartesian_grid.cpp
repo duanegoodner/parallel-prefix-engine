@@ -9,7 +9,9 @@
 #include <cmath>
 
 MpiCartesianGrid::MpiCartesianGrid(int rank, int num_rows, int num_cols)
-    : num_rows_(num_rows), num_cols_(num_cols) {
+    : rank_(rank)
+    , num_rows_(num_rows)
+    , num_cols_(num_cols) {
   // p_ = static_cast<int>(std::round(std::sqrt(size)));
 
   int dims[2] = {num_rows_, num_cols_};

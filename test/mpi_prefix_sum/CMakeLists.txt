@@ -16,6 +16,7 @@ target_link_libraries(
     GTest::gtest_main
     prefix_sum_common
     prefix_sum_mpi
+    prefix_sum_cuda
     )
 
 
@@ -36,6 +37,7 @@ target_link_libraries(
     GTest::gtest_main
     prefix_sum_common
     prefix_sum_mpi
+    prefix_sum_cuda
     )
 
 
