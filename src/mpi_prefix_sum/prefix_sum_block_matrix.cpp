@@ -49,6 +49,39 @@ void PrefixSumBlockMatrix::ComputeLocalPrefixSum() {
   }
 }
 
+std::unordered_map<int, std::vector<int>> PrefixSumBlockMatrix::SubDivide(
+    int rows_per_tile,
+    int cols_per_tile
+) const {
+  // Validate input dimensions
+  if (num_rows_ % rows_per_tile != 0 || num_cols_ % cols_per_tile != 0) {
+    throw std::invalid_argument("Matrix dimensions must be divisible by "
+                                "rows_per_tile and cols_per_tile");
+  }
+
+  // Calculate the number of tiles in each dimension
+  int tiles_per_row = num_rows_ / rows_per_tile;
+  int tiles_per_col = num_cols_ / cols_per_tile;
+
+  // Map to store the tiles
+  std::unordered_map<int, std::vector<int>> tiles;
+
+  // Loop through the matrix and assign elements to the appropriate tile
+  for (int row = 0; row < num_rows_; ++row) {
+    for (int col = 0; col < num_cols_; ++col) {
+      // Determine the tile index
+      int tile_row = row / rows_per_tile;
+      int tile_col = col / cols_per_tile;
+      int tile_index = tile_row * tiles_per_col + tile_col;
+
+      // Add the element to the corresponding tile
+      tiles[tile_index].push_back(ValueAt(row, col));
+    }
+  }
+
+  return tiles;
+}
+
 std::vector<int> PrefixSumBlockMatrix::ExtractRightEdge() const {
   std::vector<int> edge(num_rows_);
   for (int row = 0; row < num_rows_; ++row) {

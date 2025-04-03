@@ -46,7 +46,8 @@ TEST_F(PrefixSumBlockMatrixTest, InitRectangularWithData) {
   int num_rows = 2;
   int num_cols = 3;
   std::vector<int> data = {1, 2, 3, 4, 5, 6};
-  auto block_matrix = PrefixSumBlockMatrix(num_rows, num_cols, std::move(data));
+  auto block_matrix =
+      PrefixSumBlockMatrix(num_rows, num_cols, std::move(data));
   EXPECT_EQ(block_matrix.data().size(), num_rows * num_cols);
 
   EXPECT_EQ(block_matrix.num_rows(), num_rows);
@@ -60,6 +61,57 @@ TEST_F(PrefixSumBlockMatrixTest, InitRectangularWithData) {
   EXPECT_EQ(block_matrix.ValueAt(1, 2), 6);
 
   EXPECT_EQ(data.size(), 0);
+}
+
+TEST_F(PrefixSumBlockMatrixTest, ComputeLocalPrefixSum) {
+  int num_rows = 2;
+  int num_cols = 3;
+  std::vector<int> data = {1, 2, 3, 4, 5, 6};
+  auto block_matrix =
+      PrefixSumBlockMatrix(num_rows, num_cols, std::move(data));
+
+  block_matrix.ComputeLocalPrefixSum();
+
+  EXPECT_EQ(block_matrix.ValueAt(0, 0), 1);
+  EXPECT_EQ(block_matrix.ValueAt(0, 1), 3);
+  EXPECT_EQ(block_matrix.ValueAt(0, 2), 6);
+  EXPECT_EQ(block_matrix.ValueAt(1, 0), 5);
+  EXPECT_EQ(block_matrix.ValueAt(1, 1), 12);
+  EXPECT_EQ(block_matrix.ValueAt(1, 2), 21);
+}
+
+TEST_F(PrefixSumBlockMatrixTest, SubDivide) {
+  int num_rows = 6;
+  int num_cols = 6;
+  std::vector<int> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                           13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+                           25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36};
+  auto block_matrix =
+      PrefixSumBlockMatrix(num_rows, num_cols, std::move(data));
+
+  int rows_per_tile = 3;
+  int cols_per_tile = 3;
+
+  auto sub_matrices = block_matrix.SubDivide(rows_per_tile, cols_per_tile);
+
+  EXPECT_EQ(
+      sub_matrices.size(),
+      (num_rows / rows_per_tile) * (num_cols / cols_per_tile)
+  );
+
+  for (auto &sub_matrix : sub_matrices) {
+    EXPECT_EQ(sub_matrix.second.size(), rows_per_tile * cols_per_tile);
+  }
+
+  EXPECT_EQ(sub_matrices[0][0], 1);
+  EXPECT_EQ(sub_matrices[0][1], 2);
+  EXPECT_EQ(sub_matrices[0][2], 3);
+  EXPECT_EQ(sub_matrices[0][3], 7);
+  EXPECT_EQ(sub_matrices[0][4], 8);
+  EXPECT_EQ(sub_matrices[0][5], 9);
+  EXPECT_EQ(sub_matrices[0][6], 13);
+  EXPECT_EQ(sub_matrices[0][7], 14);
+  EXPECT_EQ(sub_matrices[0][8], 15);
 }
 
 int main(int argc, char **argv) {

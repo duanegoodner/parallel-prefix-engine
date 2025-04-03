@@ -10,6 +10,7 @@
 #include <mpi.h>
 
 #include <cassert>
+#include <unordered_map>
 #include <vector>
 
 // Class PrefixSumBlockMatrix: Represents a local matrix block in the global 2D
@@ -36,6 +37,11 @@ public:
   // int local_n() const { return local_n_; }
   int num_rows() const { return num_rows_; }
   int num_cols() const { return num_cols_; }
+
+  std::unordered_map<int, std::vector<int>> SubDivide(
+      int rows_per_tile,
+      int cols_per_tile
+  ) const;
 
   std::vector<int> ExtractRightEdge() const;
   std::vector<int> ExtractBottomEdge() const;
