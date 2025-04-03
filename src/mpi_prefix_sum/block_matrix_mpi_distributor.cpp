@@ -15,7 +15,7 @@ BlockMatrixMpiDistributor::BlockMatrixMpiDistributor(
     : matrix_(matrix)
     , grid_(grid) {}
 
-void BlockMatrixMpiDistributor::ShareRightEdges(MPI_Comm row_comm) {
+void BlockMatrixMpiDistributor::ShareRightEdges() {
   std::vector<int> buffer(matrix_.num_rows());
   std::vector<int> accum(matrix_.num_rows(), 0);
 
@@ -24,7 +24,13 @@ void BlockMatrixMpiDistributor::ShareRightEdges(MPI_Comm row_comm) {
       buffer = matrix_.ExtractRightEdge();
     }
 
-    MPI_Bcast(buffer.data(), matrix_.num_rows(), MPI_INT, sender_col, row_comm);
+    MPI_Bcast(
+        buffer.data(),
+        matrix_.num_rows(),
+        MPI_INT,
+        sender_col,
+        grid_.row_comm()
+    );
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (grid_.proc_col() > sender_col) {
@@ -38,7 +44,7 @@ void BlockMatrixMpiDistributor::ShareRightEdges(MPI_Comm row_comm) {
   matrix_.AddRowwiseOffset(accum);
 }
 
-void BlockMatrixMpiDistributor::ShareBottomEdges(MPI_Comm col_comm) {
+void BlockMatrixMpiDistributor::ShareBottomEdges() {
   std::vector<int> buffer(matrix_.num_cols());
   std::vector<int> accum(matrix_.num_cols(), 0);
 
@@ -47,7 +53,13 @@ void BlockMatrixMpiDistributor::ShareBottomEdges(MPI_Comm col_comm) {
       buffer = matrix_.ExtractBottomEdge();
     }
 
-    MPI_Bcast(buffer.data(), matrix_.num_cols(), MPI_INT, sender_row, col_comm);
+    MPI_Bcast(
+        buffer.data(),
+        matrix_.num_cols(),
+        MPI_INT,
+        sender_row,
+        grid_.col_comm()
+    );
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (grid_.proc_row() > sender_row) {

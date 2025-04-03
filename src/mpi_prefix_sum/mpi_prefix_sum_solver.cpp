@@ -37,7 +37,6 @@ void MpiPrefixSumSolver::PopulateFullMatrix() {
 }
 
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
-  MpiCartesianGrid grid(mpi_environment_.rank(), mpi_environment_.size());
 
   PrefixSumBlockMatrix matrix(program_args_.local_n());
   matrix.data() = local_matrix;
@@ -45,8 +44,8 @@ void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
 
   BlockMatrixMpiDistributor distributor(matrix, grid_);
 
-  distributor.ShareRightEdges(grid.row_comm());
-  distributor.ShareBottomEdges(grid.col_comm());
+  distributor.ShareRightEdges();
+  distributor.ShareBottomEdges();
   local_matrix = matrix.data();
 }
 

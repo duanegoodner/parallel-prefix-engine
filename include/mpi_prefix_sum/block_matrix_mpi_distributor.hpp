@@ -22,8 +22,8 @@ public:
       const MpiCartesianGrid &grid
   );
 
-  void ShareRightEdges(MPI_Comm row_comm);
-  void ShareBottomEdges(MPI_Comm col_comm);
+  void ShareRightEdges();
+  void ShareBottomEdges();
 
 private:
   PrefixSumBlockMatrix &matrix_;
