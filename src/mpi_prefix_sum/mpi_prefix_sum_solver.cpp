@@ -16,16 +16,23 @@
 #include "common/matrix_init.hpp"
 #include "common/program_args.hpp"
 
-#include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
 #include "mpi_prefix_sum/matrix_io.hpp"
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
 #include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
 
 MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     : mpi_environment_(MpiEnvironment(program_args))
     , program_args_(program_args)
-    , grid_(MpiCartesianGrid(mpi_environment_.rank(), mpi_environment_.size())
-      ) {}
+    , grid_(MpiCartesianGrid(
+          mpi_environment_.rank(),
+          program_args_.num_tile_rows(),
+          program_args_.num_tile_cols()
+      )) {
+  // TODO : Error if product of num_tile_rows and num_tile_cols is not equal to
+  // mpi_environment_.size()
+  // TODO : Error if num_tile_rows and num_tile_cols are not divisible by
+}
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {

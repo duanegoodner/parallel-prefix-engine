@@ -33,6 +33,8 @@ public:
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
   [[nodiscard]] int full_matrix_size() const { return full_matrix_size_; }
+  [[nodiscard]] int num_tile_rows() const { return num_tile_rows_; }
+  [[nodiscard]] int num_tile_cols() const { return num_tile_cols_; }
   bool verbose() const { return verbose_; }
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
   [[nodiscard]] char **orig_argv() const { return orig_argv_; }
@@ -44,6 +46,8 @@ private:
   int seed_ = 1234;
   std::string backend_ = "mpi";
   int full_matrix_size_ = 16;
+  int num_tile_rows_ = 2;
+  int num_tile_cols_ = 2;
   bool verbose_ = false;
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;

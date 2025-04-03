@@ -8,10 +8,11 @@
 
 #include <cmath>
 
-MpiCartesianGrid::MpiCartesianGrid(int rank, int size) {
-  p_ = static_cast<int>(std::round(std::sqrt(size)));
+MpiCartesianGrid::MpiCartesianGrid(int rank, int num_rows, int num_cols)
+    : num_rows_(num_rows), num_cols_(num_cols) {
+  // p_ = static_cast<int>(std::round(std::sqrt(size)));
 
-  int dims[2] = {p_, p_};
+  int dims[2] = {num_rows_, num_cols_};
   int periodic[2] = {0, 0};
   MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periodic, 0, &comm_2d_);
 

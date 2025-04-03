@@ -19,7 +19,7 @@ void MpiTileInfoDistributor::ShareRightEdges() {
   std::vector<int> buffer(tile_.num_rows());
   std::vector<int> accum(tile_.num_rows(), 0);
 
-  for (int sender_col = 0; sender_col < grid_.grid_dim() - 1; ++sender_col) {
+  for (int sender_col = 0; sender_col < grid_.num_cols() - 1; ++sender_col) {
     if (sender_col == grid_.proc_col()) {
       buffer = tile_.ExtractRightEdge();
     }
@@ -48,7 +48,7 @@ void MpiTileInfoDistributor::ShareBottomEdges() {
   std::vector<int> buffer(tile_.num_cols());
   std::vector<int> accum(tile_.num_cols(), 0);
 
-  for (int sender_row = 0; sender_row < grid_.grid_dim() - 1; ++sender_row) {
+  for (int sender_row = 0; sender_row < grid_.num_rows() - 1; ++sender_row) {
     if (sender_row == grid_.proc_row()) {
       buffer = tile_.ExtractBottomEdge();
     }
