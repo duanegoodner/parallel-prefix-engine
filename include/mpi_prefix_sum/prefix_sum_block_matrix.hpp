@@ -39,8 +39,8 @@ public:
   int num_cols() const { return num_cols_; }
 
   std::unordered_map<int, std::vector<int>> SubDivide(
-      int rows_per_tile,
-      int cols_per_tile
+      int tiles_per_row,
+      int tiles_per_col
   ) const;
 
   std::vector<int> ExtractRightEdge() const;

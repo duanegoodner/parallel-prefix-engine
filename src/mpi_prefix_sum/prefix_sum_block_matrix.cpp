@@ -50,18 +50,18 @@ void PrefixSumBlockMatrix::ComputeLocalPrefixSum() {
 }
 
 std::unordered_map<int, std::vector<int>> PrefixSumBlockMatrix::SubDivide(
-    int rows_per_tile,
-    int cols_per_tile
+    int tiles_per_row,
+    int tiles_per_col
 ) const {
   // Validate input dimensions
-  if (num_rows_ % rows_per_tile != 0 || num_cols_ % cols_per_tile != 0) {
+  if (num_rows_ % tiles_per_row != 0 || num_cols_ % tiles_per_col != 0) {
     throw std::invalid_argument("Matrix dimensions must be divisible by "
-                                "rows_per_tile and cols_per_tile");
+                                "tiles_per_row and tiles_per_col");
   }
 
-  // Calculate the number of tiles in each dimension
-  int tiles_per_row = num_rows_ / rows_per_tile;
-  int tiles_per_col = num_cols_ / cols_per_tile;
+  // Calculate the size of each tile
+  int rows_per_tile = num_rows_ / tiles_per_row;
+  int cols_per_tile = num_cols_ / tiles_per_col;
 
   // Map to store the tiles
   std::unordered_map<int, std::vector<int>> tiles;

@@ -89,15 +89,18 @@ TEST_F(PrefixSumBlockMatrixTest, SubDivide) {
   auto block_matrix =
       PrefixSumBlockMatrix(num_rows, num_cols, std::move(data));
 
-  int rows_per_tile = 3;
-  int cols_per_tile = 3;
+  int tiles_per_row = 2;
+  int tiles_per_col = 2;
 
-  auto sub_matrices = block_matrix.SubDivide(rows_per_tile, cols_per_tile);
+  auto sub_matrices = block_matrix.SubDivide(tiles_per_row, tiles_per_col);
 
   EXPECT_EQ(
       sub_matrices.size(),
-      (num_rows / rows_per_tile) * (num_cols / cols_per_tile)
+      tiles_per_row * tiles_per_col
   );
+
+  int rows_per_tile = num_rows / tiles_per_row;
+  int cols_per_tile = num_cols / tiles_per_col;
 
   for (auto &sub_matrix : sub_matrices) {
     EXPECT_EQ(sub_matrix.second.size(), rows_per_tile * cols_per_tile);
