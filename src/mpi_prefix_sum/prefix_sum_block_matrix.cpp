@@ -113,3 +113,12 @@ void PrefixSumBlockMatrix::AddColwiseOffset(const std::vector<int> &offsets) {
     }
   }
 }
+
+void PrefixSumBlockMatrix::Print() const {
+  for (int row = 0; row < num_rows_; ++row) {
+    for (int col = 0; col < num_cols_; ++col) {
+      std::cout << ValueAt(row, col) << " ";
+    }
+    std::cout << std::endl;
+  }
+}

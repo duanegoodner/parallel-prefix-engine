@@ -17,7 +17,51 @@ MpiTileInfoDistributor::MpiTileInfoDistributor(
 
 void MpiTileInfoDistributor::DistributeFullMatrix(
     const PrefixSumBlockMatrix &full_matrix
-) {}
+) {
+
+  if (grid_.rank() == 0) {
+    std::cout << "Rank 0 will subdivide and distribute the following matrix:"
+              << std::endl;
+    full_matrix.Print();
+    std::cout << std::endl;
+  }
+
+  if (grid_.rank() == 0) {
+
+    auto sub_matrices =
+        full_matrix.SubDivide(grid_.num_rows(), grid_.num_cols());
+    for (auto &sub_matrix : sub_matrices) {
+      auto block_sub_matrix = PrefixSumBlockMatrix(
+          tile_.num_rows(),
+          tile_.num_cols(),
+          sub_matrix.second
+      );
+
+      MPI_Send(
+          sub_matrix.second.data(),
+          sub_matrix.second.size(),
+          MPI_INT,
+          sub_matrix.first,
+          0,
+          grid_.cart_comm()
+      );
+    }
+  }
+  // MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Recv(
+      tile_.data().data(),
+      tile_.data().size(),
+      MPI_INT,
+      0,
+      0,
+      grid_.cart_comm(),
+      MPI_STATUS_IGNORE
+  );
+
+  std::cout << "Received by rank " << grid_.rank() << std::endl;
+  tile_.Print();
+  std::cout << std::endl;
+}
 
 void MpiTileInfoDistributor::ShareRightEdges() {
   std::vector<int> buffer(tile_.num_rows());

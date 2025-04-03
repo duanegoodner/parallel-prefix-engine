@@ -49,6 +49,8 @@ public:
   void AddRowwiseOffset(const std::vector<int> &offsets);
   void AddColwiseOffset(const std::vector<int> &offsets);
 
+  void Print() const;
+
 private:
   int num_rows_;
   int num_cols_;
