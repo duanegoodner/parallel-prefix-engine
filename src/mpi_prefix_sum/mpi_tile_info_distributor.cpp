@@ -52,6 +52,49 @@ void MpiTileInfoDistributor::DistributeFullMatrix(
   );
 }
 
+void MpiTileInfoDistributor::ReconstructFullMatrix(
+    PrefixSumBlockMatrix &full_matrix
+) {
+  // All ranks (including rank 0) send their data to rank 0
+  MPI_Send(
+      tile_.data().data(),
+      tile_.data().size(),
+      MPI_INT,
+      0,
+      0,
+      grid_.cart_comm()
+  );
+
+  // Rank 0 receives all tile data into a map
+  if (grid_.rank() == 0) {
+    std::unordered_map<int, PrefixSumBlockMatrix> tile_data;
+
+    for (auto idx = 0; idx < grid_.size(); ++idx) {
+      tile_data[idx] =
+          PrefixSumBlockMatrix(tile_.num_rows(), tile_.num_cols());
+    }
+
+    for (auto idx = 0; idx < grid_.size(); ++idx) {
+      MPI_Recv(
+          tile_data[idx].data().data(),
+          tile_data[idx].data().size(),
+          MPI_INT,
+          idx,
+          0,
+          grid_.cart_comm(),
+          MPI_STATUS_IGNORE
+      );
+    }
+
+    PrefixSumBlockMatrix::Combine(
+        tile_data,
+        grid_.num_rows(),
+        grid_.num_cols(),
+        full_matrix
+    );
+  }
+}
+
 void MpiTileInfoDistributor::ShareRightEdges() {
   std::vector<int> buffer(tile_.num_rows());
   std::vector<int> accum(tile_.num_rows(), 0);

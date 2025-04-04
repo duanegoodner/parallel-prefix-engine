@@ -50,6 +50,13 @@ public:
 
   void Print() const;
 
+  static void Combine(
+      const std::unordered_map<int, PrefixSumBlockMatrix> &tiles,
+      int tiles_per_row,
+      int tiles_per_col,
+      PrefixSumBlockMatrix &result
+  );
+
 private:
   int num_rows_;
   int num_cols_;

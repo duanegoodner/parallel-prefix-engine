@@ -27,6 +27,10 @@ public:
 
   void DistributeSubMatrices();
 
+  void ComputeAssigned();
+
+  void CollectSubMatrices();
+
   void Compute(std::vector<int> &local_matrix) override;
 
   void PrintMatrix(

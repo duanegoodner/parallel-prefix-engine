@@ -28,16 +28,30 @@ TEST_F(MpiPrefixSumSolverTest, Functonality) {
     std::cout << std::endl;
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
-
   mpi_prefix_sum_solver_.DistributeSubMatrices();
 
-  
+  MPI_Barrier(MPI_COMM_WORLD);
 
   std::cout << "Rank " << mpi_prefix_sum_solver_.Rank()
             << " received sub-matrix." << std::endl;
   mpi_prefix_sum_solver_.PrintAssignedMatrix();
   std::cout << std::endl;
+
+  mpi_prefix_sum_solver_.ComputeAssigned();
+
+  MPI_Barrier(MPI_COMM_WORLD);
+
+  std::cout << "After local compute + sharing at Rank "
+            << mpi_prefix_sum_solver_.Rank() << std::endl;
+
+  mpi_prefix_sum_solver_.PrintAssignedMatrix();
+  std::cout << std::endl;
+
+  mpi_prefix_sum_solver_.CollectSubMatrices();
+  if (mpi_prefix_sum_solver_.Rank() == 0) {
+    std::cout << "After collecting sub-matrices at Rank 0:" << std::endl;
+    mpi_prefix_sum_solver_.PrintFullMatrix();
+  }
 }
 
 int main(int argc, char **argv) {

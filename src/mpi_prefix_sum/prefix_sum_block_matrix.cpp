@@ -82,6 +82,32 @@ std::unordered_map<int, std::vector<int>> PrefixSumBlockMatrix::SubDivide(
   return tiles;
 }
 
+void PrefixSumBlockMatrix::Combine(
+    const std::unordered_map<int, PrefixSumBlockMatrix> &tiles,
+    int tiles_per_row,
+    int tiles_per_col,
+    PrefixSumBlockMatrix &result
+) {
+  int block_rows = result.num_rows() / tiles_per_row;
+  int block_cols = result.num_cols() / tiles_per_col;
+
+  for (const auto &pair : tiles) {
+    int tile_index = pair.first;
+    const auto &block = pair.second;
+
+    int tile_row = tile_index / tiles_per_col;
+    int tile_col = tile_index % tiles_per_col;
+
+    for (int i = 0; i < block.num_rows(); ++i) {
+      for (int j = 0; j < block.num_cols(); ++j) {
+        int global_row = tile_row * block_rows + i;
+        int global_col = tile_col * block_cols + j;
+        result.ValueAt(global_row, global_col) = block.ValueAt(i, j);
+      }
+    }
+  }
+}
+
 std::vector<int> PrefixSumBlockMatrix::ExtractRightEdge() const {
   std::vector<int> edge(num_rows_);
   for (int row = 0; row < num_rows_; ++row) {

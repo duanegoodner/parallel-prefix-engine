@@ -24,6 +24,8 @@ public:
 
   void DistributeFullMatrix(const PrefixSumBlockMatrix &full_matrix);
 
+  void ReconstructFullMatrix(PrefixSumBlockMatrix &full_matrix);
+
   void ShareRightEdges();
   void ShareBottomEdges();
 
