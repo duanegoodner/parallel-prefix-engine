@@ -40,8 +40,6 @@ private:
   MpiEnvironment mpi_environment_;
   ProgramArgs program_args_;
   MpiCartesianGrid grid_;
-  // PrefixSumBlockMatrix full_matrix_;
-  // PrefixSumBlockMatrix assigned_matrix_;
   std::vector<int> full_matrix_;
   std::vector<int> assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
