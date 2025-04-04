@@ -9,7 +9,6 @@
 
 class MpiCartesianGridTest : public ::testing::Test {
 protected:
-
   ArgvBuilder args_ = ArgvBuilder(
       "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
   );

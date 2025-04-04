@@ -20,13 +20,6 @@ void MpiTileInfoDistributor::DistributeFullMatrix(
 ) {
 
   if (grid_.rank() == 0) {
-    std::cout << "Rank 0 will subdivide and distribute the following matrix:"
-              << std::endl;
-    full_matrix.Print();
-    std::cout << std::endl;
-  }
-
-  if (grid_.rank() == 0) {
 
     auto sub_matrices =
         full_matrix.SubDivide(grid_.num_rows(), grid_.num_cols());
@@ -57,10 +50,6 @@ void MpiTileInfoDistributor::DistributeFullMatrix(
       grid_.cart_comm(),
       MPI_STATUS_IGNORE
   );
-
-  std::cout << "Received by rank " << grid_.rank() << std::endl;
-  tile_.Print();
-  std::cout << std::endl;
 }
 
 void MpiTileInfoDistributor::ShareRightEdges() {

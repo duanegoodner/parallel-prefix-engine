@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
 
-  solver->PopulateFullMatrix();
+  // solver->PopulateFullMatrix(); // Do this in the solver constructor
   solver->PrintMatrix(local_mat, "Before prefix sum:");
   solver->StartTimer();
   solver->Compute(local_mat);
