@@ -56,14 +56,14 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   app.add_flag("-v,--verbose", verbose, "Enable verbose output");
 
   app.add_option(
-         "--full-matrix-dim",
+         "-f, --full-matrix-dim",
          full_matrix_dim,
-         "Full matrix size (rows cols)"
+         "Full matrix dimensions (rows cols)"
   )
       ->expected(2)
       ->default_val(std::vector<std::string>{"4", "4"});
 
-  app.add_option("--grid-size", grid_dim, "Grid dimensions (rows cols)")
+  app.add_option("-g, --grid-size", grid_dim, "Grid dimensions (rows cols)")
       ->expected(2)
       ->default_val(std::vector<std::string>{"2", "2"});
 
