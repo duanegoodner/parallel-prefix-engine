@@ -37,7 +37,7 @@ TEST_F(MpiPrefixSumSolverTest, Functonality) {
   mpi_prefix_sum_solver_.PrintAssignedMatrix();
   std::cout << std::endl;
 
-  mpi_prefix_sum_solver_.ComputeAssigned();
+  mpi_prefix_sum_solver_.ComputeAndShareAssigned();
 
   MPI_Barrier(MPI_COMM_WORLD);
 

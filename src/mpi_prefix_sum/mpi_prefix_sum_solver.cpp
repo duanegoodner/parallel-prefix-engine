@@ -62,7 +62,7 @@ void MpiPrefixSumSolver::DistributeSubMatrices() {
   distributor.DistributeFullMatrix(full_matrix_);
 }
 
-void MpiPrefixSumSolver::ComputeAssigned() {
+void MpiPrefixSumSolver::ComputeAndShareAssigned() {
   assigned_matrix_.ComputeLocalPrefixSum();
 
   MpiTileInfoDistributor distributor(assigned_matrix_, grid_);

@@ -27,7 +27,7 @@ public:
 
   void DistributeSubMatrices();
 
-  void ComputeAssigned();
+  void ComputeAndShareAssigned();
 
   void CollectSubMatrices();
 
