@@ -6,29 +6,7 @@
 
 #include "common/program_args.hpp"
 
-struct ArgvBuilder {
-  std::vector<std::string> args_str;
-  std::vector<char *> argv;
-
-  ArgvBuilder(const std::string &cmdline) {
-    std::istringstream iss(cmdline);
-    std::string token;
-
-    argv.push_back(const_cast<char *>("test_program"));
-
-    while (iss >> token) {
-      args_str.push_back(token);
-    }
-
-    // Store .data() after args_str is fully built to avoid invalidation
-    for (auto &arg : args_str) {
-      argv.push_back(const_cast<char *>(arg.data())); // safe + linter-friendly
-    }
-  }
-
-  int argc() const { return static_cast<int>(argv.size()); }
-  char **argv_data() { return argv.data(); }
-};
+#include "test_cli_utils.hpp"
 
 class ProgramArgsTest : public ::testing::Test {};
 
@@ -47,7 +25,7 @@ TEST_F(ProgramArgsTest, DefaultInit) {
 
 TEST_F(ProgramArgsTest, ParseWithArgs) {
   ArgvBuilder args(
-      "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend cuda -v"
+      "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
   );
 
   for (int i = 0; i < args.argc(); ++i) {
@@ -58,7 +36,7 @@ TEST_F(ProgramArgsTest, ParseWithArgs) {
 
   EXPECT_EQ(program_args.local_n(), 8);
   EXPECT_EQ(program_args.seed(), 42);
-  EXPECT_EQ(program_args.backend(), "cuda");
+  EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), true);
   EXPECT_EQ(program_args.full_matrix_size(), 16); // 4 * 4
 }
