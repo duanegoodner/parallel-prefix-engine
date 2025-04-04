@@ -73,6 +73,7 @@ add_executable(
 target_include_directories(
     test_mpi_tile_info_distributor PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
     test_mpi_tile_info_distributor

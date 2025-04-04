@@ -47,10 +47,10 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   std::vector<int> full_matrix_dim = {4, 4};
   std::vector<int> grid_dim = {2, 2};
 
-  app.add_option("--local-n", local_n, "Size of local matrix")
+  app.add_option("-n, --local-n", local_n, "Size of local (square) matrix")
       ->default_val("2");
-  app.add_option("--seed", seed, "Random seed")->default_val("1234");
-  app.add_option("--backend", backend, "Backend to use (mpi or cuda)")
+  app.add_option("-s, --seed", seed, "Random seed")->default_val("1234");
+  app.add_option("-b, --backend", backend, "Backend to use (mpi or cuda)")
       ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
   app.add_flag("-v,--verbose", verbose, "Enable verbose output");

@@ -36,7 +36,9 @@ public:
   [[nodiscard]] int full_matrix_size() const { return full_matrix_size_; }
   [[nodiscard]] int num_tile_rows() const { return num_tile_rows_; }
   [[nodiscard]] int num_tile_cols() const { return num_tile_cols_; }
-  [[nodiscard]] const std::vector<int> &full_matrix_dim() const { return full_matrix_dim_; }
+  [[nodiscard]] const std::vector<int> &full_matrix_dim() const {
+    return full_matrix_dim_;
+  }
   [[nodiscard]] const std::vector<int> &grid_dim() const { return grid_dim_; }
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
   [[nodiscard]] char **orig_argv() const { return orig_argv_; }

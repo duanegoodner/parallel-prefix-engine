@@ -1,3 +1,5 @@
+#include "test_cli_utils.hpp"
+
 #include <gtest/gtest.h>
 
 #include "common/matrix_init.hpp"
@@ -10,17 +12,24 @@
 
 class MpiTileInfoDistributorTest : public ::testing::Test {
 protected:
-  char *argv_storage_[6] = {
-      const_cast<char *>("program_name"),
-      const_cast<char *>("-v"),
-      const_cast<char *>("2"),
-      const_cast<char *>("789"),
-      const_cast<char *>("--backend=mpi"),
-      nullptr // <--- Important!
-  };
-  int argc_ = 5;
-  char **argv_ = argv_storage_;
-  ProgramArgs program_args_ = ProgramArgs::Parse(argc_, argv_);
+  // char *argv_storage_[6] = {
+  //     const_cast<char *>("program_name"),
+  //     const_cast<char *>("-v"),
+  //     const_cast<char *>("2"),
+  //     const_cast<char *>("789"),
+  //     const_cast<char *>("--backend=mpi"),
+  //     nullptr // <--- Important!
+  // };
+  // int argc_ = 5;
+  // char **argv_ = argv_storage_;
+  // ProgramArgs program_args_ = ProgramArgs::Parse(argc_, argv_);
+
+  ArgvBuilder args_ = ArgvBuilder(
+      "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
+  );
+
+  ProgramArgs program_args_ =
+      ProgramArgs::Parse(args_.argc(), args_.argv_data());
 
   MpiEnvironment mpi_environment_ = MpiEnvironment(program_args_);
 
@@ -32,6 +41,8 @@ protected:
 };
 
 TEST_F(MpiTileInfoDistributorTest, DistributeFullMatrix) {
+
+  // MpiEnvironment mpi_environment(alt_program_args_);
   PrefixSumBlockMatrix tile(2, 2);
   MpiTileInfoDistributor distributor(tile, grid_);
 

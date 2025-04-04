@@ -25,12 +25,8 @@ TEST_F(ProgramArgsTest, DefaultInit) {
 
 TEST_F(ProgramArgsTest, ParseWithArgs) {
   ArgvBuilder args(
-      "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
+      "--local-n 8 -f 4 4 -g 2 2 --seed 42 --backend mpi -v"
   );
-
-  for (int i = 0; i < args.argc(); ++i) {
-    std::cout << "argv[" << i << "] = \"" << args.argv_data()[i] << "\"\n";
-  }
 
   auto program_args = ProgramArgs::Parse(args.argc(), args.argv_data());
 
