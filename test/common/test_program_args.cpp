@@ -16,7 +16,7 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), false);
-  EXPECT_EQ(program_args.full_matrix_size(), 16);
+  EXPECT_EQ(program_args.FullMatrixSize(), 16);
   EXPECT_EQ(program_args.GridDim()[0], 2);
   EXPECT_EQ(program_args.GridDim()[1], 2);
   EXPECT_EQ(program_args.orig_argc(), 0);
@@ -34,7 +34,7 @@ TEST_F(ProgramArgsTest, ParseWithArgs) {
   EXPECT_EQ(program_args.seed(), 42);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), true);
-  EXPECT_EQ(program_args.full_matrix_size(), 16); // 4 * 4
+  EXPECT_EQ(program_args.FullMatrixSize(), 16); // 4 * 4
 }
 
 int main(int argc, char **argv) {

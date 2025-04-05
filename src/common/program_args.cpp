@@ -34,9 +34,6 @@ ProgramArgs::ProgramArgs(
     , tile_dim_(std::move(tile_dim))
     , orig_argc_(orig_argc)
     , orig_argv_(orig_argv) {
-  full_matrix_size_ = full_matrix_dim_[0] * full_matrix_dim_[1];
-  // num_tile_rows_ = grid_dim_[0];
-  // num_tile_cols_ = grid_dim_[1];
 }
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
@@ -69,7 +66,7 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   app.add_option("-g, --grid-size", grid_dim, "Grid dimensions (rows cols)")
       ->expected(2)
       ->default_val(std::vector<std::string>{"2", "2"});
-  app.add_option("-t, --tile-dim",tile_dim, "Tile dimensions (rows cols)")
+  app.add_option("-t, --tile-dim", tile_dim, "Tile dimensions (rows cols)")
       ->expected(2)
       ->default_val(std::vector<std::string>{"2", "2"});
 

@@ -40,7 +40,6 @@ public:
   [[nodiscard]] const std::vector<int> &full_matrix_dim() const {
     return full_matrix_dim_;
   }
-  [[nodiscard]] int full_matrix_size() const { return full_matrix_size_; }
   [[nodiscard]] const std::vector<int> &tile_dim() const { return tile_dim_; }
 
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
@@ -88,7 +87,6 @@ private:
   std::vector<int> grid_dim_ = {2, 2};
   std::vector<int> tile_dim_ = {2, 2};
 
-  int full_matrix_size_ = 16;
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;
