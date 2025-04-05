@@ -31,8 +31,8 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
       ))
     , full_matrix_(PrefixSumBlockMatrix(0, 0))
     , assigned_matrix_(PrefixSumBlockMatrix(
-          program_args_.TileDim()[0],
-          program_args_.TileDim()[1]
+          program_args_.tile_dim()[0],
+          program_args_.tile_dim()[1]
       )) {
 
   PopulateFullMatrix();
