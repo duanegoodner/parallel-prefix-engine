@@ -24,7 +24,7 @@ TEST_F(ProgramArgsTest, DefaultInit) {
 
 TEST_F(ProgramArgsTest, ParseWithArgs) {
   ArgvBuilder args(
-      "--local-n 8 -f 4 4 -g 2 2 --seed 42 --backend mpi -v"
+      "-f 4 4 -g 2 2 --seed 42 --backend mpi -v"
   );
 
   auto program_args = ProgramArgs::Parse(args.argc(), args.argv_data());

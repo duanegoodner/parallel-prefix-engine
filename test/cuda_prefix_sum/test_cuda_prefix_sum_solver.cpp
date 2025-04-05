@@ -8,7 +8,7 @@
 
 class CudaPrefixSumSolverTest : public ::testing::Test {
 protected:
-  ArgvBuilder args_ = ArgvBuilder("-n 8 -f 4 4 -g 2 2 -s 42 --backend mpi -v");
+  ArgvBuilder args_ = ArgvBuilder("-f 4 4 -g 2 2 -s 42 --backend mpi -v");
   ProgramArgs program_args_ =
       ProgramArgs::Parse(args_.argc(), args_.argv_data());
 };

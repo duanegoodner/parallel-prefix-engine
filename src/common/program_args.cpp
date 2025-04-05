@@ -15,7 +15,7 @@
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 ProgramArgs::ProgramArgs(
-    int local_n,
+    // int local_n,
     int seed,
     std::string backend,
     bool verbose,
@@ -25,8 +25,7 @@ ProgramArgs::ProgramArgs(
     int orig_argc,
     char **orig_argv
 )
-    : local_n_(local_n)
-    , seed_(seed)
+    : seed_(seed)
     , backend_(std::move(backend))
     , verbose_(verbose)
     , full_matrix_dim_(std::move(full_matrix_dim))
@@ -38,7 +37,7 @@ ProgramArgs::ProgramArgs(
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
 
-  int local_n = 2;
+  // int local_n = 8;
   int seed = 1234;
   std::string backend = "mpi";
   bool verbose = false;
@@ -46,8 +45,8 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   std::vector<int> grid_dim = {2, 2};
   std::vector<int> tile_dim = {2, 2};
 
-  app.add_option("-n, --local-n", local_n, "Size of local (square) matrix")
-      ->default_val("2");
+  // app.add_option("-n, --local-n", local_n, "Size of local (square) matrix")
+  //     ->default_val("8");
   app.add_option("-s, --seed", seed, "Random seed")->default_val("1234");
   app.add_option("-b, --backend", backend, "Backend to use (mpi or cuda)")
       ->check(CLI::IsMember({"mpi", "cuda"}))
@@ -76,7 +75,7 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   }
 
   return ProgramArgs(
-      local_n,
+      // local_n,
       seed,
       backend,
       verbose,

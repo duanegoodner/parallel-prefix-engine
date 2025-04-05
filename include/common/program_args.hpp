@@ -20,7 +20,7 @@ class ProgramArgs {
 public:
   ProgramArgs() = default;
   ProgramArgs(
-      int local_n,
+      // int local_n,
       int seed,
       std::string backend,
       bool verbose,
@@ -77,7 +77,7 @@ public:
   std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 
 private:
-  int local_n_ = 2;
+  // int local_n_ = 2;
   int seed_ = 1234;
   std::string backend_ = "mpi";
   bool verbose_ = false;
