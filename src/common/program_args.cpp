@@ -35,8 +35,8 @@ ProgramArgs::ProgramArgs(
     , orig_argc_(orig_argc)
     , orig_argv_(orig_argv) {
   full_matrix_size_ = full_matrix_dim_[0] * full_matrix_dim_[1];
-  num_tile_rows_ = grid_dim_[0];
-  num_tile_cols_ = grid_dim_[1];
+  // num_tile_rows_ = grid_dim_[0];
+  // num_tile_cols_ = grid_dim_[1];
 }
 
 ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {

@@ -21,8 +21,8 @@ protected:
 TEST_F(MpiCartesianGridTest, DefaultInit) {
   MpiCartesianGrid grid(
       mpi_environment_.rank(),
-      alt_program_args_.num_tile_rows(),
-      alt_program_args_.num_tile_cols()
+      alt_program_args_.GridDim()[0],
+      alt_program_args_.GridDim()[1]
   );
 
   std::cout << "Total number of ranks is: " << grid.size() << std::endl;

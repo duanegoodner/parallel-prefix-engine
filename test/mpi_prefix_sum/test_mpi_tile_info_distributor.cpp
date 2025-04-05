@@ -24,8 +24,8 @@ protected:
 
   MpiCartesianGrid grid_ = MpiCartesianGrid(
       mpi_environment_.rank(),
-      program_args_.num_tile_rows(),
-      program_args_.num_tile_cols()
+      program_args_.GridDim()[0],
+      program_args_.GridDim()[1]
   );
 };
 

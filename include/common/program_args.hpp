@@ -37,8 +37,6 @@ public:
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
   [[nodiscard]] bool verbose() const { return verbose_; }
-  [[nodiscard]] int num_tile_rows() const { return num_tile_rows_; }
-  [[nodiscard]] int num_tile_cols() const { return num_tile_cols_; }
   [[nodiscard]] const std::vector<int> &full_matrix_dim() const {
     return full_matrix_dim_;
   }
@@ -91,8 +89,6 @@ private:
   std::vector<int> tile_dim_ = {2, 2};
 
   int full_matrix_size_ = 16;
-  int num_tile_rows_ = 2;
-  int num_tile_cols_ = 2;
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;

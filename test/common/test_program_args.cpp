@@ -17,12 +17,10 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), false);
   EXPECT_EQ(program_args.full_matrix_size(), 16);
-  EXPECT_EQ(program_args.num_tile_rows(), 2);
-  EXPECT_EQ(program_args.num_tile_cols(), 2);
+  EXPECT_EQ(program_args.GridDim()[0], 2);
+  EXPECT_EQ(program_args.GridDim()[1], 2);
   EXPECT_EQ(program_args.orig_argc(), 0);
   EXPECT_EQ(program_args.orig_argv(), nullptr);
-  EXPECT_EQ(program_args.num_tile_rows(), program_args.GridDim()[0]);
-  EXPECT_EQ(program_args.num_tile_cols(), program_args.GridDim()[1]);
 }
 
 TEST_F(ProgramArgsTest, ParseWithArgs) {
