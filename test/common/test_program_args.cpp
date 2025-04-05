@@ -12,7 +12,6 @@ class ProgramArgsTest : public ::testing::Test {};
 
 TEST_F(ProgramArgsTest, DefaultInit) {
   auto program_args = ProgramArgs();
-  EXPECT_EQ(program_args.local_n(), 2);
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), false);
@@ -30,7 +29,6 @@ TEST_F(ProgramArgsTest, ParseWithArgs) {
 
   auto program_args = ProgramArgs::Parse(args.argc(), args.argv_data());
 
-  EXPECT_EQ(program_args.local_n(), 8);
   EXPECT_EQ(program_args.seed(), 42);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.verbose(), true);

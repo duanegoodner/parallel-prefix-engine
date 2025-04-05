@@ -77,7 +77,10 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
 
 void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
 
-  PrefixSumBlockMatrix matrix(program_args_.local_n());
+  PrefixSumBlockMatrix matrix(
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1]
+  );
   matrix.data() = local_matrix;
   matrix.ComputeLocalPrefixSum();
 

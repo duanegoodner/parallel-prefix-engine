@@ -53,7 +53,8 @@ int main(int argc, char *argv[]) {
 
   if (program_args.verbose()) {
     std::cout << "Parsed options:\n"
-              << "  local_n : " << program_args.local_n() << "\n"
+              << "  rows per tile : " << program_args.tile_dim()[0] << "\n"
+              << "  cols per tile : " << program_args.tile_dim()[1] << "\n"
               << "  seed    : " << program_args.seed() << "\n"
               << "  backend : " << program_args.backend() << "\n"
               << std::endl;

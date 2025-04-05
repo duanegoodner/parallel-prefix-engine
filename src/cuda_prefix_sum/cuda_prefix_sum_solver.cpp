@@ -68,8 +68,6 @@ cudaFree(d_data);
 
 
 void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
-  // int tile_dim = program_args_.local_n();
-  // int total_elements = tile_dim * tile_dim;
 
   int *d_data = nullptr;
 
@@ -113,10 +111,11 @@ void CudaPrefixSumSolver::PrintMatrix(
     const std::string &header
 ) const {
   std::cout << header << "\n";
-  int local_n = program_args_.local_n();
-  for (int i = 0; i < local_n; ++i) {
-    for (int j = 0; j < local_n; ++j) {
-      std::cout << local_matrix[i * local_n + j] << "\t";
+  int num_rows = program_args_.tile_dim()[0];
+  int num_cols = program_args_.tile_dim()[1];
+  for (int i = 0; i < num_rows; ++i) {
+    for (int j = 0; j < num_cols; ++j) {
+      std::cout << local_matrix[i * num_cols + j] << "\t";
     }
     std::cout << "\n";
   }
