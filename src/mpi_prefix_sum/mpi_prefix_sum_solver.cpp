@@ -45,7 +45,8 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
     auto full_matrix_data = GenerateRandomMatrix<int>(
-        program_args_.FullMatrixSize(),
+        program_args_.full_matrix_dim()[0],
+        program_args_.full_matrix_dim()[1],
         program_args_.seed()
     );
     // TODO build from data with correct dims(need getters in ProgramArgs)
@@ -101,7 +102,8 @@ void MpiPrefixSumSolver::PrintMatrix(
   PrintDistributedMatrix(
       mpi_environment_.rank(),
       mpi_environment_.size(),
-      program_args_.local_n(),
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       local_matrix,
       header
   );

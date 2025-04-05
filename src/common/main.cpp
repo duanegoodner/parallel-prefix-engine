@@ -61,8 +61,11 @@ int main(int argc, char *argv[]) {
   }
 
   auto solver = program_args.MakeSolver();
-  auto local_mat =
-      GenerateRandomMatrix<int>(program_args.local_n(), program_args.seed());
+  auto local_mat = GenerateRandomMatrix<int>(
+      program_args.full_matrix_dim()[0],
+      program_args.full_matrix_dim()[1],
+      program_args.seed()
+  );
 
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
 

@@ -33,7 +33,6 @@ public:
 
   static ProgramArgs Parse(int argc, char *const argv[]);
 
-  [[nodiscard]] int local_n() const { return local_n_; }
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
   [[nodiscard]] bool verbose() const { return verbose_; }

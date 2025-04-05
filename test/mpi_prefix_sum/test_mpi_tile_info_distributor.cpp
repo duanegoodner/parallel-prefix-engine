@@ -39,7 +39,8 @@ TEST_F(MpiTileInfoDistributorTest, DistributeFullMatrix) {
 
   if (grid_.rank() == 0) {
     auto full_matrix = GenerateRandomMatrix<int>(
-        program_args_.FullMatrixSize(),
+        program_args_.full_matrix_dim()[0],
+        program_args_.full_matrix_dim()[1],
         program_args_.seed()
     );
     full_block_matrix = PrefixSumBlockMatrix(4, 4, full_matrix);

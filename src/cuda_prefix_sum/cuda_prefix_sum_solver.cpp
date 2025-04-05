@@ -19,7 +19,8 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(const ProgramArgs &program_args)
 
 void CudaPrefixSumSolver::PopulateFullMatrix() {
   full_matrix_ = GenerateRandomMatrix<int>(
-      program_args_.FullMatrixSize(),
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       program_args_.seed()
   );
 }

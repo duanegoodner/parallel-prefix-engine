@@ -35,7 +35,8 @@ template <typename T>
 void PrintDistributedMatrix(
     int rank,
     int size,
-    int local_n,
+    int num_rows,
+    int num_cols,
     const std::vector<T> &local_mat,
     const std::string &header = ""
 ) {
@@ -43,26 +44,26 @@ void PrintDistributedMatrix(
     if (!header.empty()) {
       PrintMatrix(header); // Print the header line before matrix output
     }
-    PrintMatrix(FormatMatrix(rank, local_n, local_mat));
+    PrintMatrix(FormatMatrix(rank, num_rows, num_cols, local_mat));
 
-    std::vector<T> recv_buf(local_n * local_n);
+    std::vector<T> recv_buf(num_rows * num_cols);
     MPI_Status status;
     for (int i = 1; i < size; ++i) {
       MPI_Recv(
           recv_buf.data(),
-          local_n * local_n,
+          num_rows * num_cols,
           GetMpiDatatype<T>(),
           i,
           0,
           MPI_COMM_WORLD,
           &status
       );
-      PrintMatrix(FormatMatrix(i, local_n, recv_buf));
+      PrintMatrix(FormatMatrix(i, num_rows, num_cols, recv_buf));
     }
   } else {
     MPI_Send(
         local_mat.data(),
-        local_n * local_n,
+        num_rows * num_cols,
         GetMpiDatatype<T>(),
         0,
         0,
