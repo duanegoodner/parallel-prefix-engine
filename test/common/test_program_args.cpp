@@ -21,6 +21,8 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   EXPECT_EQ(program_args.num_tile_cols(), 2);
   EXPECT_EQ(program_args.orig_argc(), 0);
   EXPECT_EQ(program_args.orig_argv(), nullptr);
+  EXPECT_EQ(program_args.num_tile_rows(), program_args.GridDim()[0]);
+  EXPECT_EQ(program_args.num_tile_cols(), program_args.GridDim()[1]);
 }
 
 TEST_F(ProgramArgsTest, ParseWithArgs) {

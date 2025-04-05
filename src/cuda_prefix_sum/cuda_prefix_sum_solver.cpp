@@ -46,8 +46,8 @@ void CudaPrefixSumSolver::ComputeNew() {
     d_data,
     program_args_.tile_dim()[0],
     program_args_.tile_dim()[1],
-    program_args_.grid_dim()[0],
-    program_args_.grid_dim()[1],
+    program_args_.GridDim()[0],
+    program_args_.GridDim()[1],
     0 // Use the default CUDA stream
 );
 
@@ -89,8 +89,8 @@ void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
       d_data,
       program_args_.tile_dim()[0],
       program_args_.tile_dim()[1],
-      program_args_.grid_dim()[0],
-      program_args_.grid_dim()[1],
+      program_args_.GridDim()[0],
+      program_args_.GridDim()[1],
       0 // Use the default CUDA stream
   );
 

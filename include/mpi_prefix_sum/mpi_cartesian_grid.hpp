@@ -22,7 +22,6 @@ public:
   MPI_Comm row_comm() const { return comm_row_; }
   MPI_Comm col_comm() const { return comm_col_; }
 
-  // int grid_dim() const { return p_; }
   int rank() const { return rank_; }
   int num_rows() const { return num_rows_; }
   int num_cols() const { return num_cols_; }
