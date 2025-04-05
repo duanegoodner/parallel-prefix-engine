@@ -84,7 +84,6 @@ private:
   bool verbose_ = false;
 
   std::vector<int> full_matrix_dim_ = {4, 4};
-  std::vector<int> grid_dim_ = {2, 2};
   std::vector<int> tile_dim_ = {2, 2};
 
 

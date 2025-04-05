@@ -30,7 +30,6 @@ ProgramArgs::ProgramArgs(
     , backend_(std::move(backend))
     , verbose_(verbose)
     , full_matrix_dim_(std::move(full_matrix_dim))
-    , grid_dim_(std::move(grid_dim))
     , tile_dim_(std::move(tile_dim))
     , orig_argc_(orig_argc)
     , orig_argv_(orig_argv) {
