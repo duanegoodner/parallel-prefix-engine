@@ -10,9 +10,9 @@
 #include <CLI/CLI.hpp>
 #include <utility>
 
-#include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
+// #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+// #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 ProgramArgs::ProgramArgs(
     // int local_n,
@@ -87,12 +87,12 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
   );
 }
 
-std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver() const {
-  if (backend_ == "mpi") {
-    return std::make_unique<MpiPrefixSumSolver>(*this);
-  } else if (backend_ == "cuda") {
-    return std::make_unique<CudaPrefixSumSolver>(*this);
-  } else {
-    throw std::runtime_error("Unsupported backend: " + backend_);
-  }
-}
+// std::unique_ptr<PrefixSumSolver> ProgramArgs::MakeSolver() const {
+//   if (backend_ == "mpi") {
+//     return std::make_unique<MpiPrefixSumSolver>(*this);
+//   } else if (backend_ == "cuda") {
+//     return std::make_unique<CudaPrefixSumSolver>(*this);
+//   } else {
+//     throw std::runtime_error("Unsupported backend: " + backend_);
+//   }
+// }

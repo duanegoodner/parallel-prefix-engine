@@ -16,6 +16,8 @@ protected:
 TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
   CudaPrefixSumSolver cuda_solver{program_args_};
 
+  cuda_solver.Compute();
+
   std::cout << "end of test" << std::endl;
   // cuda_solver.PrintFullMatrix();
   // std::cout << "pause" << std::endl;

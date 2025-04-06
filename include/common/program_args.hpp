@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "common/prefix_sum_solver.hpp"
+// #include "common/prefix_sum_solver.hpp"
 
 class ProgramArgs {
 public:
@@ -82,7 +82,7 @@ public:
               << std::endl;
   }
 
-  std::unique_ptr<PrefixSumSolver> MakeSolver() const;
+  // std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 
 private:
   // int local_n_ = 2;
