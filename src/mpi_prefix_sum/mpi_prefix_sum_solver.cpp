@@ -79,7 +79,7 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
 void MpiPrefixSumSolver::Compute() {
 
   DistributeSubMatrices();
-  assigned_matrix_.ComputeLocalPrefixSum();
+  // assigned_matrix_.ComputeLocalPrefixSum();
   ComputeAndShareAssigned();
   CollectSubMatrices();
 }
