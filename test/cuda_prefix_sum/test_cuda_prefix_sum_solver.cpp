@@ -8,7 +8,7 @@
 
 class CudaPrefixSumSolverTest : public ::testing::Test {
 protected:
-  ArgvBuilder args_ = ArgvBuilder("-f 4 4 -g 2 2 -s 42 --backend mpi -v");
+  ArgvBuilder args_ = ArgvBuilder("-f 4 4 -g 2 2 --backend mpi -v");
   ProgramArgs program_args_ =
       ProgramArgs::Parse(args_.argc(), args_.argv_data());
 };
@@ -16,7 +16,18 @@ protected:
 TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
   CudaPrefixSumSolver cuda_solver{program_args_};
 
+  // std::cout << "Full array size (flattened): " << cuda_solver.Full << std::endl;
+  
+
+  // std::cout << "Initial array on host:" << std::endl;
+  // cuda_solver.PrintFullMatrix();
+
+
+  std::cout << "Before computation:" << std::endl;
+  cuda_solver.PrintFullMatrix();
   cuda_solver.Compute();
+  std::cout << "After computation:" << std::endl;
+  cuda_solver.PrintFullMatrix();
 
   std::cout << "end of test" << std::endl;
   // cuda_solver.PrintFullMatrix();

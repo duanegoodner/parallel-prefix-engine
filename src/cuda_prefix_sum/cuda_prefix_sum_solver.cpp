@@ -44,10 +44,8 @@ void CudaPrefixSumSolver::ComputeNew() {
   // Launch kernel
   LaunchPrefixSumKernel(
       d_data,
-      program_args_.tile_dim()[0],
-      program_args_.tile_dim()[1],
-      program_args_.GridDim()[0],
-      program_args_.GridDim()[1],
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       0 // Use the default CUDA stream
   );
 
@@ -69,11 +67,11 @@ void CudaPrefixSumSolver::Compute() {
   int *d_data = nullptr;
 
   // Allocate device memory
-  cudaMalloc(&d_data, program_args_.ElementsPerTile() * sizeof(int));
+  cudaMalloc(&d_data, program_args_.FullMatrixSize() * sizeof(int));
   cudaMemcpy(
       d_data,
       full_matrix_.data(),
-      program_args_.ElementsPerTile() * sizeof(int),
+      program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyHostToDevice
   );
 
@@ -82,10 +80,8 @@ void CudaPrefixSumSolver::Compute() {
   // Launch kernel
   LaunchPrefixSumKernel(
       d_data,
-      program_args_.tile_dim()[0],
-      program_args_.tile_dim()[1],
-      program_args_.GridDim()[0],
-      program_args_.GridDim()[1],
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       0 // Use the default CUDA stream
   );
 
@@ -96,7 +92,7 @@ void CudaPrefixSumSolver::Compute() {
   cudaMemcpy(
       full_matrix_.data(),
       d_data,
-      program_args_.ElementsPerTile() * sizeof(int),
+      program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyDeviceToHost
   );
 
