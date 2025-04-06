@@ -13,19 +13,21 @@ protected:
       ProgramArgs::Parse(args_.argc(), args_.argv_data());
 };
 
-// TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
+TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
+  CudaPrefixSumSolver cuda_solver{program_args_};
+
+  std::cout << "end of test" << std::endl;
+  // cuda_solver.PrintFullMatrix();
+  // std::cout << "pause" << std::endl;
+}
+
+// TEST_F(CudaPrefixSumSolverTest, ComputeNew) {
 //   CudaPrefixSumSolver cuda_solver{program_args_};
 //   cuda_solver.PrintFullMatrix();
-//   std::cout << "pause" << std::endl;
+//   std::cout << std::endl;
+//   cuda_solver.ComputeNew();
+//   cuda_solver.PrintFullMatrix();
 // }
-
-TEST_F(CudaPrefixSumSolverTest, ComputeNew) {
-  CudaPrefixSumSolver cuda_solver{program_args_};
-  cuda_solver.PrintFullMatrix();
-  std::cout << std::endl;
-  cuda_solver.ComputeNew();
-  cuda_solver.PrintFullMatrix();
-}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
