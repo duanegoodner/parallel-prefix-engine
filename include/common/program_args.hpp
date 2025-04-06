@@ -74,6 +74,14 @@ public:
     );
   }
 
+  void Print() const {
+    std::cout << "ProgramArgs:\n"
+              << "Full Matrix Dimensions: " << full_matrix_dim_[0] << " x "
+              << full_matrix_dim_[1] << "\n"
+              << "Tile Dimensions: " << tile_dim_[0] << " x " << tile_dim_[1]
+              << std::endl;
+  }
+
   std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 
 private:
@@ -84,7 +92,6 @@ private:
 
   std::vector<int> full_matrix_dim_ = {4, 4};
   std::vector<int> tile_dim_ = {2, 2};
-
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;

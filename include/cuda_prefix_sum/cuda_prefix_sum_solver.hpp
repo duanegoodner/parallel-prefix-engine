@@ -24,11 +24,9 @@ public:
       const std::string &header
   ) const override;
 
-
   void PrintFullMatrix();
 
   const ProgramArgs &program_args() const;
-
   void StartTimer() override;
   void StopTimer() override;
   void ReportTime() const override;
