@@ -25,6 +25,8 @@ public:
       const std::string &header
   ) const = 0;
 
+  virtual void PrintFullMatrix() = 0;
+
   // ⏱️ Time tracking (backend-specific implementations)
   virtual void StartTimer() = 0;
   virtual void StopTimer() = 0;

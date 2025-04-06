@@ -71,10 +71,18 @@ int main(int argc, char *argv[]) {
 
   // solver->PopulateFullMatrix(); // Do this in the solver constructor
   // solver->PrintMatrix(local_mat, "Before prefix sum:");
+  // std::cout << "Full matrix before computing prefix sum:" << std::endl;
+  solver->PrintFullMatrix();
+
+  // solver->PopulateFullMatrix();
+
   solver->StartTimer();
   solver->Compute();
   solver->StopTimer();
+  solver->PrintFullMatrix();
   solver->ReportTime();
+
+
   // solver->PrintMatrix(local_mat, "After prefix sum:");
 
   return 0;

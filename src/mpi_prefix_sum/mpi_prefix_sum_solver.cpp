@@ -76,23 +76,12 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
   distributor.ReconstructFullMatrix(full_matrix_);
 }
 
-// void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
 void MpiPrefixSumSolver::Compute() {
 
-  // PrefixSumBlockMatrix matrix(
-  //     program_args_.full_matrix_dim()[0],
-  //     program_args_.full_matrix_dim()[1]
-  // );
-  // matrix.data() = local_matrix;
   DistributeSubMatrices();
   assigned_matrix_.ComputeLocalPrefixSum();
   ComputeAndShareAssigned();
-
-  // MpiTileInfoDistributor distributor(assigned_matrix_, grid_);
-
-  // distributor.ShareRightEdges();
-  // distributor.ShareBottomEdges();
-  // local_matrix = matrix.data();
+  CollectSubMatrices();
 }
 
 void MpiPrefixSumSolver::PrintMatrix(

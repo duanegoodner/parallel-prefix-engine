@@ -41,12 +41,14 @@ public:
   int Rank() const { return mpi_environment_.rank(); }
 
   void PrintFullMatrix() {
-    full_matrix_.Print();
+    
+    if (mpi_environment_.rank() == 0) {
+      std::cout << "Full matrix" << std::endl;
+      full_matrix_.Print();
+    }
   }
 
-  void PrintAssignedMatrix() {
-    assigned_matrix_.Print();
-  }
+  void PrintAssignedMatrix() { assigned_matrix_.Print(); }
 
   void StartTimer() override;
   void StopTimer() override;
