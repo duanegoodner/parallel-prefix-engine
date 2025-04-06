@@ -18,7 +18,7 @@ public:
 
   virtual void PopulateFullMatrix() = 0;
 
-  virtual void Compute(std::vector<int> &local_matrix) = 0;
+  virtual void Compute() = 0;
 
   virtual void PrintMatrix(
       const std::vector<int> &local_matrix,

@@ -70,12 +70,12 @@ int main(int argc, char *argv[]) {
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
 
   // solver->PopulateFullMatrix(); // Do this in the solver constructor
-  solver->PrintMatrix(local_mat, "Before prefix sum:");
+  // solver->PrintMatrix(local_mat, "Before prefix sum:");
   solver->StartTimer();
-  solver->Compute(local_mat);
+  solver->Compute();
   solver->StopTimer();
   solver->ReportTime();
-  solver->PrintMatrix(local_mat, "After prefix sum:");
+  // solver->PrintMatrix(local_mat, "After prefix sum:");
 
   return 0;
 }

@@ -17,7 +17,7 @@ public:
   explicit CudaPrefixSumSolver(const ProgramArgs &program_args);
 
   void PopulateFullMatrix() override;
-  void Compute(std::vector<int> &local_matrix) override;
+  void Compute() override;
   void ComputeNew();
   void PrintMatrix(
       const std::vector<int> &local_matrix,

@@ -31,7 +31,7 @@ public:
 
   void CollectSubMatrices();
 
-  void Compute(std::vector<int> &local_matrix) override;
+  void Compute() override;
 
   void PrintMatrix(
       const std::vector<int> &local_matrix,

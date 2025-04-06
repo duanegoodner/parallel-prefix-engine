@@ -68,15 +68,15 @@ cudaFree(d_data);
 
 
 
-void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
-
+// void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
+  void CudaPrefixSumSolver::Compute() {
   int *d_data = nullptr;
 
   // Allocate device memory
   cudaMalloc(&d_data, program_args_.ElementsPerTile() * sizeof(int));
   cudaMemcpy(
       d_data,
-      local_matrix.data(),
+      full_matrix_.data(),
       program_args_.ElementsPerTile() * sizeof(int),
       cudaMemcpyHostToDevice
   );
@@ -98,7 +98,7 @@ void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
 
   // Copy results back
   cudaMemcpy(
-      local_matrix.data(),
+      full_matrix_.data(),
       d_data,
       program_args_.ElementsPerTile() * sizeof(int),
       cudaMemcpyDeviceToHost
