@@ -25,7 +25,7 @@ public:
       std::string backend,
       bool verbose,
       std::vector<int> full_matrix_dim,
-      std::vector<int> grid_dim,
+      // std::vector<int> grid_dim,
       std::vector<int> tile_dim,
       int orig_argc,
       char **orig_argv

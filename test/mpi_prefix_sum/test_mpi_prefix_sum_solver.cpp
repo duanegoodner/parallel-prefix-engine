@@ -10,9 +10,24 @@
 
 class MpiPrefixSumSolverTest : public ::testing::Test {
 protected:
-  ArgvBuilder args_ = ArgvBuilder("-f 4 4");
-  ProgramArgs program_args_ =
-      ProgramArgs::Parse(args_.argc(), args_.argv_data());
+  // ArgvBuilder args_ = ArgvBuilder("-f 6 6 -g 2 2 -t 3 3");
+  // ProgramArgs program_args_ =
+  //     ProgramArgs::Parse(args_.argc(), args_.argv_data());
+
+  std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
+  std::vector<int> grid_dim_ = std::vector<int>({2, 2});
+  std::vector<int> tile_dim_ = std::vector<int>({3, 3});
+
+  ProgramArgs program_args_ = ProgramArgs(
+      1234,
+      "mpi",
+      false,
+      full_matrix_dim_,
+      // grid_dim_,
+      tile_dim_,
+      1,
+      nullptr
+  );
 
   MpiPrefixSumSolver mpi_prefix_sum_solver_ =
       MpiPrefixSumSolver(program_args_);
@@ -41,7 +56,8 @@ TEST_F(MpiPrefixSumSolverTest, Compute) {
 
 // TEST_F(MpiPrefixSumSolverTest, Functonality) {
 //   if (mpi_prefix_sum_solver_.Rank() == 0) {
-//     std::cout << "Rank 0 will subdivide and distribute the following matrix:"
+//     std::cout << "Rank 0 will subdivide and distribute the following
+//     matrix:"
 //               << std::endl;
 //     mpi_prefix_sum_solver_.PrintFullMatrix();
 //     std::cout << std::endl;

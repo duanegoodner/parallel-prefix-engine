@@ -20,7 +20,7 @@ ProgramArgs::ProgramArgs(
     std::string backend,
     bool verbose,
     std::vector<int> full_matrix_dim,
-    std::vector<int> grid_dim,
+    // std::vector<int> grid_dim,
     std::vector<int> tile_dim,
     int orig_argc,
     char **orig_argv
@@ -80,7 +80,7 @@ ProgramArgs ProgramArgs::Parse(int argc, char *const argv[]) {
       backend,
       verbose,
       full_matrix_dim,
-      grid_dim,
+      // grid_dim,
       tile_dim,
       argc,
       const_cast<char **>(argv)
