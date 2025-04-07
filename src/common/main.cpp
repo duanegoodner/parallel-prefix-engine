@@ -40,31 +40,31 @@
 
 int main(int argc, char *argv[]) {
   auto program_args = ArgParser::Parse(argc, argv);
-  
-  // ProgramArgs program_args = ProgramArgs::Parse(argc, argv);
-  // Logger::SetVerbose(args.verbose()); // 👈 enable debug messages if
-  // requested
 
-  // Logger::Log(
-  //     LogLevel::INFO,
-  //     "Creating solver for backend: " + args.backend()
-  // );
+  Logger::SetLogLevel(program_args.log_level());
 
-  std::cout << "argc " << argc << std::endl;
-  for (auto idx = 0; idx < argc; ++idx) {
-    std::cout << "argv[" << idx << "] = " << argv[idx] << std::endl;
-  }
+  Logger::Log(LogLevel::INFO, "Parsed options:");
+  Logger::Log(
+      LogLevel::INFO,
+      "  rows per tile : " + std::to_string(program_args.tile_dim()[0])
+  );
+  Logger::Log(
+      LogLevel::INFO,
+      "  cols per tile : " + std::to_string(program_args.tile_dim()[1])
+  );
+  Logger::Log(
+      LogLevel::INFO,
+      "  seed    : " + std::to_string(program_args.seed())
+  );
+  Logger::Log(LogLevel::INFO, "  backend : " + program_args.backend());
+  Logger::Log(
+      LogLevel::INFO,
+      "  full matrix dim : " +
+          std::to_string(program_args.full_matrix_dim()[0]) + " x " +
+          std::to_string(program_args.full_matrix_dim()[1])
+  );
 
-  if (program_args.verbose()) {
-    std::cout << "Parsed options:\n"
-              << "  rows per tile : " << program_args.tile_dim()[0] << "\n"
-              << "  cols per tile : " << program_args.tile_dim()[1] << "\n"
-              << "  seed    : " << program_args.seed() << "\n"
-              << "  backend : " << program_args.backend() << "\n"
-              << std::endl;
-  }
 
-  // auto solver = program_args.MakeSolver();
   auto solver = MakeSolver(program_args);
   auto local_mat = GenerateRandomMatrix<int>(
       program_args.full_matrix_dim()[0],
@@ -72,22 +72,12 @@ int main(int argc, char *argv[]) {
       program_args.seed()
   );
 
-  // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
-
-  // solver->PopulateFullMatrix(); // Do this in the solver constructor
-  // solver->PrintMatrix(local_mat, "Before prefix sum:");
-  // std::cout << "Full matrix before computing prefix sum:" << std::endl;
-  solver->PrintFullMatrix();
-
-  // solver->PopulateFullMatrix();
-
+  solver->PrintFullMatrix("Starting matrix");
   solver->StartTimer();
   solver->Compute();
   solver->StopTimer();
-  solver->PrintFullMatrix();
+  solver->PrintFullMatrix("After prefix sum computation");
   solver->ReportTime();
-
-  // solver->PrintMatrix(local_mat, "After prefix sum:");
 
   return 0;
 }

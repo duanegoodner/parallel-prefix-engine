@@ -1,23 +1,18 @@
 // ----------------------------------------------------------------------------
 // program_args.cpp
 //
-// Implements argument parsing using CLI11. Parses CLI options such as backend,
-// local matrix size, seed, and matrix/grid dimensions.
+// Implements ProgramArgs class.
 // ----------------------------------------------------------------------------
 
 #include "common/program_args.hpp"
+#include "common/logger.hpp"
 
-// #include <CLI/CLI.hpp>
 #include <utility>
-
-// #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
-
-// #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 ProgramArgs::ProgramArgs(
     int seed,
     std::string backend,
-    bool verbose,
+    LogLevel log_level,
     std::vector<int> full_matrix_dim,
     std::vector<int> tile_dim,
     int orig_argc,
@@ -25,7 +20,7 @@ ProgramArgs::ProgramArgs(
 )
     : seed_(seed)
     , backend_(std::move(backend))
-    , verbose_(verbose)
+    , log_level_(log_level)
     , full_matrix_dim_(std::move(full_matrix_dim))
     , tile_dim_(std::move(tile_dim))
     , orig_argc_(orig_argc)

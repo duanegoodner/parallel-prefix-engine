@@ -33,17 +33,12 @@ public:
 
   void Compute() override;
 
-  void PrintMatrix(
-      const std::vector<int> &local_matrix,
-      const std::string &header = ""
-  ) const override;
-
   int Rank() const { return mpi_environment_.rank(); }
 
-  void PrintFullMatrix() {
+  void PrintFullMatrix(std::string title = "") override {
     
     if (mpi_environment_.rank() == 0) {
-      std::cout << "Full matrix" << std::endl;
+      std::cout << title << std::endl;
       full_matrix_.Print();
     }
   }
@@ -52,6 +47,10 @@ public:
 
   void StartTimer() override;
   void StopTimer() override;
+  std::chrono::duration<double> GetElapsedTime() const override;
+  std::chrono::duration<double> GetStartTime() const override;
+  std::chrono::duration<double> GetEndTime() const override;
+
   void ReportTime() const override;
 
 private:

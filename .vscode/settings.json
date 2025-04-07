@@ -94,6 +94,7 @@
         "typeindex": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "__nullptr": "cpp"
     }
 }

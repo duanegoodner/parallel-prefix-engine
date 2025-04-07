@@ -18,24 +18,21 @@ public:
 
   void PopulateFullMatrix() override;
   void Compute() override;
-  void ComputeNew();
-  void PrintMatrix(
-      const std::vector<int> &local_matrix,
-      const std::string &header
-  ) const override;
 
-
-  void PrintFullMatrix();
+  void PrintFullMatrix(std::string title = "") override;
 
   const ProgramArgs &program_args() const;
 
   void StartTimer() override;
   void StopTimer() override;
+  std::chrono::duration<double> GetElapsedTime() const;
+  std::chrono::duration<double> GetStartTime() const override;
+  std::chrono::duration<double> GetEndTime() const override;
   void ReportTime() const override;
 
 private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_;
-  std::chrono::steady_clock::time_point stop_time_;
+  std::chrono::steady_clock::time_point end_time_;
 };

@@ -21,7 +21,7 @@ protected:
   ProgramArgs program_args_ = ProgramArgs(
       1234,
       "mpi",
-      false,
+      LogLevel::OFF,
       full_matrix_dim_,
       tile_dim_,
       1,

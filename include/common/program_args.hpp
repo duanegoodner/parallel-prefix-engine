@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-// #include "common/prefix_sum_solver.hpp"
+#include "common/logger.hpp"
 
 class ProgramArgs {
 public:
@@ -22,17 +22,16 @@ public:
   ProgramArgs(
       int seed,
       std::string backend,
-      bool verbose,
+      LogLevel log_level,
       std::vector<int> full_matrix_dim,
       std::vector<int> tile_dim,
       int orig_argc,
       char **orig_argv
   );
 
-
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
-  [[nodiscard]] bool verbose() const { return verbose_; }
+  [[nodiscard]] LogLevel log_level() const { return log_level_; }
   [[nodiscard]] const std::vector<int> &full_matrix_dim() const {
     return full_matrix_dim_;
   }
@@ -84,7 +83,7 @@ public:
 private:
   int seed_ = 1234;
   std::string backend_ = "mpi";
-  bool verbose_ = false;
+  LogLevel log_level_ = LogLevel::OFF;
 
   std::vector<int> full_matrix_dim_ = {4, 4};
   std::vector<int> tile_dim_ = {2, 2};
