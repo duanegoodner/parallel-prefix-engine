@@ -12,13 +12,21 @@ add_library(arg_parser arg_parser.cpp)
 target_include_directories(arg_parser PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(arg_parser PUBLIC CLI11::CLI11)
 
-# Executable that links in all necessary components
-# add_executable(prefix_sum main.cpp)
 
-# target_link_libraries(prefix_sum
-#     PRIVATE
-#         prefix_sum_common
-#         prefix_sum_mpi
-#         prefix_sum_cuda
-#         MPI::MPI_CXX
-# )
+add_library(solver_dispatch solver_dispatch.cpp)
+target_include_directories(solver_dispatch PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(solver_dispatch PUBLIC MPI::MPI_CXX)
+
+
+# Executable that links in all necessary components
+add_executable(prefix_sum main.cpp)
+
+target_link_libraries(prefix_sum
+    PRIVATE
+        arg_parser
+        solver_dispatch
+        prefix_sum_common
+        prefix_sum_mpi
+        prefix_sum_cuda
+        MPI::MPI_CXX
+)

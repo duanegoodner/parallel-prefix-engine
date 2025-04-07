@@ -31,13 +31,17 @@
 #include <memory>
 #include <vector>
 
+#include "common/arg_parser.hpp"
 #include "common/logger.hpp"
 #include "common/matrix_init.hpp"
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
+#include "common/solver_dispatch.hpp"
 
 int main(int argc, char *argv[]) {
-  ProgramArgs program_args = ProgramArgs::Parse(argc, argv);
+  auto program_args = ArgParser::Parse(argc, argv);
+  
+  // ProgramArgs program_args = ProgramArgs::Parse(argc, argv);
   // Logger::SetVerbose(args.verbose()); // 👈 enable debug messages if
   // requested
 
@@ -60,7 +64,8 @@ int main(int argc, char *argv[]) {
               << std::endl;
   }
 
-  auto solver = program_args.MakeSolver();
+  // auto solver = program_args.MakeSolver();
+  auto solver = MakeSolver(program_args);
   auto local_mat = GenerateRandomMatrix<int>(
       program_args.full_matrix_dim()[0],
       program_args.full_matrix_dim()[1],
@@ -81,7 +86,6 @@ int main(int argc, char *argv[]) {
   solver->StopTimer();
   solver->PrintFullMatrix();
   solver->ReportTime();
-
 
   // solver->PrintMatrix(local_mat, "After prefix sum:");
 
