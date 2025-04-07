@@ -19,14 +19,14 @@ enum class LogLevel { OFF, INFO, DEBUG, ERROR, COUNT };
 
 namespace LogLevelUtils {
 constexpr std::array<std::string_view, static_cast<size_t>(LogLevel::COUNT)>
-    level_strings{"OFF", "INFO", "DEBUG", "ERROR"};
+    level_strings{"off", "info", "debug", "error"};
 
 constexpr std::array<std::pair<std::string_view, LogLevel>, 4> string_to_level{
     {
-        {"OFF", LogLevel::OFF},
-        {"INFO", LogLevel::INFO},
-        {"DEBUG", LogLevel::DEBUG},
-        {"ERROR", LogLevel::ERROR},
+        {"off", LogLevel::OFF},
+        {"info", LogLevel::INFO},
+        {"debug", LogLevel::DEBUG},
+        {"error", LogLevel::ERROR},
     }};
 
 constexpr std::string_view ToString(LogLevel level) {
@@ -47,29 +47,16 @@ constexpr LogLevel FromString(std::string_view str) {
 // flag.
 class Logger {
 public:
-  static void SetVerbose(bool enabled) { verbose_enabled_ = enabled; }
+  static void SetLogLevel(LogLevel level) { log_level_ = level; }
 
   static void Log(LogLevel level, const std::string &message) {
-    if (level == LogLevel::DEBUG && !verbose_enabled_)
+    if (log_level_ == LogLevel::OFF || level > log_level_)
       return;
 
     std::ostream &out = (level == LogLevel::ERROR) ? std::cerr : std::cout;
-    out << "[" << ToString(level) << "] " << message << "\n";
+    out << "[" << LogLevelUtils::ToString(level) << "] " << message << "\n";
   }
 
 private:
-  static inline bool verbose_enabled_ = false;
-
-  static std::string ToString(LogLevel level) {
-    switch (level) {
-    case LogLevel::INFO:
-      return "INFO";
-    case LogLevel::DEBUG:
-      return "DEBUG";
-    case LogLevel::ERROR:
-      return "ERROR";
-    default:
-      return "UNKNOWN";
-    }
-  }
+  static inline LogLevel log_level_ = LogLevel::OFF;
 };

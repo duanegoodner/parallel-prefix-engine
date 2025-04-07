@@ -14,7 +14,7 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   auto program_args = ProgramArgs();
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
-  EXPECT_EQ(program_args.verbose(), false);
+  EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
   EXPECT_EQ(program_args.FullMatrixSize(), 16);
   EXPECT_EQ(program_args.GridDim()[0], 2);
   EXPECT_EQ(program_args.GridDim()[1], 2);
@@ -32,11 +32,11 @@ TEST_F(ProgramArgsTest, TestInit) {
   std::vector<int> tile_dim_ = std::vector<int>({3, 3});
 
   ProgramArgs program_args =
-      ProgramArgs(1234, "mpi", false, full_matrix_dim_, tile_dim_, 1, nullptr);
+      ProgramArgs(1234, "mpi", LogLevel::OFF, full_matrix_dim_, tile_dim_, 1, nullptr);
 
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
-  EXPECT_EQ(program_args.verbose(), false);
+  EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
   EXPECT_EQ(program_args.FullMatrixSize(), 36); // 4 * 4
 }
 

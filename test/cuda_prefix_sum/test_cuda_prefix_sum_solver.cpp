@@ -17,7 +17,7 @@ protected:
   std::vector<int> tile_dim_ = std::vector<int>({3, 3});
 
   ProgramArgs program_args_ =
-      ProgramArgs(1234, "mpi", false, full_matrix_dim_, tile_dim_, 1, nullptr);
+      ProgramArgs(1234, "mpi", LogLevel::OFF, full_matrix_dim_, tile_dim_, 1, nullptr);
 };
 
 TEST_F(CudaPrefixSumSolverTest, DefaultInit) {

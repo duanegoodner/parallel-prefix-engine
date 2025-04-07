@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 
 #include "common/arg_parser.hpp"
+#include "common/logger.hpp"
 #include <CLI/CLI.hpp>
 #include <utility>
 
@@ -13,7 +14,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
 
   int seed = 1234;
   std::string backend = "mpi";
-  bool verbose = false;
+  std::string log_level = "off";
   std::vector<int> full_matrix_dim = {4, 4};
   std::vector<int> grid_dim = {2, 2};  // still parsed, might be useful later
   std::vector<int> tile_dim = {2, 2};
@@ -22,7 +23,9 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   app.add_option("-b, --backend", backend, "Backend to use (mpi or cuda)")
       ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
-  app.add_flag("-v,--verbose", verbose, "Enable verbose output");
+  app.add_option("-L, --log-level", log_level, "Logging level (off, info, debug or error)")
+      ->check(CLI::IsMember({"off", "info", "debug", "error"}))
+      ->default_val("off");
 
   app.add_option(
          "-f, --full-matrix-dim",
@@ -49,7 +52,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   return ProgramArgs(
       seed,
       backend,
-      verbose,
+      LogLevelUtils::FromString(log_level),
       full_matrix_dim,
       tile_dim,
       argc,

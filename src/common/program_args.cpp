@@ -5,13 +5,14 @@
 // ----------------------------------------------------------------------------
 
 #include "common/program_args.hpp"
+#include "common/logger.hpp"
 
 #include <utility>
 
 ProgramArgs::ProgramArgs(
     int seed,
     std::string backend,
-    bool verbose,
+    LogLevel log_level,
     std::vector<int> full_matrix_dim,
     std::vector<int> tile_dim,
     int orig_argc,
@@ -19,7 +20,7 @@ ProgramArgs::ProgramArgs(
 )
     : seed_(seed)
     , backend_(std::move(backend))
-    , verbose_(verbose)
+    , log_level_(log_level)
     , full_matrix_dim_(std::move(full_matrix_dim))
     , tile_dim_(std::move(tile_dim))
     , orig_argc_(orig_argc)
