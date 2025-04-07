@@ -99,21 +99,6 @@ void CudaPrefixSumSolver::Compute() {
   cudaFree(d_data);
 }
 
-void CudaPrefixSumSolver::PrintMatrix(
-    const std::vector<int> &local_matrix,
-    const std::string &header
-) const {
-  std::cout << header << "\n";
-  int num_rows = program_args_.tile_dim()[0];
-  int num_cols = program_args_.tile_dim()[1];
-  for (int i = 0; i < num_rows; ++i) {
-    for (int j = 0; j < num_cols; ++j) {
-      std::cout << local_matrix[i * num_cols + j] << "\t";
-    }
-    std::cout << "\n";
-  }
-}
-
 void CudaPrefixSumSolver::PrintFullMatrix() {
   for (auto row = 0; row < program_args_.full_matrix_dim()[0]; ++row) {
     for (auto col = 0; col < program_args_.full_matrix_dim()[1]; ++col) {

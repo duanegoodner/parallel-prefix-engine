@@ -33,11 +33,6 @@ public:
 
   void Compute() override;
 
-  void PrintMatrix(
-      const std::vector<int> &local_matrix,
-      const std::string &header = ""
-  ) const override;
-
   int Rank() const { return mpi_environment_.rank(); }
 
   void PrintFullMatrix() {

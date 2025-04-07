@@ -84,22 +84,22 @@ void MpiPrefixSumSolver::Compute() {
   CollectSubMatrices();
 }
 
-void MpiPrefixSumSolver::PrintMatrix(
-    const std::vector<int> &local_matrix,
-    const std::string &header
-) const {
-  // Ensure all ranks have completed prior work before printing
-  MPI_Barrier(MPI_COMM_WORLD);
+// void MpiPrefixSumSolver::PrintMatrix(
+//     const std::vector<int> &local_matrix,
+//     const std::string &header
+// ) const {
+//   // Ensure all ranks have completed prior work before printing
+//   MPI_Barrier(MPI_COMM_WORLD);
 
-  PrintDistributedMatrix(
-      mpi_environment_.rank(),
-      mpi_environment_.size(),
-      program_args_.full_matrix_dim()[0],
-      program_args_.full_matrix_dim()[1],
-      local_matrix,
-      header
-  );
-}
+//   PrintDistributedMatrix(
+//       mpi_environment_.rank(),
+//       mpi_environment_.size(),
+//       program_args_.full_matrix_dim()[0],
+//       program_args_.full_matrix_dim()[1],
+//       local_matrix,
+//       header
+//   );
+// }
 
 void MpiPrefixSumSolver::StartTimer() {
   start_time_ = std::chrono::steady_clock::now();

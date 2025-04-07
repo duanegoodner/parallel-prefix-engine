@@ -20,26 +20,7 @@ public:
 
   virtual void Compute() = 0;
 
-  virtual void PrintMatrix(
-      const std::vector<int> &local_matrix,
-      const std::string &header
-  ) const = 0;
-
   virtual void PrintFullMatrix() = 0;
-
-  // ⏱️ Time tracking (backend-specific implementations)
-  virtual void StartTimer() = 0;
-  virtual void StopTimer() = 0;
-  virtual void ReportTime() const = 0;
-};
-
-class PrefixSumSolverNew {
-public:
-  virtual ~PrefixSumSolverNew() = default;
-
-  virtual void Compute() = 0;
-
-  virtual void PrintMatrix(const std::string &header) const = 0;
 
   // ⏱️ Time tracking (backend-specific implementations)
   virtual void StartTimer() = 0;
