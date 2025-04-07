@@ -13,12 +13,13 @@
 #include <vector>
 
 template <typename T>
-std::string FormatMatrix(int rank, int local_n, const std::vector<T> &mat) {
+std::string
+FormatMatrix(int rank, int num_rows, int num_cols, const std::vector<T> &mat) {
   std::ostringstream oss;
   oss << "rank " << rank << ":";
-  for (int i = 0; i < local_n; ++i) {
-    for (int j = 0; j < local_n; ++j) {
-      oss << "\t" << mat[i * local_n + j];
+  for (int i = 0; i < num_rows; ++i) {
+    for (int j = 0; j < num_cols; ++j) {
+      oss << "\t" << mat[i * num_cols + j];
     }
     oss << "\n";
   }

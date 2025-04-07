@@ -27,12 +27,28 @@ public:
 
   void DistributeSubMatrices();
 
-  void Compute(std::vector<int> &local_matrix) override;
+  void ComputeAndShareAssigned();
+
+  void CollectSubMatrices();
+
+  void Compute() override;
 
   void PrintMatrix(
       const std::vector<int> &local_matrix,
       const std::string &header = ""
   ) const override;
+
+  int Rank() const { return mpi_environment_.rank(); }
+
+  void PrintFullMatrix() {
+    
+    if (mpi_environment_.rank() == 0) {
+      std::cout << "Full matrix" << std::endl;
+      full_matrix_.Print();
+    }
+  }
+
+  void PrintAssignedMatrix() { assigned_matrix_.Print(); }
 
   void StartTimer() override;
   void StopTimer() override;
@@ -42,11 +58,7 @@ private:
   MpiEnvironment mpi_environment_;
   ProgramArgs program_args_;
   MpiCartesianGrid grid_;
-  // PrefixSumBlockMatrix full_matrix_;
-  // PrefixSumBlockMatrix assigned_matrix_;
-  std::vector<int> full_matrix_;
-  std::vector<int> assigned_matrix_;
+  PrefixSumBlockMatrix full_matrix_;
+  PrefixSumBlockMatrix assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
-
-  std::vector<int> CollectSubmatrix(int submatrix_x, int submatrix_y);
 };

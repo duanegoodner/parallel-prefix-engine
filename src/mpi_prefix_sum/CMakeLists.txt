@@ -10,4 +10,4 @@ add_library(prefix_sum_mpi
 )
 
 target_include_directories(prefix_sum_mpi PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(prefix_sum_mpi PUBLIC prefix_sum_common)
+target_link_libraries(prefix_sum_mpi PUBLIC prefix_sum_common MPI::MPI_CXX)

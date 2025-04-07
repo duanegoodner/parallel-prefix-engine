@@ -53,25 +53,37 @@ int main(int argc, char *argv[]) {
 
   if (program_args.verbose()) {
     std::cout << "Parsed options:\n"
-              << "  local_n : " << program_args.local_n() << "\n"
+              << "  rows per tile : " << program_args.tile_dim()[0] << "\n"
+              << "  cols per tile : " << program_args.tile_dim()[1] << "\n"
               << "  seed    : " << program_args.seed() << "\n"
               << "  backend : " << program_args.backend() << "\n"
               << std::endl;
   }
 
   auto solver = program_args.MakeSolver();
-  auto local_mat =
-      GenerateRandomMatrix<int>(program_args.local_n(), program_args.seed());
+  auto local_mat = GenerateRandomMatrix<int>(
+      program_args.full_matrix_dim()[0],
+      program_args.full_matrix_dim()[1],
+      program_args.seed()
+  );
 
   // Logger::Log(LogLevel::DEBUG, "Random matrix initialized.");
 
-  solver->PopulateFullMatrix();
-  solver->PrintMatrix(local_mat, "Before prefix sum:");
+  // solver->PopulateFullMatrix(); // Do this in the solver constructor
+  // solver->PrintMatrix(local_mat, "Before prefix sum:");
+  // std::cout << "Full matrix before computing prefix sum:" << std::endl;
+  solver->PrintFullMatrix();
+
+  // solver->PopulateFullMatrix();
+
   solver->StartTimer();
-  solver->Compute(local_mat);
+  solver->Compute();
   solver->StopTimer();
+  solver->PrintFullMatrix();
   solver->ReportTime();
-  solver->PrintMatrix(local_mat, "After prefix sum:");
+
+
+  // solver->PrintMatrix(local_mat, "After prefix sum:");
 
   return 0;
 }

@@ -13,43 +13,86 @@
 // 0);
 
 CudaPrefixSumSolver::CudaPrefixSumSolver(const ProgramArgs &program_args)
-    : program_args_(program_args) {}
+    : program_args_(program_args) {
+  PopulateFullMatrix();
+}
 
 void CudaPrefixSumSolver::PopulateFullMatrix() {
   full_matrix_ = GenerateRandomMatrix<int>(
-      program_args_.full_matrix_size(),
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       program_args_.seed()
   );
 }
 
-void CudaPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
-  int tile_dim = program_args_.local_n();
-  int total_elements = tile_dim * tile_dim;
+void CudaPrefixSumSolver::ComputeNew() {
+  // This function is not used in the current implementation
+  // It can be removed or implemented as needed
 
   int *d_data = nullptr;
 
-  // Allocate device memory
-  cudaMalloc(&d_data, total_elements * sizeof(int));
+  cudaMalloc(&d_data, program_args_.FullMatrixSize() * sizeof(int));
   cudaMemcpy(
       d_data,
-      local_matrix.data(),
-      total_elements * sizeof(int),
+      full_matrix_.data(),
+      program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyHostToDevice
   );
 
   start_time_ = std::chrono::steady_clock::now();
 
   // Launch kernel
-  LaunchPrefixSumKernel(d_data, tile_dim);
+  LaunchPrefixSumKernel(
+      d_data,
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
+      0 // Use the default CUDA stream
+  );
 
   cudaDeviceSynchronize();
   stop_time_ = std::chrono::steady_clock::now();
 
   // Copy results back
   cudaMemcpy(
-      local_matrix.data(),
+      full_matrix_.data(),
       d_data,
-      total_elements * sizeof(int),
+      program_args_.ElementsPerTile() * sizeof(int),
+      cudaMemcpyDeviceToHost
+  );
+
+  cudaFree(d_data);
+}
+
+void CudaPrefixSumSolver::Compute() {
+  int *d_data = nullptr;
+
+  // Allocate device memory
+  cudaMalloc(&d_data, program_args_.FullMatrixSize() * sizeof(int));
+  cudaMemcpy(
+      d_data,
+      full_matrix_.data(),
+      program_args_.FullMatrixSize() * sizeof(int),
+      cudaMemcpyHostToDevice
+  );
+
+  start_time_ = std::chrono::steady_clock::now();
+
+  // Launch kernel
+  LaunchPrefixSumKernel(
+      d_data,
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
+      0 // Use the default CUDA stream
+  );
+
+  cudaDeviceSynchronize();
+  stop_time_ = std::chrono::steady_clock::now();
+
+  // Copy results back
+  cudaMemcpy(
+      full_matrix_.data(),
+      d_data,
+      program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyDeviceToHost
   );
 
@@ -61,10 +104,21 @@ void CudaPrefixSumSolver::PrintMatrix(
     const std::string &header
 ) const {
   std::cout << header << "\n";
-  int local_n = program_args_.local_n();
-  for (int i = 0; i < local_n; ++i) {
-    for (int j = 0; j < local_n; ++j) {
-      std::cout << local_matrix[i * local_n + j] << "\t";
+  int num_rows = program_args_.tile_dim()[0];
+  int num_cols = program_args_.tile_dim()[1];
+  for (int i = 0; i < num_rows; ++i) {
+    for (int j = 0; j < num_cols; ++j) {
+      std::cout << local_matrix[i * num_cols + j] << "\t";
+    }
+    std::cout << "\n";
+  }
+}
+
+void CudaPrefixSumSolver::PrintFullMatrix() {
+  for (auto row = 0; row < program_args_.full_matrix_dim()[0]; ++row) {
+    for (auto col = 0; col < program_args_.full_matrix_dim()[1]; ++col) {
+      std::cout << full_matrix_[row * program_args_.full_matrix_dim()[1] + col]
+                << "\t";
     }
     std::cout << "\n";
   }

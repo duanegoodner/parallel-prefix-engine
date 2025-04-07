@@ -1,3 +1,5 @@
+#include "test_cli_utils.hpp"
+
 #include <gtest/gtest.h>
 
 #include "common/matrix_init.hpp"
@@ -10,28 +12,31 @@
 
 class MpiTileInfoDistributorTest : public ::testing::Test {
 protected:
-  char *argv_storage_[6] = {
-      const_cast<char *>("program_name"),
-      const_cast<char *>("-v"),
-      const_cast<char *>("2"),
-      const_cast<char *>("789"),
-      const_cast<char *>("--backend=mpi"),
-      nullptr // <--- Important!
-  };
-  int argc_ = 5;
-  char **argv_ = argv_storage_;
-  ProgramArgs program_args_ = ProgramArgs::Parse(argc_, argv_);
+  // ArgvBuilder args_ = ArgvBuilder(
+  //     "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
+  // );
+
+  // ProgramArgs program_args_ =
+  //     ProgramArgs::Parse(args_.argc(), args_.argv_data());
+
+  std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
+  std::vector<int> grid_dim_ = std::vector<int>({2, 2});
+  std::vector<int> tile_dim_ = std::vector<int>({3, 3});
+
+  ProgramArgs program_args_ =
+      ProgramArgs(1234, "mpi", false, full_matrix_dim_, tile_dim_, 1, nullptr);
 
   MpiEnvironment mpi_environment_ = MpiEnvironment(program_args_);
 
   MpiCartesianGrid grid_ = MpiCartesianGrid(
       mpi_environment_.rank(),
-      program_args_.num_tile_rows(),
-      program_args_.num_tile_cols()
+      program_args_.GridDim()[0],
+      program_args_.GridDim()[1]
   );
 };
 
 TEST_F(MpiTileInfoDistributorTest, DistributeFullMatrix) {
+
   PrefixSumBlockMatrix tile(2, 2);
   MpiTileInfoDistributor distributor(tile, grid_);
 
@@ -40,7 +45,8 @@ TEST_F(MpiTileInfoDistributorTest, DistributeFullMatrix) {
 
   if (grid_.rank() == 0) {
     auto full_matrix = GenerateRandomMatrix<int>(
-        program_args_.full_matrix_size(),
+        program_args_.full_matrix_dim()[0],
+        program_args_.full_matrix_dim()[1],
         program_args_.seed()
     );
     full_block_matrix = PrefixSumBlockMatrix(4, 4, full_matrix);

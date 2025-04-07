@@ -12,11 +12,16 @@
 #include <vector>
 
 template <typename T>
-std::vector<T>
-GenerateRandomMatrix(int size, int seed, T low = T(-10), T high = T(10)) {
+std::vector<T> GenerateRandomMatrix(
+    int num_rows,
+    int num_cols,
+    int seed,
+    T low = T(-10),
+    T high = T(10)
+) {
   std::mt19937 rng(seed);
 
-  std::vector<T> mat(size * size);
+  std::vector<T> mat(num_rows * num_cols);
 
   if constexpr (std::is_integral_v<T>) {
     std::uniform_int_distribution<T> dist(low, high - 1);

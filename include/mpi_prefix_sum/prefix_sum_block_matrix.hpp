@@ -34,7 +34,6 @@ public:
   std::vector<int> &data() { return data_; }
   const std::vector<int> &data() const { return data_; }
 
-  // int local_n() const { return local_n_; }
   int num_rows() const { return num_rows_; }
   int num_cols() const { return num_cols_; }
 
@@ -51,9 +50,15 @@ public:
 
   void Print() const;
 
+  static void Combine(
+      const std::unordered_map<int, PrefixSumBlockMatrix> &tiles,
+      int tiles_per_row,
+      int tiles_per_col,
+      PrefixSumBlockMatrix &result
+  );
+
 private:
   int num_rows_;
   int num_cols_;
-  // int local_n_;
   std::vector<int> data_;
 };

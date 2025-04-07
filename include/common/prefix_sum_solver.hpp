@@ -18,12 +18,14 @@ public:
 
   virtual void PopulateFullMatrix() = 0;
 
-  virtual void Compute(std::vector<int> &local_matrix) = 0;
+  virtual void Compute() = 0;
 
   virtual void PrintMatrix(
       const std::vector<int> &local_matrix,
       const std::string &header
   ) const = 0;
+
+  virtual void PrintFullMatrix() = 0;
 
   // ⏱️ Time tracking (backend-specific implementations)
   virtual void StartTimer() = 0;

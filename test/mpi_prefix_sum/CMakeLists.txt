@@ -9,6 +9,7 @@ add_executable(
 target_include_directories(
     test_mpi_cartesian_grid PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
     test_mpi_cartesian_grid
@@ -30,6 +31,7 @@ add_executable(
 target_include_directories(
     test_mpi_environment PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
     test_mpi_environment
@@ -51,6 +53,7 @@ add_executable(
 target_include_directories(
     test_mpi_prefix_sum_solver PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
     test_mpi_prefix_sum_solver
@@ -58,6 +61,7 @@ target_link_libraries(
     GTest::gtest_main
     prefix_sum_common
     prefix_sum_mpi
+    prefix_sum_cuda
     )
 
 
@@ -71,6 +75,7 @@ add_executable(
 target_include_directories(
     test_mpi_tile_info_distributor PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
     test_mpi_tile_info_distributor

@@ -26,9 +26,17 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     , program_args_(program_args)
     , grid_(MpiCartesianGrid(
           mpi_environment_.rank(),
-          program_args_.num_tile_rows(),
-          program_args_.num_tile_cols()
+          program_args_.GridDim()[0],
+          program_args_.GridDim()[1]
+      ))
+    , full_matrix_(PrefixSumBlockMatrix(0, 0))
+    , assigned_matrix_(PrefixSumBlockMatrix(
+          program_args_.tile_dim()[0],
+          program_args_.tile_dim()[1]
       )) {
+
+  PopulateFullMatrix();
+
   // TODO : Error if product of num_tile_rows and num_tile_cols is not equal to
   // mpi_environment_.size()
   // TODO : Error if num_tile_rows and num_tile_cols are not divisible by
@@ -36,24 +44,44 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
-    full_matrix_ = GenerateRandomMatrix<int>(
-        program_args_.full_matrix_size(),
+    auto full_matrix_data = GenerateRandomMatrix<int>(
+        program_args_.full_matrix_dim()[0],
+        program_args_.full_matrix_dim()[1],
         program_args_.seed()
+    );
+    // TODO build from data with correct dims(need getters in ProgramArgs)
+    full_matrix_ = PrefixSumBlockMatrix(
+        program_args_.full_matrix_dim()[0],
+        program_args_.full_matrix_dim()[1],
+        full_matrix_data
     );
   }
 }
 
-void MpiPrefixSumSolver::Compute(std::vector<int> &local_matrix) {
+void MpiPrefixSumSolver::DistributeSubMatrices() {
+  MpiTileInfoDistributor distributor(assigned_matrix_, grid_);
+  distributor.DistributeFullMatrix(full_matrix_);
+}
 
-  PrefixSumBlockMatrix matrix(program_args_.local_n());
-  matrix.data() = local_matrix;
-  matrix.ComputeLocalPrefixSum();
+void MpiPrefixSumSolver::ComputeAndShareAssigned() {
+  assigned_matrix_.ComputeLocalPrefixSum();
 
-  MpiTileInfoDistributor distributor(matrix, grid_);
-
+  MpiTileInfoDistributor distributor(assigned_matrix_, grid_);
   distributor.ShareRightEdges();
   distributor.ShareBottomEdges();
-  local_matrix = matrix.data();
+}
+
+void MpiPrefixSumSolver::CollectSubMatrices() {
+  MpiTileInfoDistributor distributor(assigned_matrix_, grid_);
+  distributor.ReconstructFullMatrix(full_matrix_);
+}
+
+void MpiPrefixSumSolver::Compute() {
+
+  DistributeSubMatrices();
+  // assigned_matrix_.ComputeLocalPrefixSum();
+  ComputeAndShareAssigned();
+  CollectSubMatrices();
 }
 
 void MpiPrefixSumSolver::PrintMatrix(
@@ -66,7 +94,8 @@ void MpiPrefixSumSolver::PrintMatrix(
   PrintDistributedMatrix(
       mpi_environment_.rank(),
       mpi_environment_.size(),
-      program_args_.local_n(),
+      program_args_.full_matrix_dim()[0],
+      program_args_.full_matrix_dim()[1],
       local_matrix,
       header
   );
