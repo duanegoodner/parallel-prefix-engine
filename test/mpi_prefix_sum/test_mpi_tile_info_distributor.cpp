@@ -12,13 +12,19 @@
 
 class MpiTileInfoDistributorTest : public ::testing::Test {
 protected:
+  // ArgvBuilder args_ = ArgvBuilder(
+  //     "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
+  // );
 
-  ArgvBuilder args_ = ArgvBuilder(
-      "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
-  );
+  // ProgramArgs program_args_ =
+  //     ProgramArgs::Parse(args_.argc(), args_.argv_data());
+
+  std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
+  std::vector<int> grid_dim_ = std::vector<int>({2, 2});
+  std::vector<int> tile_dim_ = std::vector<int>({3, 3});
 
   ProgramArgs program_args_ =
-      ProgramArgs::Parse(args_.argc(), args_.argv_data());
+      ProgramArgs(1234, "mpi", false, full_matrix_dim_, tile_dim_, 1, nullptr);
 
   MpiEnvironment mpi_environment_ = MpiEnvironment(program_args_);
 

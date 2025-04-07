@@ -23,7 +23,6 @@ protected:
       "mpi",
       false,
       full_matrix_dim_,
-      // grid_dim_,
       tile_dim_,
       1,
       nullptr

@@ -20,18 +20,15 @@ class ProgramArgs {
 public:
   ProgramArgs() = default;
   ProgramArgs(
-      // int local_n,
       int seed,
       std::string backend,
       bool verbose,
       std::vector<int> full_matrix_dim,
-      // std::vector<int> grid_dim,
       std::vector<int> tile_dim,
       int orig_argc,
       char **orig_argv
   );
 
-  static ProgramArgs Parse(int argc, char *const argv[]);
 
   [[nodiscard]] int seed() const { return seed_; }
   [[nodiscard]] const std::string &backend() const { return backend_; }
@@ -85,7 +82,6 @@ public:
   // std::unique_ptr<PrefixSumSolver> MakeSolver() const;
 
 private:
-  // int local_n_ = 2;
   int seed_ = 1234;
   std::string backend_ = "mpi";
   bool verbose_ = false;
