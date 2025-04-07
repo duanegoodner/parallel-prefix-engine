@@ -42,9 +42,11 @@ __device__ void PrintGlobalMemArray(int *d_data) {
 }
 
 __global__ void PrefixSumKernel(
-    int *d_data
-    // int rows_per_tile,
-    // int cols_per_tile
+    int *d_data,
+    int full_matrix_dim_x,
+    int full_matrix_dim_y,
+    int tile_dim_x,
+    int tile_dim_y
 ) {
   // Print data on device global memory
   // PrintGlobalMemArray(d_data);
@@ -123,13 +125,25 @@ void LaunchPrefixSumKernel(
     int *d_data,
     int full_matrix_dim_x,
     int full_matrix_dim_y,
+    int tile_dim_x,
+    int tile_dim_y,
     cudaStream_t stream
 ) {
 
-  dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
+  int num_tiles_x = full_matrix_dim_x / tile_dim_x;
+  int num_tiles_y = full_matrix_dim_y / tile_dim_y;
+
+  // dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
+  dim3 blockDim(num_tiles_x, num_tiles_y);
   dim3 gridDim(1, 1); // Single block for now
 
-  PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(d_data);
+  PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(
+      d_data,
+      full_matrix_dim_x,
+      full_matrix_dim_y,
+      tile_dim_x,
+      tile_dim_y
+  );
 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {

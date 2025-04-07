@@ -44,6 +44,8 @@ void CudaPrefixSumSolver::Compute() {
       d_data,
       program_args_.full_matrix_dim()[0],
       program_args_.full_matrix_dim()[1],
+      program_args_.tile_dim()[0],
+      program_args_.tile_dim()[1],
       0 // Use the default CUDA stream
   );
 

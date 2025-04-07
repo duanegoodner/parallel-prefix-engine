@@ -6,9 +6,7 @@ void LaunchPrefixSumKernel(
     int *d_data,
     int full_matrix_dim_x,
     int full_matrix_dim_y,
-    // int rows_per_block,
-    // int cols_per_block,
-    // int blocks_per_row,
-    // int blocks_per_col,
+    int tile_dim_x,
+    int tile_dim_y,
     cudaStream_t stream
 );
