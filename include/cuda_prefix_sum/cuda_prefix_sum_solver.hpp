@@ -25,6 +25,9 @@ public:
 
   void StartTimer() override;
   void StopTimer() override;
+  std::chrono::duration<double> GetElapsedTime() const;
+  std::chrono::duration<double> GetStartTime() const override;
+  std::chrono::duration<double> GetEndTime() const override;
   void ReportTime() const override;
 
 private:

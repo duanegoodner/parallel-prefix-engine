@@ -84,7 +84,6 @@ private:
   int seed_ = 1234;
   std::string backend_ = "mpi";
   LogLevel log_level_ = LogLevel::OFF;
-  // bool verbose_ = false;
 
   std::vector<int> full_matrix_dim_ = {4, 4};
   std::vector<int> tile_dim_ = {2, 2};

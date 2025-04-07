@@ -91,46 +91,62 @@ void MpiPrefixSumSolver::StopTimer() {
   end_time_ = std::chrono::steady_clock::now();
 }
 
+std::chrono::duration<double> MpiPrefixSumSolver::GetElapsedTime() const {
+  return end_time_ - start_time_;
+}
+
+std::chrono::duration<double> MpiPrefixSumSolver::GetStartTime() const {
+  return std::chrono::duration<double>(start_time_.time_since_epoch());
+}
+
+std::chrono::duration<double> MpiPrefixSumSolver::GetEndTime() const {
+  return std::chrono::duration<double>(end_time_.time_since_epoch());
+}
+
 void MpiPrefixSumSolver::ReportTime() const {
-  double local_start =
-      std::chrono::duration<double>(start_time_.time_since_epoch()).count();
-  double local_end =
-      std::chrono::duration<double>(end_time_.time_since_epoch()).count();
-  double local_elapsed =
-      std::chrono::duration<double>(end_time_ - start_time_).count();
+  // double local_start =
+  //     std::chrono::duration<double>(start_time_.time_since_epoch()).count();
+  // double local_end =
+  //     std::chrono::duration<double>(end_time_.time_since_epoch()).count();
+  // double local_elapsed =
+  //     std::chrono::duration<double>(end_time_ - start_time_).count();
+
+  auto local_start_time_s = GetStartTime().count();
+  auto local_end_time_s = GetEndTime().count();
+  auto local_elapsed_time_s = GetElapsedTime().count();
 
   int rank = mpi_environment_.rank();
   int size = mpi_environment_.size();
 
-  std::vector<double> all_starts(size);
-  std::vector<double> all_ends(size);
-  std::vector<double> all_durations(size);
+  std::vector<double> all_start_times_s(size);
+  std::vector<double> all_end_times_s(size);
+  std::vector<double> all_elapsed_times_s(size);
 
   MPI_Gather(
-      &local_start,
+      &local_start_time_s,
       1,
       MPI_DOUBLE,
-      all_starts.data(),
-      1,
-      MPI_DOUBLE,
-      0,
-      MPI_COMM_WORLD
-  );
-  MPI_Gather(
-      &local_end,
-      1,
-      MPI_DOUBLE,
-      all_ends.data(),
+      all_start_times_s.data(),
       1,
       MPI_DOUBLE,
       0,
       MPI_COMM_WORLD
   );
   MPI_Gather(
-      &local_elapsed,
+      &local_end_time_s,
       1,
       MPI_DOUBLE,
-      all_durations.data(),
+      all_end_times_s.data(),
+      1,
+      MPI_DOUBLE,
+      0,
+      MPI_COMM_WORLD
+  );
+  MPI_Gather(
+      &local_elapsed_time_s,
+      1,
+      MPI_DOUBLE,
+      all_elapsed_times_s.data(),
       1,
       MPI_DOUBLE,
       0,
@@ -138,18 +154,19 @@ void MpiPrefixSumSolver::ReportTime() const {
   );
 
   if (rank == 0) {
-    double global_start =
-        *std::min_element(all_starts.begin(), all_starts.end());
-    double global_end = *std::max_element(all_ends.begin(), all_ends.end());
-    double total_time = global_end - global_start;
+    double global_start_time_s =
+        *std::min_element(all_start_times_s.begin(), all_start_times_s.end());
+    double global_end_time_s =
+        *std::max_element(all_end_times_s.begin(), all_end_times_s.end());
+    double total_time_elapsed_time_s = global_end_time_s - global_start_time_s;
 
     std::cout << "\n=== Runtime Report ===\n";
-    std::cout << "Total runtime (wall clock): " << total_time * 1000
-              << " ms\n";
+    std::cout << "Total runtime (wall clock): "
+              << total_time_elapsed_time_s * 1000.0 << " ms\n";
 
     std::cout << "\nPer-rank execution times:\n";
     for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": " << all_durations[i] * 1000
+      std::cout << "  Rank " << i << ": " << all_elapsed_times_s[i] * 1000.0
                 << " ms\n";
     }
     std::cout << std::endl;

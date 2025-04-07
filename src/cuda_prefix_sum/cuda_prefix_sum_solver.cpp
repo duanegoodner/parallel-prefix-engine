@@ -25,7 +25,6 @@ void CudaPrefixSumSolver::PopulateFullMatrix() {
   );
 }
 
-
 void CudaPrefixSumSolver::Compute() {
   int *d_data = nullptr;
 
@@ -80,11 +79,22 @@ void CudaPrefixSumSolver::StopTimer() {
   end_time_ = std::chrono::steady_clock::now();
 }
 
+std::chrono::duration<double> CudaPrefixSumSolver::GetElapsedTime() const {
+  return end_time_ - start_time_;
+}
+
+std::chrono::duration<double> CudaPrefixSumSolver::GetStartTime() const {
+  return std::chrono::duration<double>(start_time_.time_since_epoch());
+}
+
+std::chrono::duration<double> CudaPrefixSumSolver::GetEndTime() const {
+  return std::chrono::duration<double>(end_time_.time_since_epoch());
+}
+
 void CudaPrefixSumSolver::ReportTime() const {
-  double time_ms =
-      std::chrono::duration<double, std::milli>(end_time_ - start_time_)
-          .count();
-  std::cout << "CUDA Execution time: " << time_ms << " ms" << std::endl;
+  double elapsed_time_s = GetElapsedTime().count();
+  std::cout << "CUDA Execution time: " << elapsed_time_s * 1000 << " ms"
+            << std::endl;
 }
 
 const ProgramArgs &CudaPrefixSumSolver::program_args() const {
