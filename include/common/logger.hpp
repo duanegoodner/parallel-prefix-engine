@@ -7,12 +7,41 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <string_view>
+#include <utility>
 
-enum class LogLevel { INFO, DEBUG, ERROR };
+enum class LogLevel { OFF, INFO, DEBUG, ERROR, COUNT };
+
+namespace LogLevelUtils {
+constexpr std::array<std::string_view, static_cast<size_t>(LogLevel::COUNT)>
+    level_strings{"OFF", "INFO", "DEBUG", "ERROR"};
+
+constexpr std::array<std::pair<std::string_view, LogLevel>, 4> string_to_level{
+    {
+        {"OFF", LogLevel::OFF},
+        {"INFO", LogLevel::INFO},
+        {"DEBUG", LogLevel::DEBUG},
+        {"ERROR", LogLevel::ERROR},
+    }};
+
+constexpr std::string_view ToString(LogLevel level) {
+  auto index = static_cast<size_t>(level);
+  return index < level_strings.size() ? level_strings[index] : "UNKNOWN";
+}
+
+constexpr LogLevel FromString(std::string_view str) {
+  for (const auto &[name, level] : string_to_level) {
+    if (name == str)
+      return level;
+  }
+  return LogLevel::OFF;
+}
+} // namespace LogLevelUtils
 
 // Class Logger: Lightweight utility for conditional logging based on verbosity
 // flag.

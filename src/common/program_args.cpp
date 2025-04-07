@@ -1,18 +1,12 @@
 // ----------------------------------------------------------------------------
 // program_args.cpp
 //
-// Implements argument parsing using CLI11. Parses CLI options such as backend,
-// local matrix size, seed, and matrix/grid dimensions.
+// Implements ProgramArgs class.
 // ----------------------------------------------------------------------------
 
 #include "common/program_args.hpp"
 
-// #include <CLI/CLI.hpp>
 #include <utility>
-
-// #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
-
-// #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 ProgramArgs::ProgramArgs(
     int seed,
