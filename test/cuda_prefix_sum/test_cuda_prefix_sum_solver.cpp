@@ -16,8 +16,15 @@ protected:
   std::vector<int> grid_dim_ = std::vector<int>({2, 2});
   std::vector<int> tile_dim_ = std::vector<int>({3, 3});
 
-  ProgramArgs program_args_ =
-      ProgramArgs(1234, "mpi", LogLevel::OFF, full_matrix_dim_, tile_dim_, 1, nullptr);
+  ProgramArgs program_args_ = ProgramArgs(
+      1234,
+      "mpi",
+      LogLevel::OFF,
+      full_matrix_dim_,
+      tile_dim_,
+      1,
+      nullptr
+  );
 };
 
 TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
@@ -39,14 +46,6 @@ TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
   // cuda_solver.PrintFullMatrix();
   // std::cout << "pause" << std::endl;
 }
-
-// TEST_F(CudaPrefixSumSolverTest, ComputeNew) {
-//   CudaPrefixSumSolver cuda_solver{program_args_};
-//   cuda_solver.PrintFullMatrix();
-//   std::cout << std::endl;
-//   cuda_solver.ComputeNew();
-//   cuda_solver.PrintFullMatrix();
-// }
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

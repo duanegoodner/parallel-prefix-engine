@@ -35,10 +35,10 @@ public:
 
   int Rank() const { return mpi_environment_.rank(); }
 
-  void PrintFullMatrix() {
+  void PrintFullMatrix(std::string title = "") override {
     
     if (mpi_environment_.rank() == 0) {
-      std::cout << "Full matrix" << std::endl;
+      std::cout << title << std::endl;
       full_matrix_.Print();
     }
   }

@@ -25,43 +25,6 @@ void CudaPrefixSumSolver::PopulateFullMatrix() {
   );
 }
 
-void CudaPrefixSumSolver::ComputeNew() {
-  // This function is not used in the current implementation
-  // It can be removed or implemented as needed
-
-  int *d_data = nullptr;
-
-  cudaMalloc(&d_data, program_args_.FullMatrixSize() * sizeof(int));
-  cudaMemcpy(
-      d_data,
-      full_matrix_.data(),
-      program_args_.FullMatrixSize() * sizeof(int),
-      cudaMemcpyHostToDevice
-  );
-
-  start_time_ = std::chrono::steady_clock::now();
-
-  // Launch kernel
-  LaunchPrefixSumKernel(
-      d_data,
-      program_args_.full_matrix_dim()[0],
-      program_args_.full_matrix_dim()[1],
-      0 // Use the default CUDA stream
-  );
-
-  cudaDeviceSynchronize();
-  stop_time_ = std::chrono::steady_clock::now();
-
-  // Copy results back
-  cudaMemcpy(
-      full_matrix_.data(),
-      d_data,
-      program_args_.ElementsPerTile() * sizeof(int),
-      cudaMemcpyDeviceToHost
-  );
-
-  cudaFree(d_data);
-}
 
 void CudaPrefixSumSolver::Compute() {
   int *d_data = nullptr;
@@ -86,7 +49,6 @@ void CudaPrefixSumSolver::Compute() {
   );
 
   cudaDeviceSynchronize();
-  stop_time_ = std::chrono::steady_clock::now();
 
   // Copy results back
   cudaMemcpy(
@@ -99,7 +61,8 @@ void CudaPrefixSumSolver::Compute() {
   cudaFree(d_data);
 }
 
-void CudaPrefixSumSolver::PrintFullMatrix() {
+void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {
+  std::cout << title << std::endl;
   for (auto row = 0; row < program_args_.full_matrix_dim()[0]; ++row) {
     for (auto col = 0; col < program_args_.full_matrix_dim()[1]; ++col) {
       std::cout << full_matrix_[row * program_args_.full_matrix_dim()[1] + col]
@@ -114,12 +77,12 @@ void CudaPrefixSumSolver::StartTimer() {
 }
 
 void CudaPrefixSumSolver::StopTimer() {
-  stop_time_ = std::chrono::steady_clock::now();
+  end_time_ = std::chrono::steady_clock::now();
 }
 
 void CudaPrefixSumSolver::ReportTime() const {
   double time_ms =
-      std::chrono::duration<double, std::milli>(stop_time_ - start_time_)
+      std::chrono::duration<double, std::milli>(end_time_ - start_time_)
           .count();
   std::cout << "CUDA Execution time: " << time_ms << " ms" << std::endl;
 }

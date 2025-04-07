@@ -72,11 +72,11 @@ int main(int argc, char *argv[]) {
       program_args.seed()
   );
 
-  solver->PrintFullMatrix();
+  solver->PrintFullMatrix("Starting matrix");
   solver->StartTimer();
   solver->Compute();
   solver->StopTimer();
-  solver->PrintFullMatrix();
+  solver->PrintFullMatrix("After prefix sum computation");
   solver->ReportTime();
 
   return 0;
