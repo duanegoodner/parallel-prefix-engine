@@ -16,7 +16,6 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   std::string backend = "mpi";
   std::string log_level = "off";
   std::vector<int> full_matrix_dim = {4, 4};
-  std::vector<int> grid_dim = {2, 2};  // still parsed, might be useful later
   std::vector<int> tile_dim = {2, 2};
 
   app.add_option("-s, --seed", seed, "Random seed")->default_val("1234");
@@ -34,10 +33,6 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   )
       ->expected(2)
       ->default_val(std::vector<std::string>{"4", "4"});
-
-  app.add_option("-g, --grid-size", grid_dim, "Grid dimensions (rows cols)")
-      ->expected(2)
-      ->default_val(std::vector<std::string>{"2", "2"});
 
   app.add_option("-t, --tile-dim", tile_dim, "Tile dimensions (rows cols)")
       ->expected(2)
