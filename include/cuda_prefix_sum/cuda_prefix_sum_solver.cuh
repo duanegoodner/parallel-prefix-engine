@@ -2,6 +2,7 @@
 #pragma once
 #include <cuda_runtime.h>
 
+
 void LaunchPrefixSumKernel(
     int *d_data,
     int full_matrix_dim_x,
