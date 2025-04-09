@@ -41,11 +41,11 @@ void CudaPrefixSumSolver::Compute() {
 
   start_time_ = std::chrono::steady_clock::now();
 
-  auto launch_params = CreateKernelLaunchParams(program_args_);
+  auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
 
   // Launch kernel
   LaunchPrefixSumKernel(
-      d_data,
+      // d_data,
       launch_params,
       0 // Use the default CUDA stream
   );
