@@ -41,7 +41,7 @@ void CudaPrefixSumSolver::Compute() {
 
   start_time_ = std::chrono::steady_clock::now();
 
-  auto launch_params = CreateKernelLaunchParams(program_args_);
+  auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
 
   // Launch kernel
   LaunchPrefixSumKernel(

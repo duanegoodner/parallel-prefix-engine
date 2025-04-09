@@ -36,7 +36,7 @@ __device__ void LoadFromGlobalToSharedMemory(
     for (int tile_col = 0; tile_col < params.tile_size_y; ++tile_col) {
       int arr_idx_x = ArrayIndexX(tile_row, tile_col, params.tile_size_x);
       int arr_idx_y = ArrayIndexY(tile_row, tile_col, params.tile_size_y);
-      int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, params.full_matrix_dim_y);
+      int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, params.arr_size_y);
       local_array[index_1d] = d_data[index_1d];
     }
   }

@@ -3,10 +3,11 @@
 #include "common/program_args.hpp"
 
 struct KernelLaunchParams {
-  int full_matrix_dim_x;
-  int full_matrix_dim_y;
+  int* d_arr;
+  int arr_size_x;
+  int arr_size_y;
   int tile_size_x;
   int tile_size_y;
 };
 
-KernelLaunchParams CreateKernelLaunchParams(const ProgramArgs &program_args);
+KernelLaunchParams CreateKernelLaunchParams(int* d_arr, const ProgramArgs &program_args);
