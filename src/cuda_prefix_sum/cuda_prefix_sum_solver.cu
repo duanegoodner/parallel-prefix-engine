@@ -62,21 +62,22 @@ __global__ void PrefixSumKernel(
   // === Phase 4: Compute/write final result into arrayB ===
 
   // Extract right edges of upstream tiles
+  SumAndCopyAllTileEdges(array_a, params.tile_size, array_b);
 
   // iterate over each tile to left of current tile
-  for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
-       ++upstream_tile_col) {
-    // get array y_index of that tile's right edge
-    int upstream_tile_full_matrix_col_idx =
-        upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
-    // iterate over each row in tile
-    SumAndCopyAllTileRows(
-        array_a,
-        upstream_tile_full_matrix_col_idx,
-        params.tile_size,
-        array_b
-    );
-  }
+  // for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
+  //      ++upstream_tile_col) {
+  //   // get array y_index of that tile's right edge
+  //   int upstream_tile_full_matrix_col_idx =
+  //       upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
+  //   // iterate over each row in tile
+  //   SumAndCopyAllTileRows(
+  //       array_a,
+  //       upstream_tile_full_matrix_col_idx,
+  //       params.tile_size,
+  //       array_b
+  //   );
+  // }
 
   __syncthreads();
   // Debug statement: Print contents of arrayB after adding upstream right

@@ -174,3 +174,20 @@ __device__ void SumAndCopyAllTileRows(
     SumAndCopyTileRow(source_array, tile_row, edge_val, tile_size, dest_array);
   }
 }
+
+__device__ void SumAndCopyAllTileEdges(
+    KernelArray source_array,
+    ArraySize2D tile_size,
+    KernelArray dest_array
+) {
+  for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
+       ++upstream_tile_col) {
+    int tile_edge_idx_y = upstream_tile_col * tile_size.y + tile_size.y - 1;
+    SumAndCopyAllTileRows(
+        source_array,
+        tile_edge_idx_y,
+        tile_size,
+        dest_array
+    );
+  }
+}
