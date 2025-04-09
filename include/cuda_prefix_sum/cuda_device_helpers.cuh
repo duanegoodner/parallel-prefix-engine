@@ -61,9 +61,7 @@ __device__ void LoadFromGlobalToSharedMemory(
     int *local_array,
     ArraySize2D array_size,
     ArraySize2D tile_size
-    // KernelLaunchParams params
 ) {
-  // Load data from global memory to shared memory
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
       int arr_idx_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
@@ -113,23 +111,16 @@ __device__ void CombineElementInto(
 }
 
 __device__ void ComputeRowWisePrefixSum(
-    // int *arr,
-    // int arr_size_x,
-    // int arr_size_y,
     KernelArray arr,
     ArraySize2D tile_size,
     int tile_row,
     int tile_col
-    // int tile_size_x,
-    // int tile_size_y
 ) {
   int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
   int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
   int index_y_prev = ArrayIndexY(tile_row, tile_col - 1, tile_size.y);
   CombineElementInto(
       arr,
-      // arr_size_x,
-      // arr_size_y,
       index_x,
       index_y_prev,
       index_x,

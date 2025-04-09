@@ -19,27 +19,12 @@ __global__ void PrefixSumKernel(
   // Declare dynamic shared memory
   extern __shared__ int shared_mem[];
 
+  // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
   KernelArray array_b{.d_address = shared_mem, .size = params.array.size};
 
-  // Divide shared memory into two arrays
-  // int *arrayA = shared_mem;
-  // int *arrayB = shared_mem + params.array.size.x * params.array.size.y;
-
-  // int tx = threadIdx.x;
-  // int ty = threadIdx.y;
-
-  // int index = tx * blockDim.y + ty;
-
   // === Phase 1: Load input from global memory to shared memory ===
   CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
-
-  // LoadFromGlobalToSharedMemory(
-  //     params.array.d_address,
-  //     arrayA,
-  //     params.array.size,
-  //     params.tile_size
-  // );
 
   __syncthreads();
 
@@ -49,27 +34,10 @@ __global__ void PrefixSumKernel(
       "Contents of array_a after loading from global memory"
   );
 
-  // PrintArray(
-  //     arrayA,
-  //     params.arr_size_x,
-  //     params.arr_size_y,
-  //     "Contents of arrayA after loading from global memory"
-  // );
-
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
     for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
-      int full_matrix_x = ArrayIndexX(tile_row, tile_col, params.tile_size.x);
-      int full_matrix_y = ArrayIndexY(tile_row, tile_col, params.tile_size.y);
-      int full_matrix_y_prev =
-          ArrayIndexY(tile_row, tile_col - 1, params.tile_size.y);
-      CombineElementInto(
-          array_a,
-          full_matrix_x,
-          full_matrix_y_prev,
-          full_matrix_x,
-          full_matrix_y
-      );
+      ComputeRowWisePrefixSum(array_a, params.tile_size, tile_row, tile_col);
     }
   }
 
@@ -181,7 +149,6 @@ __global__ void PrefixSumKernel(
 
   // === Phase 4: Write final result back to global memory ===
   CopySharedArrayToGlobalArray(array_b, params.array, params.tile_size);
-
 
   // params.d_arr[index] = arrayA[tx * blockDim.y + ty];
 
