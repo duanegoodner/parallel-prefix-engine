@@ -70,21 +70,12 @@ __global__ void PrefixSumKernel(
     int upstream_tile_full_matrix_col_idx =
         upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
     // iterate over each row in tile
-    for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
-      // get the array x_index of the row
-      int full_matrix_row_idx = threadIdx.x * params.tile_size.x + tile_row;
-      // get the value of the upstream tile edge element in this row
-      int edge_val = array_a.d_address
-                         [full_matrix_row_idx * array_a.size.y +
-                          upstream_tile_full_matrix_col_idx];
-      SumAndCopyTileRow(
-          array_a,
-          tile_row,
-          edge_val,
-          params.tile_size,
-          array_b
-      );
-    }
+    SumAndCopyAllTileRows(
+        array_a,
+        upstream_tile_full_matrix_col_idx,
+        params.tile_size,
+        array_b
+    );
   }
 
   __syncthreads();

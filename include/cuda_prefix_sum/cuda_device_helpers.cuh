@@ -159,3 +159,18 @@ __device__ void SumAndCopyTileRow(
     SumAndCopy(source_array, index_x, index_y, val_to_add, dest_array);
   }
 }
+
+__device__ void SumAndCopyAllTileRows(
+    KernelArray source_array,
+    int upstream_tile_col_idx,
+    ArraySize2D tile_size,
+    KernelArray dest_array
+) {
+  for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
+    int index_x = ArrayIndexX(tile_row, tile_size.x);
+    int index_1d =
+        ArrayIndex1D(index_x, upstream_tile_col_idx, source_array.size.y);
+    int edge_val = source_array.d_address[index_1d];
+    SumAndCopyTileRow(source_array, tile_row, edge_val, tile_size, dest_array);
+  }
+}
