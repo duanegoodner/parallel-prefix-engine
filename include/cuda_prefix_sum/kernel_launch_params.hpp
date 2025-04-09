@@ -2,12 +2,23 @@
 
 #include "common/program_args.hpp"
 
-struct KernelLaunchParams {
-  int* d_arr;
-  int arr_size_x;
-  int arr_size_y;
-  int tile_size_x;
-  int tile_size_y;
+struct ArraySize2D {
+  int x;
+  int y;
 };
 
-KernelLaunchParams CreateKernelLaunchParams(int* d_arr, const ProgramArgs &program_args);
+struct KernelArray {
+  int *d_address;
+  ArraySize2D size;
+};
+
+struct KernelLaunchParams {
+  KernelArray array;
+  ArraySize2D tile_size;
+};
+
+KernelLaunchParams CreateKernelLaunchParams(
+    int *d_arr,
+    const ProgramArgs &program_args
+);
+
