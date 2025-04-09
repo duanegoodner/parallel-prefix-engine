@@ -45,7 +45,7 @@ void CudaPrefixSumSolver::Compute() {
 
   // Launch kernel
   LaunchPrefixSumKernel(
-      d_data,
+      // d_data,
       launch_params,
       0 // Use the default CUDA stream
   );

@@ -13,7 +13,7 @@
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
 __global__ void PrefixSumKernel(
-    int *d_data,
+    // int *d_data,
     KernelLaunchParams params
 ) {
   // Declare dynamic shared memory
@@ -32,7 +32,7 @@ __global__ void PrefixSumKernel(
 
   // === Phase 1: Load input from global memory to shared memory ===
 
-  LoadFromGlobalToSharedMemory(d_data, arrayA, params);
+  LoadFromGlobalToSharedMemory(arrayA, params);
 
   __syncthreads();
 
@@ -169,13 +169,13 @@ __global__ void PrefixSumKernel(
   // );
 
   // === Phase 4: Write final result back to global memory ===
-  d_data[index] = arrayA[tx * blockDim.y + ty];
+  params.d_arr[index] = arrayA[tx * blockDim.y + ty];
 
   // PrintGlobalMemArray(d_data);
 }
 
 void LaunchPrefixSumKernel(
-    int *d_data,
+    // int *d_data,
     KernelLaunchParams kernel_params,
     cudaStream_t stream
 ) {
@@ -188,7 +188,7 @@ void LaunchPrefixSumKernel(
   dim3 gridDim(1, 1); // Single block for now
 
   PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(
-      d_data,
+      // d_data,
       kernel_params
   );
 

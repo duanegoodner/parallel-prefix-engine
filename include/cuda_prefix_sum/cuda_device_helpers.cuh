@@ -27,7 +27,7 @@ __device__ int ArrayIndexY(int tile_row, int tile_col, int tile_size_y) {
 }
 
 __device__ void LoadFromGlobalToSharedMemory(
-    int *d_data,
+    // int *d_data,
     int *local_array,
     KernelLaunchParams params
 ) {
@@ -37,7 +37,7 @@ __device__ void LoadFromGlobalToSharedMemory(
       int arr_idx_x = ArrayIndexX(tile_row, tile_col, params.tile_size_x);
       int arr_idx_y = ArrayIndexY(tile_row, tile_col, params.tile_size_y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, params.arr_size_y);
-      local_array[index_1d] = d_data[index_1d];
+      local_array[index_1d] = params.d_arr[index_1d];
     }
   }
 }
