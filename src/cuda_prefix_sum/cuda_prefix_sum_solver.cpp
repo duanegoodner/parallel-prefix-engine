@@ -8,6 +8,8 @@
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 
+#include "cuda_prefix_sum/kernel_launch_params.hpp"
+
 // Ensure proper linkage between C++ and CUDA code
 // void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream =
 // 0);
@@ -39,11 +41,12 @@ void CudaPrefixSumSolver::Compute() {
 
   start_time_ = std::chrono::steady_clock::now();
 
+  auto launch_params = CreateKernelLaunchParams(program_args_);
+
   // Launch kernel
   LaunchPrefixSumKernel(
       d_data,
-      program_args_.full_matrix_dim()[0],
-      program_args_.full_matrix_dim()[1],
+      launch_params,
       0 // Use the default CUDA stream
   );
 

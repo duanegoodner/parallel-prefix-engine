@@ -6,45 +6,62 @@
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
-class CudaPrefixSumSolverTest : public ::testing::Test {
-protected:
-  // ArgvBuilder args_ = ArgvBuilder("-f 6 6 -g 2 2 --backend mpi -v");
-  // ProgramArgs program_args_ =
-  //     ProgramArgs::Parse(args_.argc(), args_.argv_data());
-
-  std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
-  std::vector<int> grid_dim_ = std::vector<int>({2, 2});
-  std::vector<int> tile_dim_ = std::vector<int>({3, 3});
-
-  ProgramArgs program_args_ = ProgramArgs(
+ProgramArgs GenerateProgramArgsForTest(
+    std::vector<int> full_matrix_dim,
+    std::vector<int> tile_dim
+) {
+  return ProgramArgs(
       1234,
-      "mpi",
+      "cuda",
       LogLevel::OFF,
-      full_matrix_dim_,
-      tile_dim_,
+      full_matrix_dim,
+      tile_dim,
       1,
       nullptr
   );
-};
+}
 
-TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
-  CudaPrefixSumSolver cuda_solver{program_args_};
+class CudaPrefixSumSolverTest : public ::testing::Test {};
 
-  // std::cout << "Full array size (flattened): " << cuda_solver.Full <<
-  // std::endl;
+// TEST_F(CudaPrefixSumSolverTest, DefaultInit) {
 
-  // std::cout << "Initial array on host:" << std::endl;
+//   ProgramArgs program_args{};
+//   CudaPrefixSumSolver cuda_solver{program_args};
+
+//   EXPECT_EQ(cuda_solver.GetElapsedTime().count(), 0);
+//   EXPECT_EQ(cuda_solver.GetStartTime().count(), 0);
+//   EXPECT_EQ(cuda_solver.GetEndTime().count(), 0);
+// }
+
+// TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize1x1) {
+//   std::vector<int> full_matrix_dim = std::vector<int>({4, 4});
+//   std::vector<int> tile_dim = std::vector<int>({1, 1});
+
+//   auto program_args = GenerateProgramArgsForTest(full_matrix_dim, tile_dim);
+
+//   CudaPrefixSumSolver cuda_solver{program_args};
+
+//   std::cout << "Before computation:" << std::endl;
+//   cuda_solver.PrintFullMatrix();
+//   cuda_solver.Compute();
+//   std::cout << "After computation:" << std::endl;
+//   cuda_solver.PrintFullMatrix();
+
+// }
+
+TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
+  std::vector<int> full_matrix_dim = std::vector<int>({4, 4});
+  std::vector<int> tile_dim = std::vector<int>({2, 2});
+
+  auto program_args = GenerateProgramArgsForTest(full_matrix_dim, tile_dim);
+
+  CudaPrefixSumSolver cuda_solver{program_args};
+
+  // std::cout << "Before computation:" << std::endl;
   // cuda_solver.PrintFullMatrix();
-
-  std::cout << "Before computation:" << std::endl;
-  cuda_solver.PrintFullMatrix();
   cuda_solver.Compute();
-  std::cout << "After computation:" << std::endl;
-  cuda_solver.PrintFullMatrix();
-
-  std::cout << "end of test" << std::endl;
+  // std::cout << "After computation:" << std::endl;
   // cuda_solver.PrintFullMatrix();
-  // std::cout << "pause" << std::endl;
 }
 
 int main(int argc, char **argv) {

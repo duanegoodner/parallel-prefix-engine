@@ -8,43 +8,74 @@
 #include <cstdio>
 #include <iostream>
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh" // Host-side declaration
+#include "cuda_prefix_sum/cuda_device_helpers.cuh"
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include "cuda_prefix_sum/kernel_launch_params.hpp"
 
-__device__ void PrintSharedMemoryArray(
-    const int *array,
-    // int rows_per_tile,
-    // int cols_per_tile,
-    const char *label
+__device__ void LoadFromGlobalToSharedMemory(
+    int *d_data,
+    int *local_array,
+    KernelLaunchParams params
 ) {
-  // Only thread (0, 0) in the block prints the array to avoid excessive output
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("%s:\n", label);
-    for (int row = 0; row < blockDim.x; ++row) {
-      for (int col = 0; col < blockDim.y; ++col) {
-        printf("%d\t", array[row * blockDim.y + col]);
-      }
-      printf("\n");
+  // Load data from global memory to shared memory
+  for (int tile_row = 0; tile_row < params.tile_dim_x; ++tile_row) {
+    for (int tile_col = 0; tile_col < params.tile_dim_y; ++tile_col) {
+      int full_matrix_x = threadIdx.x * params.tile_dim_x + tile_row;
+      int full_matrix_y = threadIdx.y * params.tile_dim_y + tile_col;
+      local_array[full_matrix_x * params.full_matrix_dim_y + full_matrix_y] =
+          d_data[full_matrix_x * params.full_matrix_dim_y + full_matrix_y];
     }
   }
-  __syncthreads(); // Ensure all threads reach this point
 }
 
-__device__ void PrintGlobalMemArray(int *d_data) {
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Data on Device Global Memory:\n");
-    for (int row = 0; row < blockDim.x; ++row) {
-      for (int col = 0; col < blockDim.y; ++col) {
-        printf("%d\t", d_data[row * blockDim.y + col]);
-      }
-      printf("\n");
-    }
-  }
+__device__ void CombineElementInto(
+    int *local_array,
+    int full_matrix_dim_x,
+    int full_matrix_dim_y,
+    int other_element_full_matrix_x,
+    int other_element_full_matrix_y,
+    int cur_element_full_matrix_x,
+    int cur_element_full_matrix_y
+) {
+  
+  local_array
+      [cur_element_full_matrix_x * full_matrix_dim_y +
+       cur_element_full_matrix_y] += local_array
+          [other_element_full_matrix_x * full_matrix_dim_y +
+           other_element_full_matrix_y];
+}
+
+__device__ void ComputeRowWisePrefixSum(
+    int *full_matrix,
+    int full_matrix_dim_x,
+    int full_matrix_dim_y,
+    int tile_row,
+    int tile_col,
+    int tile_dim_x,
+    int tile_dim_y
+) {
+  int full_matrix_x = GetFullMatrixIndexX(tile_row, tile_col, tile_dim_x);
+  int full_matrix_y = GetFullMatrixIndexY(tile_row, tile_col, tile_dim_y);
+  int full_matrix_y_prev =
+      GetFullMatrixIndexY(tile_row, tile_col - 1, tile_dim_y);
+  CombineElementInto(
+      full_matrix,
+      full_matrix_dim_x,
+      full_matrix_dim_y,
+      full_matrix_x,
+      full_matrix_y_prev,
+      full_matrix_x,
+      full_matrix_y
+  );
 }
 
 __global__ void PrefixSumKernel(
-    int *d_data
-    // int rows_per_tile,
-    // int cols_per_tile
+    int *d_data,
+    KernelLaunchParams params
+    // int full_matrix_dim_x,
+    // int full_matrix_dim_y,
+    // int tile_dim_x,
+    // int tile_dim_y
 ) {
   // Print data on device global memory
   // PrintGlobalMemArray(d_data);
@@ -54,7 +85,8 @@ __global__ void PrefixSumKernel(
 
   // Divide shared memory into two arrays
   int *arrayA = shared_mem;
-  int *arrayB = shared_mem + blockDim.x * blockDim.y;
+  int *arrayB =
+      shared_mem + params.full_matrix_dim_x * params.full_matrix_dim_y;
 
   int tx = threadIdx.x;
   int ty = threadIdx.y;
@@ -72,14 +104,110 @@ __global__ void PrefixSumKernel(
   // );
 
   // === Phase 1: Load input from global memory to shared memory ===
-  arrayA[tx * blockDim.y + ty] = d_data[index];
+
+  LoadFromGlobalToSharedMemory(d_data, arrayA, params);
+
   __syncthreads();
 
   // Debug statement: Print contents of arrayA after loading from global memory
-  // PrintSharedMemoryArray(
-  //     arrayA,
-  //     "Contents of arrayA after loading from global memory"
-  // );
+  PrintSharedMemoryArrayNew(
+      arrayA,
+      params.full_matrix_dim_x,
+      params.full_matrix_dim_y,
+      "Contents of arrayA after loading from global memory"
+  );
+
+  // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
+  for (int tile_col = 1; tile_col < params.tile_dim_y; tile_col++) {
+    for (int tile_row = 0; tile_row < params.tile_dim_x; ++tile_row) {
+      int full_matrix_x =
+          GetFullMatrixIndexX(tile_row, tile_col, params.tile_dim_x);
+      int full_matrix_y =
+          GetFullMatrixIndexY(tile_row, tile_col, params.tile_dim_y);
+      int full_matrix_y_prev =
+          GetFullMatrixIndexY(tile_row, tile_col - 1, params.tile_dim_y);
+      CombineElementInto(
+          arrayA,
+          params.full_matrix_dim_x,
+          params.full_matrix_dim_y,
+          full_matrix_x,
+          full_matrix_y_prev,
+          full_matrix_x,
+          full_matrix_y
+      );
+    }
+  }
+
+  __syncthreads();
+  // Debug statement: Print contents of arrayA after row-wise prefix sum
+  PrintSharedMemoryArrayNew(
+      arrayA,
+      params.full_matrix_dim_x,
+      params.full_matrix_dim_y,
+      "Contents of arrayA after row-wise prefix sum"
+  );
+
+  // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
+  for (int tile_row = 1; tile_row < params.tile_dim_x; tile_row++) {
+    for (int tile_col = 0; tile_col < params.tile_dim_y; ++tile_col) {
+      int full_matrix_x = tx * params.tile_dim_x + tile_row;
+      int full_matrix_y = ty * params.tile_dim_y + tile_col;
+      int full_matrix_x_prev = tx * params.tile_dim_x + tile_row - 1;
+      arrayA[full_matrix_x * params.full_matrix_dim_y + full_matrix_y] +=
+          arrayA
+              [full_matrix_x_prev * params.full_matrix_dim_y + full_matrix_y];
+    }
+  }
+
+  __syncthreads();
+  // Debug statement: Print contents of arrayA after column-wise prefix sum
+  PrintSharedMemoryArrayNew(
+      arrayA,
+      params.full_matrix_dim_x,
+      params.full_matrix_dim_y,
+      "Contents of arrayA after column-wise prefix sum"
+  );
+
+  // === Phase 4: Compute/write final result into arrayB ===
+
+  // Extract right edges of upstream tiles
+  for (int upstream_tile_col = 0; upstream_tile_col < ty;
+       ++upstream_tile_col) {
+    int upstream_tile_full_matrix_col_idx =
+        upstream_tile_col * params.tile_dim_y + params.tile_dim_y - 1;
+    for (int tile_row = 0; tile_row < params.tile_dim_x; ++tile_row) {
+      int full_matrix_row_idx = tx * params.tile_dim_x + tile_row;
+      int edge_val = arrayA
+          [full_matrix_row_idx * params.full_matrix_dim_y +
+           upstream_tile_full_matrix_col_idx];
+      for (int tile_col = 0; tile_col < params.tile_dim_y; ++tile_col) {
+        int full_matrix_x = tx * params.tile_dim_x + tile_row;
+        int full_matrix_y = ty * params.tile_dim_y + tile_col;
+        arrayB[full_matrix_x * params.full_matrix_dim_y + full_matrix_y] =
+            arrayA[full_matrix_x * params.full_matrix_dim_y + full_matrix_y] +
+            edge_val;
+      }
+    }
+  }
+
+  __syncthreads();
+  // Debug statement: Print contents of arrayB after adding upstream right
+  // edges
+  PrintSharedMemoryArrayNew(
+      arrayB,
+      params.full_matrix_dim_x,
+      params.full_matrix_dim_y,
+      "Contents of arrayB extracting/adding right edges of upstream tiles"
+  );
+
+  // Extrat bottom edges of upstream tiles
+
+  for (int tile_row = 0; tile_row < params.tile_dim_x; ++tile_row) {
+    for (int tile_col = 0; tile_col < params.tile_dim_y; ++tile_col) {
+      int full_matrix_x = tx * params.tile_dim_x + tile_row;
+      int full_matrix_y = ty * params.tile_dim_y + tile_col;
+    }
+  }
 
   // === Phase 2: Row-wise prefix sum into arrayB ===
   int sum = 0;
@@ -121,15 +249,29 @@ __global__ void PrefixSumKernel(
 
 void LaunchPrefixSumKernel(
     int *d_data,
-    int full_matrix_dim_x,
-    int full_matrix_dim_y,
+    KernelLaunchParams kernel_params,
+    // int full_matrix_dim_x,
+    // int full_matrix_dim_y,
+    // int tile_dim_x,
+    // int tile_dim_y,
     cudaStream_t stream
 ) {
 
-  dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
+  int num_tiles_x = kernel_params.full_matrix_dim_x / kernel_params.tile_dim_x;
+  int num_tiles_y = kernel_params.full_matrix_dim_y / kernel_params.tile_dim_y;
+
+  // dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
+  dim3 blockDim(num_tiles_x, num_tiles_y);
   dim3 gridDim(1, 1); // Single block for now
 
-  PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(d_data);
+  PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(
+      d_data,
+      kernel_params
+      // full_matrix_dim_x,
+      // full_matrix_dim_y,
+      // tile_dim_x,
+      // tile_dim_y
+  );
 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
