@@ -18,11 +18,11 @@ __device__ int ArrayIndex1D(int x_idx, int y_idx, int array_size_y) {
   return x_idx * array_size_y + y_idx;
 }
 
-__device__ int ArrayIndexX(int tile_row, int tile_col, int tile_size_x) {
+__device__ int ArrayIndexX(int tile_row, int tile_size_x) {
   return threadIdx.x * tile_size_x + tile_row;
 }
 
-__device__ int ArrayIndexY(int tile_row, int tile_col, int tile_size_y) {
+__device__ int ArrayIndexY(int tile_col, int tile_size_y) {
   return threadIdx.y * tile_size_y + tile_col;
 }
 
@@ -33,8 +33,8 @@ __device__ void CopyGlobalArrayToSharedArray(
 ) {
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-      int arr_idx_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-      int arr_idx_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+      int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
+      int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, global_array.size.y);
       shared_array.d_address[index_1d] = global_array.d_address[index_1d];
     }
@@ -48,8 +48,8 @@ __device__ void CopySharedArrayToGlobalArray(
 ) {
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-      int arr_idx_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-      int arr_idx_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+      int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
+      int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, global_array.size.y);
       global_array.d_address[index_1d] = shared_array.d_address[index_1d];
     }
@@ -64,8 +64,8 @@ __device__ void LoadFromGlobalToSharedMemory(
 ) {
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-      int arr_idx_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-      int arr_idx_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+      int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
+      int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, array_size.y);
       local_array[index_1d] = global_array[index_1d];
     }
@@ -116,9 +116,9 @@ __device__ void ComputeRowWisePrefixSum(
     int tile_row,
     int tile_col
 ) {
-  int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-  int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
-  int index_y_prev = ArrayIndexY(tile_row, tile_col - 1, tile_size.y);
+  int index_x = ArrayIndexX(tile_row, tile_size.x);
+  int index_y = ArrayIndexY(tile_col, tile_size.y);
+  int index_y_prev = ArrayIndexY(tile_col - 1, tile_size.y);
   CombineElementInto(arr, index_x, index_y_prev, index_x, index_y);
 }
 
@@ -128,9 +128,9 @@ __device__ void ComputeColWisePrefixSum(
     int tile_row,
     int tile_col
 ) {
-  int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-  int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
-  int index_x_prev = ArrayIndexX(tile_row - 1, tile_col, tile_size.x);
+  int index_x = ArrayIndexX(tile_row, tile_size.x);
+  int index_y = ArrayIndexY(tile_col, tile_size.y);
+  int index_x_prev = ArrayIndexX(tile_row - 1, tile_size.x);
   CombineElementInto(arr, index_x_prev, index_y, index_x, index_y);
 }
 
@@ -154,8 +154,8 @@ __device__ void SumAndCopyTileRow(
     KernelArray dest_array
 ) {
   for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-    int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
-    int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+    int index_x = ArrayIndexX(tile_row, tile_size.x);
+    int index_y = ArrayIndexY(tile_col, tile_size.y);
     SumAndCopy(source_array, index_x, index_y, val_to_add, dest_array);
   }
 }
