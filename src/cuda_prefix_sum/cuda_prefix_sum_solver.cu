@@ -48,16 +48,7 @@ __global__ void PrefixSumKernel(
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
   for (int tile_row = 1; tile_row < params.tile_size.x; tile_row++) {
     for (int tile_col = 0; tile_col < params.tile_size.y; ++tile_col) {
-      int full_matrix_x = threadIdx.x * params.tile_size.x + tile_row;
-      int full_matrix_y = threadIdx.y * params.tile_size.y + tile_col;
-      int full_matrix_x_prev = threadIdx.x * params.tile_size.x + tile_row - 1;
-      CombineElementInto(
-          array_a,
-          full_matrix_x_prev,
-          full_matrix_y,
-          full_matrix_x,
-          full_matrix_y
-      );
+      ComputeColWisePrefixSum(array_a, params.tile_size, tile_row, tile_col);
     }
   }
 
@@ -71,22 +62,28 @@ __global__ void PrefixSumKernel(
   // === Phase 4: Compute/write final result into arrayB ===
 
   // Extract right edges of upstream tiles
+
+  // iterate over each tile to left of current tile
   for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
        ++upstream_tile_col) {
+    // get array y_index of that tile's right edge
     int upstream_tile_full_matrix_col_idx =
         upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
+    // iterate over each row in tile
     for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
+      // get the array x_index of the row
       int full_matrix_row_idx = threadIdx.x * params.tile_size.x + tile_row;
+      // get the value of the upstream tile edge element in this row
       int edge_val = array_a.d_address
                          [full_matrix_row_idx * array_a.size.y +
                           upstream_tile_full_matrix_col_idx];
-      for (int tile_col = 0; tile_col < params.tile_size.y; ++tile_col) {
-        int full_matrix_x = threadIdx.x * params.tile_size.x + tile_row;
-        int full_matrix_y = threadIdx.y * params.tile_size.y + tile_col;
-        array_b.d_address[full_matrix_x * array_b.size.y + full_matrix_y] =
-            array_a.d_address[full_matrix_x * array_a.size.y + full_matrix_y] +
-            edge_val;
-      }
+      SumAndCopyTileRow(
+          array_a,
+          tile_row,
+          edge_val,
+          params.tile_size,
+          array_b
+      );
     }
   }
 
@@ -97,14 +94,6 @@ __global__ void PrefixSumKernel(
       array_b,
       "Contents of array_b extracting/adding right edges of upstream tiles"
   );
-
-  // PrintArray(
-  //     arrayB,
-  //     params.arr_size_x,
-  //     params.arr_size_y,
-  //     "Contents of arrayB extracting/adding right edges of upstream
-  //     tiles"
-  // );
 
   // Extract bottom edges of upstream tiles
 

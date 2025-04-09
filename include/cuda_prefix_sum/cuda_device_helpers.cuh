@@ -119,11 +119,43 @@ __device__ void ComputeRowWisePrefixSum(
   int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
   int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
   int index_y_prev = ArrayIndexY(tile_row, tile_col - 1, tile_size.y);
-  CombineElementInto(
-      arr,
-      index_x,
-      index_y_prev,
-      index_x,
-      index_y
-  );
+  CombineElementInto(arr, index_x, index_y_prev, index_x, index_y);
+}
+
+__device__ void ComputeColWisePrefixSum(
+    KernelArray arr,
+    ArraySize2D tile_size,
+    int tile_row,
+    int tile_col
+) {
+  int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
+  int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+  int index_x_prev = ArrayIndexX(tile_row - 1, tile_col, tile_size.x);
+  CombineElementInto(arr, index_x_prev, index_y, index_x, index_y);
+}
+
+__device__ void SumAndCopy(
+    KernelArray source_array,
+    int cur_x,
+    int cur_y,
+    int val_to_add,
+    KernelArray dest_array
+) {
+  int index_1d = ArrayIndex1D(cur_x, cur_y, source_array.size.y);
+  dest_array.d_address[index_1d] =
+      source_array.d_address[index_1d] + val_to_add;
+}
+
+__device__ void SumAndCopyTileRow(
+    KernelArray source_array,
+    int tile_row,
+    int val_to_add,
+    ArraySize2D tile_size,
+    KernelArray dest_array
+) {
+  for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
+    int index_x = ArrayIndexX(tile_row, tile_col, tile_size.x);
+    int index_y = ArrayIndexY(tile_row, tile_col, tile_size.y);
+    SumAndCopy(source_array, index_x, index_y, val_to_add, dest_array);
+  }
 }
