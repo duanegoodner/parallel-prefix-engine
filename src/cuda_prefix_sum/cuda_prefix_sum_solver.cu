@@ -15,14 +15,7 @@
 __global__ void PrefixSumKernel(
     int *d_data,
     KernelLaunchParams params
-    // int full_matrix_dim_x,
-    // int full_matrix_dim_y,
-    // int tile_size_x,
-    // int tile_size_y
 ) {
-  // Print data on device global memory
-  // PrintGlobalMemArray(d_data);
-
   // Declare dynamic shared memory
   extern __shared__ int shared_mem[];
 
@@ -36,15 +29,6 @@ __global__ void PrefixSumKernel(
 
   int index = tx * blockDim.y + ty;
 
-  // Debug statement: Print thread and block indices
-  // printf(
-  //     "Block (%d, %d), Thread (%d, %d), Global Index: %d\n",
-  //     blockIdx.x,
-  //     blockIdx.y,
-  //     tx,
-  //     ty,
-  //     index
-  // );
 
   // === Phase 1: Load input from global memory to shared memory ===
 
@@ -53,7 +37,7 @@ __global__ void PrefixSumKernel(
   __syncthreads();
 
   // Debug statement: Print contents of arrayA after loading from global memory
-  PrintSharedMemoryArrayNew(
+  PrintArray(
       arrayA,
       params.full_matrix_dim_x,
       params.full_matrix_dim_y,
@@ -64,11 +48,11 @@ __global__ void PrefixSumKernel(
   for (int tile_col = 1; tile_col < params.tile_size_y; tile_col++) {
     for (int tile_row = 0; tile_row < params.tile_size_x; ++tile_row) {
       int full_matrix_x =
-          FullArrayX(tile_row, tile_col, params.tile_size_x);
+          ArrayIndexX(tile_row, tile_col, params.tile_size_x);
       int full_matrix_y =
-          FullArrayY(tile_row, tile_col, params.tile_size_y);
+          ArrayIndexY(tile_row, tile_col, params.tile_size_y);
       int full_matrix_y_prev =
-          FullArrayY(tile_row, tile_col - 1, params.tile_size_y);
+          ArrayIndexY(tile_row, tile_col - 1, params.tile_size_y);
       CombineElementInto(
           arrayA,
           params.full_matrix_dim_x,
@@ -83,7 +67,7 @@ __global__ void PrefixSumKernel(
 
   __syncthreads();
   // Debug statement: Print contents of arrayA after row-wise prefix sum
-  PrintSharedMemoryArrayNew(
+  PrintArray(
       arrayA,
       params.full_matrix_dim_x,
       params.full_matrix_dim_y,
@@ -104,7 +88,7 @@ __global__ void PrefixSumKernel(
 
   __syncthreads();
   // Debug statement: Print contents of arrayA after column-wise prefix sum
-  PrintSharedMemoryArrayNew(
+  PrintArray(
       arrayA,
       params.full_matrix_dim_x,
       params.full_matrix_dim_y,
@@ -136,7 +120,7 @@ __global__ void PrefixSumKernel(
   __syncthreads();
   // Debug statement: Print contents of arrayB after adding upstream right
   // edges
-  PrintSharedMemoryArrayNew(
+  PrintArray(
       arrayB,
       params.full_matrix_dim_x,
       params.full_matrix_dim_y,
