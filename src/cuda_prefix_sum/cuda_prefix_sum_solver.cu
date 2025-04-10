@@ -21,7 +21,10 @@ __global__ void PrefixSumKernel(
 
   // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
-  KernelArray array_b{.d_address = shared_mem, .size = params.array.size};
+  KernelArray array_b{
+      .d_address = shared_mem + array_a.size.x * array_a.size.y,
+      .size = params.array.size
+  };
 
   // === Phase 1: Load input from global memory to shared memory ===
   CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
@@ -33,6 +36,7 @@ __global__ void PrefixSumKernel(
       array_a,
       "Contents of array_a after loading from global memory"
   );
+
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
@@ -59,29 +63,18 @@ __global__ void PrefixSumKernel(
       "Contents of array_a after column-wise prefix sum"
   );
 
+  // === Phase 3: Broadcast downstream
+
+  BroadcastDownstream(array_a, params.tile_size, array_b);
+  __syncthreads();
+  PrintKernelArray(array_b, "array_b after column broadcasting from array_a");
+
   // === Phase 4: Compute/write final result into arrayB ===
 
   // Extract right edges of upstream tiles
   SumAndCopyAllTileEdges(array_a, params.tile_size, array_b);
 
-  // iterate over each tile to left of current tile
-  // for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
-  //      ++upstream_tile_col) {
-  //   // get array y_index of that tile's right edge
-  //   int upstream_tile_full_matrix_col_idx =
-  //       upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
-  //   // iterate over each row in tile
-  //   SumAndCopyAllTileRows(
-  //       array_a,
-  //       upstream_tile_full_matrix_col_idx,
-  //       params.tile_size,
-  //       array_b
-  //   );
-  // }
-
   __syncthreads();
-  // Debug statement: Print contents of arrayB after adding upstream right
-  // edges
   PrintKernelArray(
       array_b,
       "Contents of array_b extracting/adding right edges of upstream tiles"
