@@ -77,6 +77,21 @@ __device__ void CopySharedArrayToGlobalArray(
   }
 }
 
+__device__ void CopySharedArrayToSharedArray(
+    KernelArray source_array,
+    KernelArray dest_array,
+    ArraySize2D tile_size
+) {
+  for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
+    for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
+      int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
+      int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
+      int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, source_array.size.y);
+      dest_array.d_address[index_1d] = source_array.d_address[index_1d];
+    }
+  }
+}
+
 __device__ void LoadFromGlobalToSharedMemory(
     int *global_array,
     int *local_array,
@@ -102,6 +117,7 @@ __device__ void PrintKernelArray(KernelArray array, const char *label) {
       }
       printf("\n");
     }
+    printf("\n");
   }
 }
 
@@ -111,14 +127,13 @@ __device__ void PrintKernelArrayFlattended(
 ) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
-    for (int index_1d = 0; index_1d < array.size.x * array.size.y; ++index_1d) {
+    for (int index_1d = 0; index_1d < array.size.x * array.size.y;
+         ++index_1d) {
       printf("%d\t", array.d_address[index_1d]);
-    
     }
     printf("\n");
   }
 }
-
 
 __device__ void
 PrintArray(const int *arr, int arr_size_x, int arr_size_y, const char *label) {
@@ -182,7 +197,7 @@ __device__ void SumAndCopy(
       source_array.d_address[index_1d] + val_to_add;
 }
 
-__device__ void BroadcastDownstream(
+__device__ void BroadcastRightEdges(
     KernelArray source_array,
     ArraySize2D tile_size,
     KernelArray dest_array
@@ -197,9 +212,36 @@ __device__ void BroadcastDownstream(
         int array_x = threadIdx.x * tile_size.x + tile_row;
         int source_array_y = ArrayIndexY(tile_size.y - 1, tile_size.y);
         int dest_array_y = block_col * tile_size.y + downstream_tile_col;
-        int dest_index_1d = ArrayIndex1D(array_x, dest_array_y, dest_array.size.y);
+        int dest_index_1d =
+            ArrayIndex1D(array_x, dest_array_y, dest_array.size.y);
         int source_index_1d =
             ArrayIndex1D(array_x, source_array_y, source_array.size.y);
+        dest_array.d_address[dest_index_1d] +=
+            source_array.d_address[source_index_1d];
+      }
+    }
+  }
+}
+
+__device__ void BroadcastBottomEdges(
+    KernelArray source_array,
+    ArraySize2D tile_size,
+    KernelArray dest_array
+) {
+  // iterate over each tile below cur_tile
+  for (int block_row = threadIdx.x + 1; block_row < blockDim.x; ++block_row) {
+    // iterate over each col of cur_tile
+    for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
+      // iterate over each row of downstream tile
+      for (int downstream_tile_row = 0; downstream_tile_row < tile_size.x;
+           ++downstream_tile_row) {
+        int array_y = threadIdx.y * tile_size.y + tile_col;
+        int source_array_x = ArrayIndexX(tile_size.x - 1, tile_size.x);
+        int dest_array_x = block_row * tile_size.x + downstream_tile_row;
+        int dest_index_1d =
+            ArrayIndex1D(dest_array_x, array_y, dest_array.size.x);
+        int source_index_1d =
+            ArrayIndex1D(source_array_x, array_y, source_array.size.x);
         dest_array.d_address[dest_index_1d] +=
             source_array.d_address[source_index_1d];
       }
