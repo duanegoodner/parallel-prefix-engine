@@ -1,0 +1,86 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "binaryDir": "${sourceDir}/build/dev",
+      "displayName": "Development Build (O3, native arch)",
+      "generator": "Ninja",
+      "description": "Optimized build for local development with fast builds and CUDA",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_O3": "ON",
+        "ENABLE_DEBUG": "OFF",
+        "ENABLE_MARCH_NATIVE": "ON",
+        "ENABLE_NO_INLINE": "OFF",
+        "ENABLE_PROFILING": "OFF",
+        "ENABLE_CONCEPT_ERROR_DETAIL": "OFF",
+        "ENABLE_CUDA_FAST_MATH": "OFF",
+        "ENABLE_CUDA_DEVICE_DEBUG": "OFF",
+        "CMAKE_CUDA_ARCHITECTURES": "86"
+      }
+    },
+    {
+      "name": "debug",
+      "binaryDir": "${sourceDir}/build/debug",
+      "displayName": "Debug Build",
+      "generator": "Ninja",
+      "description": "Full debug info, no optimizations, includes CUDA device debugging",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ENABLE_O0": "ON",
+        "ENABLE_DEBUG": "ON",
+        "ENABLE_NO_INLINE": "ON",
+        "ENABLE_PROFILING": "ON",
+        "ENABLE_CONCEPT_ERROR_DETAIL": "ON",
+        "ENABLE_CUDA_FAST_MATH": "OFF",
+        "ENABLE_CUDA_DEVICE_DEBUG": "ON",
+        "CMAKE_CUDA_ARCHITECTURES": "86"
+      }
+    },
+    {
+      "name": "release",
+      "binaryDir": "${sourceDir}/build/release",
+      "displayName": "Production Release",
+      "generator": "Ninja",
+      "description": "Lean build with aggressive optimization and profiling enabled",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_O3": "ON",
+        "ENABLE_DEBUG": "OFF",
+        "ENABLE_MARCH_NATIVE": "ON",
+        "ENABLE_NO_INLINE": "OFF",
+        "ENABLE_PROFILING": "ON",
+        "ENABLE_CONCEPT_ERROR_DETAIL": "OFF",
+        "ENABLE_CUDA_FAST_MATH": "ON",
+        "ENABLE_CUDA_DEVICE_DEBUG": "OFF",
+        "CMAKE_CUDA_ARCHITECTURES": "86"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "description": "Build everything using dev preset",
+      "jobs": 8
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "description": "Build using debug preset",
+      "jobs": 8
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "description": "Build using release preset",
+      "jobs": 8
+    }
+  ]
+}

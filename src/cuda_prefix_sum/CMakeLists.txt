@@ -17,4 +17,6 @@ target_link_libraries(prefix_sum_cuda
         CLI11::CLI11
 )
 
+target_link_libraries(prefix_sum_cuda PRIVATE my_default_flags)
+
 
