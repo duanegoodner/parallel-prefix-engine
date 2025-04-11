@@ -16,25 +16,7 @@ target_link_libraries(
     GTest::gtest_main
     prefix_sum_common
     )
-
-# ===========================
-# MATRIX_OUTPUT
-# ===========================
-
-add_executable(
-    test_matrix_output
-    test_matrix_output.cpp
-    )
-target_include_directories(
-    test_matrix_output PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
-    )
-target_link_libraries(
-    test_matrix_output
-    PRIVATE
-    GTest::gtest_main
-    prefix_sum_common
-    )
+target_link_libraries(test_matrix_init PRIVATE my_default_flags)
 
 
 # ===========================
@@ -59,3 +41,4 @@ target_link_libraries(
     prefix_sum_mpi
     prefix_sum_cuda
     )
+target_link_libraries(test_program_args PRIVATE my_default_flags)

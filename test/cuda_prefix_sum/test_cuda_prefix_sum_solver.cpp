@@ -57,11 +57,12 @@ TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
 
   CudaPrefixSumSolver cuda_solver{program_args};
 
-  // std::cout << "Before computation:" << std::endl;
-  // cuda_solver.PrintFullMatrix();
+  std::cout << "Before computation:";
+  cuda_solver.PrintFullMatrix();
   cuda_solver.Compute();
-  // std::cout << "After computation:" << std::endl;
-  // cuda_solver.PrintFullMatrix();
+  std::cout << std::endl;
+  std::cout << "After computation:";
+  cuda_solver.PrintFullMatrix();
 }
 
 int main(int argc, char **argv) {

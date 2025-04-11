@@ -21,18 +21,15 @@ __global__ void PrefixSumKernel(
 
   // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
-  KernelArray array_b{.d_address = shared_mem, .size = params.array.size};
+  KernelArray array_b{
+      .d_address = shared_mem + array_a.size.x * array_a.size.y,
+      .size = params.array.size
+  };
 
   // === Phase 1: Load input from global memory to shared memory ===
   CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
 
   __syncthreads();
-
-  // Debug statement: Print contents of arrayA after loading from global memory
-  PrintKernelArray(
-      array_a,
-      "Contents of array_a after loading from global memory"
-  );
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
@@ -42,8 +39,6 @@ __global__ void PrefixSumKernel(
   }
 
   __syncthreads();
-  // Debug statement: Print contents of arrayA after row-wise prefix sum
-  PrintKernelArray(array_a, "Contents of array_a after row-wise prefix sum");
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
   for (int tile_row = 1; tile_row < params.tile_size.x; tile_row++) {
@@ -53,85 +48,30 @@ __global__ void PrefixSumKernel(
   }
 
   __syncthreads();
-  // Debug statement: Print contents of arrayA after column-wise prefix sum
-  PrintKernelArray(
-      array_a,
-      "Contents of array_a after column-wise prefix sum"
-  );
 
-  // === Phase 4: Compute/write final result into arrayB ===
+  // === Phase 3: Copy array_a to array_b ===
 
-  // Extract right edges of upstream tiles
-  SumAndCopyAllTileEdges(array_a, params.tile_size, array_b);
-
-  // iterate over each tile to left of current tile
-  // for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
-  //      ++upstream_tile_col) {
-  //   // get array y_index of that tile's right edge
-  //   int upstream_tile_full_matrix_col_idx =
-  //       upstream_tile_col * params.tile_size.y + params.tile_size.y - 1;
-  //   // iterate over each row in tile
-  //   SumAndCopyAllTileRows(
-  //       array_a,
-  //       upstream_tile_full_matrix_col_idx,
-  //       params.tile_size,
-  //       array_b
-  //   );
-  // }
-
-  __syncthreads();
-  // Debug statement: Print contents of arrayB after adding upstream right
-  // edges
-  PrintKernelArray(
-      array_b,
-      "Contents of array_b extracting/adding right edges of upstream tiles"
-  );
-
-  // Extract bottom edges of upstream tiles
-
-  for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
-    for (int tile_col = 0; tile_col < params.tile_size.y; ++tile_col) {
-      int full_matrix_x = threadIdx.x * params.tile_size.x + tile_row;
-      int full_matrix_y = threadIdx.y * params.tile_size.y + tile_col;
-    }
-  }
-
-  // === Phase 2: Row-wise prefix sum into arrayB ===
-  int sum = 0;
-  for (int col = 0; col <= threadIdx.y; ++col) {
-    // TODO: implement op
-    sum += array_a.d_address[threadIdx.x * blockDim.y + col];
-  }
-
-  array_b.d_address[threadIdx.x * blockDim.y + threadIdx.y] = sum;
-
+  CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
   __syncthreads();
 
-  // PrintSharedMemoryArray(
-  //     arrayB,
-  //     "Contents of arrayB after row-wise prefix sum"
-  // );
+  // === Phase 4: Broadcast array_a right edges to array_b
 
-  // === Phase 3: Column-wise prefix sum (over arrayB) into arrayA ===
-  sum = 0;
-  for (int row = 0; row <= threadIdx.x; ++row) {
-    // TODO: implement op
-    sum += array_b.d_address[row * blockDim.y + threadIdx.y];
-  }
-  array_a.d_address[threadIdx.x * blockDim.y + threadIdx.y] = sum;
-
+  BroadcastRightEdges(array_a, params.tile_size, array_b);
   __syncthreads();
 
-  // Debug: Print contents of arrayA after column-wise prefix sum
-  // PrintSharedMemoryArray(
-  //     arrayA,
-  //     "Contents of arrayA after column-wise prefix sum"
-  // );
+  // === Phase 5: Copy array_b to array_a ===
 
-  // === Phase 4: Write final result back to global memory ===
-  CopySharedArrayToGlobalArray(array_b, params.array, params.tile_size);
+  CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
+  __syncthreads();
 
-  // params.d_arr[index] = arrayA[tx * blockDim.y + ty];
+
+  // ==== Phase 6: Broadcast array_b bottom edges to array_a
+
+  BroadcastBottomEdges(array_b, params.tile_size, array_a);
+  __syncthreads();
+
+  // === Phase 5: Write final result back to global memory ===
+  CopySharedArrayToGlobalArray(array_a, params.array, params.tile_size);
 
   // PrintGlobalMemArray(d_data);
 }

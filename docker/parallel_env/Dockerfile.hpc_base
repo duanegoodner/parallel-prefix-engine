@@ -26,6 +26,7 @@ RUN sudo apt-get update && \
     cmake \
     ca-certificates \
     libpq-dev \
+    ninja-build \
     git \
     curl \
     wget \

@@ -19,3 +19,4 @@ target_link_libraries(
     prefix_sum_mpi
     prefix_sum_cuda
     )
+target_link_libraries(test_cuda_prefix_sum_solver PRIVATE my_default_flags)
