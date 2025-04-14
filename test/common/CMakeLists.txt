@@ -1,3 +1,6 @@
+include(GoogleTest)
+
+
 # ===========================
 # MATRIX_INIT
 # ===========================
@@ -42,3 +45,8 @@ target_link_libraries(
     prefix_sum_cuda
     )
 target_link_libraries(test_program_args PRIVATE my_default_flags)
+
+
+gtest_discover_tests(test_matrix_init)
+gtest_discover_tests(test_program_args)
+

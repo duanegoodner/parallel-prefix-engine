@@ -62,7 +62,6 @@
       }
     }
   ],
-
   "buildPresets": [
     {
       "name": "dev",
@@ -81,6 +80,32 @@
       "configurePreset": "release",
       "description": "Build using release preset",
       "jobs": 8
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "description": "Run tests built with the dev configuration",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "description": "Run tests built with the debug configuration",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "description": "Run tests built with the release configuration",
+      "output": {
+        "outputOnFailure": true
+      }
     }
   ]
 }
