@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 project(PrefixSumCompare CXX CUDA)
 
 include(CTest)
+enable_testing()
+include(GoogleTest)
+
 
 # Enable CUDA
 enable_language(CUDA)
