@@ -228,6 +228,13 @@ __device__ void BroadcastBottomEdges(
     ArraySize2D tile_size,
     KernelArray dest_array
 ) {
+
+  if (threadIdx.x == 0 && threadIdx.y == 0) {
+    printf("Source array 2D dims = [%d, %d]\n", source_array.size.x, source_array.size.y);
+    printf("Dest array 2D dims = [%d, %d]\n", dest_array.size.x, dest_array.size.y);
+  }
+  
+  
   // iterate over each tile below cur_tile
   for (int block_row = threadIdx.x + 1; block_row < blockDim.x; ++block_row) {
     if (threadIdx.x == 0 && threadIdx.y == 0) {
@@ -260,12 +267,12 @@ __device__ void BroadcastBottomEdges(
         }
 
         int dest_index_1d =
-            ArrayIndex1D(dest_array_x, array_y, dest_array.size.x);
+            ArrayIndex1D(dest_array_x, array_y, dest_array.size.y);
         int source_index_1d =
-            ArrayIndex1D(source_array_x, array_y, source_array.size.x);
+            ArrayIndex1D(source_array_x, array_y, source_array.size.y);
         if (threadIdx.x == 0 && threadIdx.y == 0) {
           printf(
-              "\t\tSource index-1D = %d, Dest index-1D = %d",
+              "\t\tSource index-1D = %d, Dest index-1D = %d\n\n",
               source_index_1d,
               dest_index_1d
           );
