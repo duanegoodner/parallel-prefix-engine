@@ -228,6 +228,7 @@ __device__ void BroadcastBottomEdges(
     ArraySize2D tile_size,
     KernelArray dest_array
 ) {
+
   // iterate over each tile below cur_tile
   for (int block_row = threadIdx.x + 1; block_row < blockDim.x; ++block_row) {
     // iterate over each col of cur_tile
@@ -235,13 +236,15 @@ __device__ void BroadcastBottomEdges(
       // iterate over each row of downstream tile
       for (int downstream_tile_row = 0; downstream_tile_row < tile_size.x;
            ++downstream_tile_row) {
+
         int array_y = threadIdx.y * tile_size.y + tile_col;
         int source_array_x = ArrayIndexX(tile_size.x - 1, tile_size.x);
         int dest_array_x = block_row * tile_size.x + downstream_tile_row;
+
         int dest_index_1d =
-            ArrayIndex1D(dest_array_x, array_y, dest_array.size.x);
+            ArrayIndex1D(dest_array_x, array_y, dest_array.size.y);
         int source_index_1d =
-            ArrayIndex1D(source_array_x, array_y, source_array.size.x);
+            ArrayIndex1D(source_array_x, array_y, source_array.size.y);
         dest_array.d_address[dest_index_1d] +=
             source_array.d_address[source_index_1d];
       }
