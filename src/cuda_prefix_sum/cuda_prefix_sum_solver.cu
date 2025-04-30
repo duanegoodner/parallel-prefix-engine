@@ -31,8 +31,6 @@ __global__ void PrefixSumKernel(
 
   __syncthreads();
 
-  // PrintKernelArray(array_a, "array_a after copy from global memory");
-
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
     for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
@@ -41,8 +39,6 @@ __global__ void PrefixSumKernel(
   }
 
   __syncthreads();
-
-  // PrintKernelArray(array_a, "array_a after tile row-wise prefix sums");
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
   for (int tile_row = 1; tile_row < params.tile_size.x; tile_row++) {
@@ -53,35 +49,26 @@ __global__ void PrefixSumKernel(
 
   __syncthreads();
 
-  // PrintKernelArray(array_a, "array_a after tile col-wise prefix sums");
-
   // === Phase 3: Copy array_a to array_b ===
 
   CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
   __syncthreads();
-
-  // PrintKernelArray(array_b, "array_b after copy from array_a");
 
   // === Phase 4: Broadcast array_a right edges to array_b
 
   BroadcastRightEdges(array_a, params.tile_size, array_b);
   __syncthreads();
 
-  PrintKernelArray(array_b, "array_b after tile right edges broadcasted from array_a");
-
   // === Phase 5: Copy array_b to array_a ===
 
   CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
   __syncthreads();
 
-  PrintKernelArray(array_a, "array_a after copy back from array_b");
 
   // ==== Phase 6: Broadcast array_b bottom edges to array_a
 
   BroadcastBottomEdges(array_b, params.tile_size, array_a);
   __syncthreads();
-
-  PrintKernelArray(array_a, "array_a after bottom edges broadcast from array_b");
 
   // === Phase 5: Write final result back to global memory ===
   CopySharedArrayToGlobalArray(array_a, params.array, params.tile_size);

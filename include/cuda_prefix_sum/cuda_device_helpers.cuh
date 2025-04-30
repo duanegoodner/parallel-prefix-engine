@@ -229,54 +229,22 @@ __device__ void BroadcastBottomEdges(
     KernelArray dest_array
 ) {
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Source array 2D dims = [%d, %d]\n", source_array.size.x, source_array.size.y);
-    printf("Dest array 2D dims = [%d, %d]\n", dest_array.size.x, dest_array.size.y);
-  }
-  
-  
   // iterate over each tile below cur_tile
   for (int block_row = threadIdx.x + 1; block_row < blockDim.x; ++block_row) {
-    if (threadIdx.x == 0 && threadIdx.y == 0) {
-      printf("Will broadcast to block row = %d\n", block_row);
-    }
     // iterate over each col of cur_tile
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-      if (threadIdx.x == 0 && threadIdx.y == 0) {
-        printf("\tWill broadcast to tile col = %d\n", tile_col);
-      }
       // iterate over each row of downstream tile
       for (int downstream_tile_row = 0; downstream_tile_row < tile_size.x;
            ++downstream_tile_row) {
-        if (threadIdx.x == 0 && threadIdx.y == 0) {
-          printf("\t\tWill broadcast to tile row = %d\n", downstream_tile_row);
-        }
 
         int array_y = threadIdx.y * tile_size.y + tile_col;
         int source_array_x = ArrayIndexX(tile_size.x - 1, tile_size.x);
         int dest_array_x = block_row * tile_size.x + downstream_tile_row;
 
-        if (threadIdx.x == 0 && threadIdx.y == 0) {
-          printf(
-              "\t\tBroadcasting from full_array [%d, %d] to [%d, %d]\n",
-              source_array_x,
-              array_y,
-              dest_array_x,
-              array_y
-          );
-        }
-
         int dest_index_1d =
             ArrayIndex1D(dest_array_x, array_y, dest_array.size.y);
         int source_index_1d =
             ArrayIndex1D(source_array_x, array_y, source_array.size.y);
-        if (threadIdx.x == 0 && threadIdx.y == 0) {
-          printf(
-              "\t\tSource index-1D = %d, Dest index-1D = %d\n\n",
-              source_index_1d,
-              dest_index_1d
-          );
-        }
         dest_array.d_address[dest_index_1d] +=
             source_array.d_address[source_index_1d];
       }
