@@ -1,8 +1,8 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
-    "editor.fontSize": 12,
-    "terminal.integrated.fontSize": 12,
-    "markdown.preview.fontSize": 12,
+    "editor.fontSize": 11,
+    "terminal.integrated.fontSize": 11,
+    "markdown.preview.fontSize": 11,
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
     "files.associations": {
         "*.tcc": "cpp",
