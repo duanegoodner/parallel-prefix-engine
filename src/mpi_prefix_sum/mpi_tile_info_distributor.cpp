@@ -57,7 +57,6 @@ void MpiTileInfoDistributor::DistributeFullMatrix(
         grid_.cart_comm(),
         MPI_STATUS_IGNORE
     );
-    std::cout << "Rank " << grid_.rank() << " done with MPI_Recv" << std::endl;
   }
 }
 
@@ -103,8 +102,6 @@ void MpiTileInfoDistributor::ReconstructFullMatrix(
           MPI_STATUS_IGNORE
       );
     }
-
-    std::cout << "Rank 0 done with MPI_Recv" << std::endl;
 
     PrefixSumBlockMatrix::Combine(
         tile_data,
