@@ -240,8 +240,8 @@ __device__ void AccumulateEdges(
 ) {
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-      int x = ArrayIndexX(threadIdx.x, tile_size.x);
-      int y = ArrayIndexY(threadIdx.y, tile_size.y);
+      int x = ArrayIndexX(tile_row, tile_size.x);
+      int y = ArrayIndexY(tile_col, tile_size.y);
       int idx = ArrayIndex1D(x, y, src.size.y);
 
       int sum = src.d_address[idx];
