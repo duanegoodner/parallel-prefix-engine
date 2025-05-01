@@ -44,6 +44,7 @@ void CudaPrefixSumSolver::Compute() {
 
   // Launch kernel
   LaunchPrefixSumKernel(launch_params, 0);
+  // LaunchPrefixSumKernelSingleElement(launch_params, 0);
 
 
   cudaDeviceSynchronize();

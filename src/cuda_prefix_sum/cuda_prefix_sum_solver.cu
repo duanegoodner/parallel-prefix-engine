@@ -19,25 +19,6 @@ __global__ void PrefixSumKernel(
   // Declare dynamic shared memory
   extern __shared__ int shared_mem[];
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf(
-        "Start kernel: full array size = %d x %d, tile size = %d x %d\n\n",
-        params.array.size.x,
-        params.array.size.y,
-        params.tile_size.x,
-        params.tile_size.y
-    );
-    printf("gridDim.x = %d, gridDim.y = %d\n", gridDim.x, gridDim.y);
-  }
-
-  printf(
-      "Hello from thread (%d, %d) in block(%d, %d)\n",
-      threadIdx.x,
-      threadIdx.y,
-      blockIdx.x,
-      blockIdx.y
-  );
-
   // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
   KernelArray array_b{
@@ -48,10 +29,6 @@ __global__ void PrefixSumKernel(
   // === Phase 1: Load input from global memory to shared memory ===
   CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Finished CopyGlobalArrayToSharedArray\n");
-  }
-
   __syncthreads();
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
@@ -59,10 +36,6 @@ __global__ void PrefixSumKernel(
     for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
       ComputeRowWisePrefixSum(array_a, params.tile_size, tile_row, tile_col);
     }
-  }
-
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Finished LoccalRowWisePrefixSum\n");
   }
 
   __syncthreads();
@@ -74,23 +47,12 @@ __global__ void PrefixSumKernel(
     }
   }
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Finished LoccalColWisePrefixSum\n");
-  }
-
   __syncthreads();
 
   // === Phase 3: Copy array_a to array_b ===
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Preparing to copy from array_a to array_b\n");
-  }
-
   CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
 
-  if (threadIdx.x == 0 && threadIdx.y == 0) {
-    printf("Finished CopyFromArrayAToArrayB\n");
-  }
   __syncthreads();
 
   // === Phase 4: Broadcast array_a right edges to array_b
@@ -127,8 +89,8 @@ void LaunchPrefixSumKernel(
   dim3 blockDim(num_tiles_x, num_tiles_y);
   dim3 gridDim(1, 1); // Single block for now
 
-  int shared_mem_size =
-      2 * kernel_params.array.size.x * kernel_params.array.size.y * sizeof(int);
+  int shared_mem_size = 2 * kernel_params.array.size.x *
+                        kernel_params.array.size.y * sizeof(int);
 
   PrefixSumKernel<<<gridDim, blockDim, shared_mem_size, stream>>>(kernel_params
   );
