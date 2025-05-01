@@ -82,11 +82,13 @@ __device__ void CopySharedArrayToSharedArray(
     KernelArray dest_array,
     ArraySize2D tile_size
 ) {
+
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
       int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
       int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, source_array.size.y);
+
       dest_array.d_address[index_1d] = source_array.d_address[index_1d];
     }
   }
