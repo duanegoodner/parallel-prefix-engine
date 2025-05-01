@@ -52,6 +52,7 @@ __global__ void PrefixSumKernel(
   // === Phase 3: Copy array_a to array_b ===
 
   CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
+
   __syncthreads();
 
   // === Phase 4: Broadcast array_a right edges to array_b
@@ -63,7 +64,6 @@ __global__ void PrefixSumKernel(
 
   CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
   __syncthreads();
-
 
   // ==== Phase 6: Broadcast array_b bottom edges to array_a
 
@@ -89,9 +89,10 @@ void LaunchPrefixSumKernel(
   dim3 blockDim(num_tiles_x, num_tiles_y);
   dim3 gridDim(1, 1); // Single block for now
 
-  PrefixSumKernel<<<gridDim, blockDim, 0, stream>>>(
-      // d_data,
-      kernel_params
+  int shared_mem_size = 2 * kernel_params.array.size.x *
+                        kernel_params.array.size.y * sizeof(int);
+
+  PrefixSumKernel<<<gridDim, blockDim, shared_mem_size, stream>>>(kernel_params
   );
 
   cudaError_t err = cudaGetLastError();
@@ -100,4 +101,8 @@ void LaunchPrefixSumKernel(
   }
 
   cudaDeviceSynchronize();
+  cudaError_t sync_err = cudaGetLastError();
+  if (sync_err != cudaSuccess) {
+    fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
+  }
 }

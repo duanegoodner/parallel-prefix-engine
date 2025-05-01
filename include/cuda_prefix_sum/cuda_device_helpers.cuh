@@ -82,11 +82,13 @@ __device__ void CopySharedArrayToSharedArray(
     KernelArray dest_array,
     ArraySize2D tile_size
 ) {
+
   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
       int arr_idx_x = ArrayIndexX(tile_row, tile_size.x);
       int arr_idx_y = ArrayIndexY(tile_col, tile_size.y);
       int index_1d = ArrayIndex1D(arr_idx_x, arr_idx_y, source_array.size.y);
+
       dest_array.d_address[index_1d] = source_array.d_address[index_1d];
     }
   }
@@ -196,6 +198,90 @@ __device__ void SumAndCopy(
   dest_array.d_address[index_1d] =
       source_array.d_address[index_1d] + val_to_add;
 }
+
+struct AccumulateRight {
+  __device__ void operator()(
+      KernelArray src,
+      ArraySize2D tile_size,
+      int x,
+      int y,
+      int &acc
+  ) const {
+    for (int block_col = 0; block_col < threadIdx.y; ++block_col) {
+      int upstream_y = block_col + tile_size.y - 1;
+      int idx = ArrayIndex1D(x, upstream_y, src.size.y);
+      acc += src.d_address[idx];
+    }
+  }
+};
+
+struct AccumulateBottom {
+  __device__ void operator()(
+      KernelArray src,
+      ArraySize2D tile_size,
+      int x,
+      int y,
+      int &acc
+  ) const {
+    for (int block_row = 0; block_row < threadIdx.x; ++block_row) {
+      int upstream_x = block_row + tile_size.x - 1;
+      int idx = ArrayIndex1D(upstream_x, y, src.size.y);
+      acc += src.d_address[idx];
+    }
+  }
+};
+
+template <typename AccumulateFn>
+__device__ void AccumulateEdges(
+    KernelArray src,
+    ArraySize2D tile_size,
+    KernelArray dst,
+    AccumulateFn accumulate_fn
+) {
+  for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
+    for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
+      int x = ArrayIndexX(tile_row, tile_size.x);
+      int y = ArrayIndexY(tile_col, tile_size.y);
+      int idx = ArrayIndex1D(x, y, src.size.y);
+
+      int sum = src.d_address[idx];
+
+      // Functor decides what to do with x, y, tile
+      accumulate_fn(src, tile_size, x, y, sum);
+
+      dst.d_address[idx] = sum;
+    }
+  }
+}
+
+// __device__ void AddRightEdges(
+//     KernelArray source_array,
+//     ArraySize2D tile_size,
+//     KernelArray dest_array
+// ) {
+//   // Iterate over each element in tile
+//   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
+//     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
+//       int array_x = ArrayIndexX(threadIdx.x, tile_size.x);
+//       int array_y = ArrayIndexY(threadIdx.y, tile_size.y);
+//       int index_1d = ArrayIndex1D(array_x, array_y, source_array.size.y);
+
+//       // initialize register variable that will collect sum of cur element +
+//       // upstream right edges.
+//       int sum = source_array.d_address[index_1d];
+
+//       AccumulateUpstreamRightEdgesInto(
+//           source_array,
+//           array_x,
+//           tile_size.y,
+//           sum
+//       );
+
+//       // copy the accumulated sum into destination array
+//       dest_array.d_address[index_1d] = sum;
+//     }
+//   }
+// }
 
 __device__ void BroadcastRightEdges(
     KernelArray source_array,

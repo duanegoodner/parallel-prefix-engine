@@ -7,7 +7,6 @@
 #include "common/matrix_init.hpp"
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
-
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
 // Ensure proper linkage between C++ and CUDA code
@@ -44,11 +43,9 @@ void CudaPrefixSumSolver::Compute() {
   auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
 
   // Launch kernel
-  LaunchPrefixSumKernel(
-      // d_data,
-      launch_params,
-      0 // Use the default CUDA stream
-  );
+  LaunchPrefixSumKernel(launch_params, 0);
+  // LaunchPrefixSumKernelSingleElement(launch_params, 0);
+
 
   cudaDeviceSynchronize();
 
@@ -96,6 +93,7 @@ std::chrono::duration<double> CudaPrefixSumSolver::GetEndTime() const {
 
 void CudaPrefixSumSolver::ReportTime() const {
   double elapsed_time_s = GetElapsedTime().count();
+  std::cout << "\n=== Runtime Report ===\n";
   std::cout << "CUDA Execution time: " << elapsed_time_s * 1000 << " ms"
             << std::endl;
 }

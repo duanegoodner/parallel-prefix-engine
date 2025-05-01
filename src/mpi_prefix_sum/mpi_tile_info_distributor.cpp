@@ -23,58 +23,75 @@ void MpiTileInfoDistributor::DistributeFullMatrix(
 
     auto sub_matrices =
         full_matrix.SubDivide(grid_.num_rows(), grid_.num_cols());
-    for (auto &sub_matrix : sub_matrices) {
-      auto block_sub_matrix = PrefixSumBlockMatrix(
-          tile_.num_rows(),
-          tile_.num_cols(),
-          sub_matrix.second
-      );
 
-      MPI_Send(
-          sub_matrix.second.data(),
-          sub_matrix.second.size(),
-          MPI_INT,
-          sub_matrix.first,
-          0,
-          grid_.cart_comm()
-      );
+    for (auto &sub_matrix : sub_matrices) {
+
+      if (sub_matrix.first == 0) {
+        std::copy(
+            sub_matrix.second.begin(),
+            sub_matrix.second.end(),
+            tile_.data().begin()
+        );
+      } else {
+
+        MPI_Send(
+            sub_matrix.second.data(),
+            sub_matrix.second.size(),
+            MPI_INT,
+            sub_matrix.first,
+            0,
+            grid_.cart_comm()
+        );
+      }
     }
   }
   // MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Recv(
-      tile_.data().data(),
-      tile_.data().size(),
-      MPI_INT,
-      0,
-      0,
-      grid_.cart_comm(),
-      MPI_STATUS_IGNORE
-  );
+
+  if (grid_.rank() != 0) {
+    MPI_Recv(
+        tile_.data().data(),
+        tile_.data().size(),
+        MPI_INT,
+        0,
+        0,
+        grid_.cart_comm(),
+        MPI_STATUS_IGNORE
+    );
+  }
 }
 
 void MpiTileInfoDistributor::ReconstructFullMatrix(
     PrefixSumBlockMatrix &full_matrix
 ) {
-  // All ranks (including rank 0) send their data to rank 0
-  MPI_Send(
-      tile_.data().data(),
-      tile_.data().size(),
-      MPI_INT,
-      0,
-      0,
-      grid_.cart_comm()
-  );
+
+  // All ranks (except rank 0) send data to rank 0
+  if (grid_.rank() != 0) {
+    MPI_Send(
+        tile_.data().data(),
+        tile_.data().size(),
+        MPI_INT,
+        0,
+        0,
+        grid_.cart_comm()
+    );
+  }
 
   // Rank 0 receives all tile data into a map
   if (grid_.rank() == 0) {
     std::unordered_map<int, PrefixSumBlockMatrix> tile_data;
 
+    // rank 0 copies its own data (no send/receive)
     for (auto idx = 0; idx < grid_.size(); ++idx) {
       tile_data[idx] =
           PrefixSumBlockMatrix(tile_.num_rows(), tile_.num_cols());
     }
 
-    for (auto idx = 0; idx < grid_.size(); ++idx) {
+    // rank 0 receives data sent by all other ranks
+    for (auto idx = 0; idx < tile_.data().size(); ++idx) {
+      tile_data[0].data()[idx] = tile_.data()[idx];
+    }
+
+    for (auto idx = 1; idx < grid_.size(); ++idx) {
       MPI_Recv(
           tile_data[idx].data().data(),
           tile_data[idx].data().size(),

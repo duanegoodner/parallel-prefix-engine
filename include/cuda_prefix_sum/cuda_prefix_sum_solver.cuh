@@ -5,9 +5,11 @@
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
 void LaunchPrefixSumKernel(
-    // int *d_data,
     KernelLaunchParams kernel_params,
     cudaStream_t stream
 );
 
-
+void LaunchPrefixSumKernelSingleElement(
+    KernelLaunchParams kernel_params,
+    cudaStream_t cuda_stream
+);
