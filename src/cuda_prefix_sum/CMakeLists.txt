@@ -3,6 +3,7 @@
 add_library(prefix_sum_cuda
     kernel_launch_params.cpp
     cuda_prefix_sum_solver.cu
+    cuda_prefix_sum_solver_single_element.cu
     cuda_prefix_sum_solver.cpp
 )
 

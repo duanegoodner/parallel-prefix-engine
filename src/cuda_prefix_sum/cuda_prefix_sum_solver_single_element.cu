@@ -120,16 +120,22 @@ __global__ void PrefixSumKernelSingleElement(
 }
 
 void LaunchPrefixSumKernelSingleElement(
-    int *d_data,
-    int full_matrix_dim_x,
-    int full_matrix_dim_y,
+    // int *d_data,
+    // int full_matrix_dim_x,
+    // int full_matrix_dim_y,
+    KernelLaunchParams kernel_params,
     cudaStream_t stream
 ) {
 
-  dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
+  dim3 blockDim(kernel_params.array.size.x, kernel_params.array.size.y);
   dim3 gridDim(1, 1); // Single block for now
 
-  PrefixSumKernelSingleElement<<<gridDim, blockDim, 0, stream>>>(d_data);
+  int shared_mem_size = 2 * kernel_params.array.size.x *
+                        kernel_params.array.size.y * sizeof(int);
+
+  PrefixSumKernelSingleElement<<<gridDim, blockDim, shared_mem_size, stream>>>(
+      kernel_params.array.d_address
+  );
 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
