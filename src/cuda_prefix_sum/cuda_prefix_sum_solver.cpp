@@ -7,7 +7,6 @@
 #include "common/matrix_init.hpp"
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
-
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
 // Ensure proper linkage between C++ and CUDA code
@@ -44,11 +43,8 @@ void CudaPrefixSumSolver::Compute() {
   auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
 
   // Launch kernel
-  LaunchPrefixSumKernel(
-      // d_data,
-      launch_params,
-      0 // Use the default CUDA stream
-  );
+  LaunchPrefixSumKernel(launch_params, 0);
+
 
   cudaDeviceSynchronize();
 

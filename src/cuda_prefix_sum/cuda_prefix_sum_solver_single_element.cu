@@ -120,9 +120,6 @@ __global__ void PrefixSumKernelSingleElement(
 }
 
 void LaunchPrefixSumKernelSingleElement(
-    // int *d_data,
-    // int full_matrix_dim_x,
-    // int full_matrix_dim_y,
     KernelLaunchParams kernel_params,
     cudaStream_t stream
 ) {
