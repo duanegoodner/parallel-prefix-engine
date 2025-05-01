@@ -93,6 +93,7 @@ std::chrono::duration<double> CudaPrefixSumSolver::GetEndTime() const {
 
 void CudaPrefixSumSolver::ReportTime() const {
   double elapsed_time_s = GetElapsedTime().count();
+  std::cout << "\n=== Runtime Report ===\n";
   std::cout << "CUDA Execution time: " << elapsed_time_s * 1000 << " ms"
             << std::endl;
 }
