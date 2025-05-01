@@ -51,29 +51,23 @@ __global__ void PrefixSumKernel(
 
   // === Phase 3: Copy array_a to array_b ===
 
-  // *** not needed if we're using accumulating into register ***
-  // CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
+  CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
 
-  // __syncthreads();
+  __syncthreads();
 
   // === Phase 4: Broadcast array_a right edges to array_b
 
-  // *** let's try to use accumulate approach ***
-  AccumulateEdges(array_a, params.tile_size, array_b, AccumulateRight{});
-
-  // BroadcastRightEdges(array_a, params.tile_size, array_b);
+  BroadcastRightEdges(array_a, params.tile_size, array_b);
   __syncthreads();
 
   // === Phase 5: Copy array_b to array_a ===
 
-  // **** trying accumlator instead ***
-  // CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
-  // __syncthreads();
+  CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
+  __syncthreads();
 
   // ==== Phase 6: Broadcast array_b bottom edges to array_a
 
-  // BroadcastBottomEdges(array_b, params.tile_size, array_a);
-  AccumulateEdges(array_b, params.tile_size, array_a, AccumulateBottom{});
+  BroadcastBottomEdges(array_b, params.tile_size, array_a);
   __syncthreads();
 
   // === Phase 5: Write final result back to global memory ===
