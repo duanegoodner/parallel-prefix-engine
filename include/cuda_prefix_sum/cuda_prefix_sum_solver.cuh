@@ -13,3 +13,5 @@ void LaunchPrefixSumKernelSingleElement(
     KernelLaunchParams kernel_params,
     cudaStream_t cuda_stream
 );
+
+void LaunchPrefixSumWarpKernel(const int* d_input, int* d_output);
