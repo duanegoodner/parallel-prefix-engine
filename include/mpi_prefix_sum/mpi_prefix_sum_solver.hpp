@@ -48,7 +48,7 @@ public:
   void StartTimer() override;
   void StopTimer() override;
   void StartDataDistrubuteTimer();
-  void StopDataDistributeTImer();
+  void StopDataDistributeTimer();
   void StartComputeTimer();
   void StopComputeTimer();
   void StartDataGatherTimer();

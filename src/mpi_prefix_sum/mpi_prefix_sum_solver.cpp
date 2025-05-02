@@ -79,7 +79,7 @@ void MpiPrefixSumSolver::Compute() {
 
   StartDataDistrubuteTimer();
   DistributeSubMatrices();
-  StopDataDistributeTImer();
+  StopDataDistributeTimer();
 
   StartComputeTimer();
   ComputeAndShareAssigned();
@@ -102,7 +102,7 @@ void MpiPrefixSumSolver::StartDataDistrubuteTimer() {
   data_distribute_start_time_ = std::chrono::steady_clock::now();
 }
 
-void MpiPrefixSumSolver::StopDataDistributeTImer() {
+void MpiPrefixSumSolver::StopDataDistributeTimer() {
   data_distribute_end_time_ = std::chrono::steady_clock::now();
 }
 
@@ -253,8 +253,8 @@ void MpiPrefixSumSolver::ReportTime() const {
 
     std::cout << "\nPer-rank compute times:\n";
     for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": "
-                << all_compute_times_s[i] * 1000.0 << " ms\n";
+      std::cout << "  Rank " << i << ": " << all_compute_times_s[i] * 1000.0
+                << " ms\n";
     }
 
     std::cout << "\nPer-rank data gather times:\n";
@@ -262,8 +262,6 @@ void MpiPrefixSumSolver::ReportTime() const {
       std::cout << "  Rank " << i << ": "
                 << all_data_gather_times_s[i] * 1000.0 << " ms\n";
     }
-
-
 
     std::cout << std::endl;
   }

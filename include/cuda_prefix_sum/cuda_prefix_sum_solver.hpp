@@ -25,9 +25,21 @@ public:
 
   void StartTimer() override;
   void StopTimer() override;
+  void StartCopyToDeviceTimer();
+  void StopCopyToDeviceTimer();
+  void StartDeviceComputeTimer();
+  void StopDeviceComputeTimer();
+  void StartCopyFromDeviceTimer();
+  void StopCopyFromDeviceTimer();
+
   std::chrono::duration<double> GetElapsedTime() const;
   std::chrono::duration<double> GetStartTime() const override;
   std::chrono::duration<double> GetEndTime() const override;
+
+  std::chrono::duration<double> GetCopyToDeviceTime() const;
+  std::chrono::duration<double> GetDeviceComputeTime() const;
+  std::chrono::duration<double> GetCopyFromDeviceTime() const;
+
   void ReportTime() const override;
 
 private:
@@ -35,4 +47,10 @@ private:
   std::vector<int> full_matrix_;
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
+
+  std::chrono::steady_clock::time_point copy_to_device_start_time_,
+      copy_to_device_end_time_;
+  std::chrono::steady_clock::time_point device_compute_start_time_, device_compute_end_time_;
+  std::chrono::steady_clock::time_point copy_from_device_start_time_,
+      copy_from_device_end_time_;
 };
