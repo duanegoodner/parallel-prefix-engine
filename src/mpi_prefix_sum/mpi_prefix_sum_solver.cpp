@@ -77,9 +77,17 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
 
 void MpiPrefixSumSolver::Compute() {
 
+  StartDataDistrubuteTimer();
   DistributeSubMatrices();
+  StopDataDistributeTImer();
+
+  StartComputeTimer();
   ComputeAndShareAssigned();
+  StopComputeTimer();
+
+  StartDataGatherTimer();
   CollectSubMatrices();
+  StopDataGatherTimer();
 }
 
 void MpiPrefixSumSolver::StartTimer() {
@@ -88,6 +96,30 @@ void MpiPrefixSumSolver::StartTimer() {
 
 void MpiPrefixSumSolver::StopTimer() {
   end_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StartDataDistrubuteTimer() {
+  data_distribute_start_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StopDataDistributeTImer() {
+  data_distribute_end_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StartComputeTimer() {
+  compute_start_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StopComputeTimer() {
+  compute_end_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StartDataGatherTimer() {
+  data_gather_start_time_ = std::chrono::steady_clock::now();
+}
+
+void MpiPrefixSumSolver::StopDataGatherTimer() {
+  data_gather_end_time_ = std::chrono::steady_clock::now();
 }
 
 std::chrono::duration<double> MpiPrefixSumSolver::GetElapsedTime() const {
@@ -102,17 +134,28 @@ std::chrono::duration<double> MpiPrefixSumSolver::GetEndTime() const {
   return std::chrono::duration<double>(end_time_.time_since_epoch());
 }
 
+std::chrono::duration<double> MpiPrefixSumSolver::GetDataDistributeTime(
+) const {
+  return data_distribute_end_time_ - data_distribute_start_time_;
+}
+
+std::chrono::duration<double> MpiPrefixSumSolver::GetComputeTime() const {
+  return compute_end_time_ - compute_start_time_;
+}
+
+std::chrono::duration<double> MpiPrefixSumSolver::GetDataGatherTime() const {
+  return data_gather_end_time_ - data_gather_start_time_;
+}
+
 void MpiPrefixSumSolver::ReportTime() const {
-  // double local_start =
-  //     std::chrono::duration<double>(start_time_.time_since_epoch()).count();
-  // double local_end =
-  //     std::chrono::duration<double>(end_time_.time_since_epoch()).count();
-  // double local_elapsed =
-  //     std::chrono::duration<double>(end_time_ - start_time_).count();
 
   auto local_start_time_s = GetStartTime().count();
   auto local_end_time_s = GetEndTime().count();
   auto local_elapsed_time_s = GetElapsedTime().count();
+
+  auto local_data_distribute_time_s = GetDataDistributeTime().count();
+  auto local_compute_time_s = GetComputeTime().count();
+  auto local_data_gather_time_s = GetDataGatherTime().count();
 
   int rank = mpi_environment_.rank();
   int size = mpi_environment_.size();
@@ -120,6 +163,9 @@ void MpiPrefixSumSolver::ReportTime() const {
   std::vector<double> all_start_times_s(size);
   std::vector<double> all_end_times_s(size);
   std::vector<double> all_elapsed_times_s(size);
+  std::vector<double> all_data_distribute_times_s(size);
+  std::vector<double> all_compute_times_s(size);
+  std::vector<double> all_data_gather_times_s(size);
 
   MPI_Gather(
       &local_start_time_s,
@@ -151,6 +197,36 @@ void MpiPrefixSumSolver::ReportTime() const {
       0,
       MPI_COMM_WORLD
   );
+  MPI_Gather(
+      &local_data_distribute_time_s,
+      1,
+      MPI_DOUBLE,
+      all_data_distribute_times_s.data(),
+      1,
+      MPI_DOUBLE,
+      0,
+      MPI_COMM_WORLD
+  );
+  MPI_Gather(
+      &local_compute_time_s,
+      1,
+      MPI_DOUBLE,
+      all_compute_times_s.data(),
+      1,
+      MPI_DOUBLE,
+      0,
+      MPI_COMM_WORLD
+  );
+  MPI_Gather(
+      &local_data_gather_time_s,
+      1,
+      MPI_DOUBLE,
+      all_data_gather_times_s.data(),
+      1,
+      MPI_DOUBLE,
+      0,
+      MPI_COMM_WORLD
+  );
 
   if (rank == 0) {
     double global_start_time_s =
@@ -168,6 +244,27 @@ void MpiPrefixSumSolver::ReportTime() const {
       std::cout << "  Rank " << i << ": " << all_elapsed_times_s[i] * 1000.0
                 << " ms\n";
     }
+
+    std::cout << "\nPer-rank data distribute times:\n";
+    for (int i = 0; i < size; ++i) {
+      std::cout << "  Rank " << i << ": "
+                << all_data_distribute_times_s[i] * 1000.0 << " ms\n";
+    }
+
+    std::cout << "\nPer-rank compute times:\n";
+    for (int i = 0; i < size; ++i) {
+      std::cout << "  Rank " << i << ": "
+                << all_compute_times_s[i] * 1000.0 << " ms\n";
+    }
+
+    std::cout << "\nPer-rank data gather times:\n";
+    for (int i = 0; i < size; ++i) {
+      std::cout << "  Rank " << i << ": "
+                << all_data_gather_times_s[i] * 1000.0 << " ms\n";
+    }
+
+
+
     std::cout << std::endl;
   }
 }

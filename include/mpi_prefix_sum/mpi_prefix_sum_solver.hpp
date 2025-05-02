@@ -36,7 +36,7 @@ public:
   int Rank() const { return mpi_environment_.rank(); }
 
   void PrintFullMatrix(std::string title = "") override {
-    
+
     if (mpi_environment_.rank() == 0) {
       std::cout << title << std::endl;
       full_matrix_.Print();
@@ -47,9 +47,19 @@ public:
 
   void StartTimer() override;
   void StopTimer() override;
+  void StartDataDistrubuteTimer();
+  void StopDataDistributeTImer();
+  void StartComputeTimer();
+  void StopComputeTimer();
+  void StartDataGatherTimer();
+  void StopDataGatherTimer();
   std::chrono::duration<double> GetElapsedTime() const override;
   std::chrono::duration<double> GetStartTime() const override;
   std::chrono::duration<double> GetEndTime() const override;
+  std::chrono::duration<double> GetDataDistributeTime() const;
+  std::chrono::duration<double> GetComputeTime() const;
+  std::chrono::duration<double> GetDataGatherTime() const;
+  
 
   void ReportTime() const override;
 
@@ -60,4 +70,11 @@ private:
   PrefixSumBlockMatrix full_matrix_;
   PrefixSumBlockMatrix assigned_matrix_;
   std::chrono::steady_clock::time_point start_time_, end_time_;
+  std::chrono::steady_clock::time_point data_distribute_start_time_,
+      data_distribute_end_time_;
+  std::chrono::steady_clock::time_point compute_start_time_, compute_end_time_;
+  std::chrono::steady_clock::time_point data_gather_start_time_,
+      data_gather_end_time_;
+  
+  
 };
