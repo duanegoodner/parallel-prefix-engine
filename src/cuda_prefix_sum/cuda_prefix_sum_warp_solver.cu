@@ -7,19 +7,21 @@ namespace config {
     // constexpr int NumElems = TileDim * TileDim;
 }
 
-// Kernel implementation
 __global__ void PrefixSumTile32x32(const int* input, int* output) {
     __shared__ int tile[config::TileDim * config::TilePitch];
 
-    int tx = threadIdx.x;
-    int ty = threadIdx.y;
+    // Original thread indices
+    int tx = threadIdx.x; // horizontal (column index in row-pass)
+    int ty = threadIdx.y; // vertical (row index in row-pass)
 
     int global_idx = ty * config::TileDim + tx;
-    int smem_idx = ty * config::TilePitch + tx;
+    int smem_idx   = ty * config::TilePitch + tx;
 
+    // Load global memory into shared memory
     tile[smem_idx] = input[global_idx];
     __syncthreads();
 
+    // --- Row-wise inclusive scan (1 warp per row) ---
     int val = tile[smem_idx];
     #pragma unroll
     for (int offset = 1; offset < config::TileDim; offset *= 2) {
@@ -29,16 +31,23 @@ __global__ void PrefixSumTile32x32(const int* input, int* output) {
     tile[smem_idx] = val;
     __syncthreads();
 
-    val = tile[smem_idx];
+    // --- Column-wise inclusive scan (1 warp per column) ---
+    int row = threadIdx.x;  // Remap: threads step down a column
+    int col = threadIdx.y;  // Each warp owns one column
+
+    int smem_col_idx = row * config::TilePitch + col;
+    val = tile[smem_col_idx];
     #pragma unroll
     for (int offset = 1; offset < config::TileDim; offset *= 2) {
         int n = __shfl_up_sync(0xffffffff, val, offset);
-        if (ty >= offset) val += n;
+        if (row >= offset) val += n;
     }
-    tile[smem_idx] = val;
+    tile[smem_col_idx] = val;
     __syncthreads();
 
-    output[global_idx] = tile[smem_idx];
+    // Restore thread indices to write final result
+    int final_idx = ty * config::TilePitch + tx;
+    output[global_idx] = tile[final_idx];
 }
 
 // Kernel launcher
