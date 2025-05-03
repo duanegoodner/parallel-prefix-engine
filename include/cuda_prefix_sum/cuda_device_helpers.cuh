@@ -254,35 +254,6 @@ __device__ void AccumulateEdges(
   }
 }
 
-// __device__ void AddRightEdges(
-//     KernelArray source_array,
-//     ArraySize2D tile_size,
-//     KernelArray dest_array
-// ) {
-//   // Iterate over each element in tile
-//   for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
-//     for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-//       int array_x = ArrayIndexX(threadIdx.x, tile_size.x);
-//       int array_y = ArrayIndexY(threadIdx.y, tile_size.y);
-//       int index_1d = ArrayIndex1D(array_x, array_y, source_array.size.y);
-
-//       // initialize register variable that will collect sum of cur element +
-//       // upstream right edges.
-//       int sum = source_array.d_address[index_1d];
-
-//       AccumulateUpstreamRightEdgesInto(
-//           source_array,
-//           array_x,
-//           tile_size.y,
-//           sum
-//       );
-
-//       // copy the accumulated sum into destination array
-//       dest_array.d_address[index_1d] = sum;
-//     }
-//   }
-// }
-
 __device__ void BroadcastRightEdges(
     KernelArray source_array,
     ArraySize2D tile_size,
@@ -338,48 +309,4 @@ __device__ void BroadcastBottomEdges(
   }
 }
 
-__device__ void SumAndCopyTileRow(
-    KernelArray source_array,
-    int tile_row,
-    int val_to_add,
-    ArraySize2D tile_size,
-    KernelArray dest_array
-) {
-  for (int tile_col = 0; tile_col < tile_size.y; ++tile_col) {
-    int index_x = ArrayIndexX(tile_row, tile_size.x);
-    int index_y = ArrayIndexY(tile_col, tile_size.y);
-    SumAndCopy(source_array, index_x, index_y, val_to_add, dest_array);
-  }
-}
 
-__device__ void SumAndCopyAllTileRows(
-    KernelArray source_array,
-    int upstream_tile_col_idx,
-    ArraySize2D tile_size,
-    KernelArray dest_array
-) {
-  for (int tile_row = 0; tile_row < tile_size.x; ++tile_row) {
-    int index_x = ArrayIndexX(tile_row, tile_size.x);
-    int index_1d =
-        ArrayIndex1D(index_x, upstream_tile_col_idx, source_array.size.y);
-    int edge_val = source_array.d_address[index_1d];
-    SumAndCopyTileRow(source_array, tile_row, edge_val, tile_size, dest_array);
-  }
-}
-
-__device__ void SumAndCopyAllTileEdges(
-    KernelArray source_array,
-    ArraySize2D tile_size,
-    KernelArray dest_array
-) {
-  for (int upstream_tile_col = 0; upstream_tile_col < threadIdx.y;
-       ++upstream_tile_col) {
-    int tile_edge_idx_y = upstream_tile_col * tile_size.y + tile_size.y - 1;
-    SumAndCopyAllTileRows(
-        source_array,
-        tile_edge_idx_y,
-        tile_size,
-        dest_array
-    );
-  }
-}
