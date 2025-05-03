@@ -78,8 +78,6 @@ public:
               << std::endl;
   }
 
-  // std::unique_ptr<PrefixSumSolver> MakeSolver() const;
-
 private:
   int seed_ = 1234;
   std::string backend_ = "mpi";

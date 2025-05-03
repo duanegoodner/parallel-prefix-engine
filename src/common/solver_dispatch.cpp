@@ -25,7 +25,7 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
           {"cuda", [](ProgramArgs &args) {
              return std::make_unique<CudaPrefixSumSolver>(
                  args,
-                 LaunchPrefixSumKernel
+                 LaunchPrefixSumKernelTiled
              );
            }}};
 

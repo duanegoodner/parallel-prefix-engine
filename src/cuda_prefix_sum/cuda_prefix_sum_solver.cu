@@ -12,7 +12,7 @@
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
-__global__ void PrefixSumKernel(
+__global__ void TiledPrefixSumKernel(
     // int *d_data,
     KernelLaunchParams params
 ) {
@@ -76,7 +76,7 @@ __global__ void PrefixSumKernel(
   // PrintGlobalMemArray(d_data);
 }
 
-void LaunchPrefixSumKernel(
+void LaunchPrefixSumKernelTiled(
     // int *d_data,
     KernelLaunchParams kernel_params,
     cudaStream_t stream
@@ -92,7 +92,7 @@ void LaunchPrefixSumKernel(
   int shared_mem_size = 2 * kernel_params.array.size.x *
                         kernel_params.array.size.y * sizeof(int);
 
-  PrefixSumKernel<<<gridDim, blockDim, shared_mem_size, stream>>>(kernel_params
+  TiledPrefixSumKernel<<<gridDim, blockDim, shared_mem_size, stream>>>(kernel_params
   );
 
   cudaError_t err = cudaGetLastError();

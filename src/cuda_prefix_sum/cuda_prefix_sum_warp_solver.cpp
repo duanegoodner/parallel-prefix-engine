@@ -24,7 +24,7 @@ std::vector<int> CudaPrefixSumWarpSolver::Run(const std::vector<int>& host_input
 
     cudaMemcpy(d_input, host_input.data(), config::NumElems * sizeof(int), cudaMemcpyHostToDevice);
 
-    LaunchPrefixSumWarpKernel(d_input, d_output);
+    LaunchPrefixSumKernelWarp(d_input, d_output);
 
     cudaMemcpy(host_output.data(), d_output, config::NumElems * sizeof(int), cudaMemcpyDeviceToHost);
 

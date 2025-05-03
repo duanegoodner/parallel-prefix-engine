@@ -51,7 +51,7 @@ __global__ void PrefixSumTile32x32(const int* input, int* output) {
 }
 
 // Kernel launcher
-void LaunchPrefixSumWarpKernel(const int* d_input, int* d_output) {
+void LaunchPrefixSumKernelWarp(const int* d_input, int* d_output) {
     dim3 block(config::TileDim, config::TileDim);
     PrefixSumTile32x32<<<1, block>>>(d_input, d_output);
 }

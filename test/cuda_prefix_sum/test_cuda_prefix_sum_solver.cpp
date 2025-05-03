@@ -31,7 +31,7 @@ TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
 
   auto program_args = GenerateProgramArgsForTest(full_matrix_dim, tile_dim);
 
-  CudaPrefixSumSolver cuda_solver{program_args, LaunchPrefixSumKernel};
+  CudaPrefixSumSolver cuda_solver{program_args, LaunchPrefixSumKernelTiled};
 
   std::cout << "Before computation:";
   cuda_solver.PrintFullMatrix();
