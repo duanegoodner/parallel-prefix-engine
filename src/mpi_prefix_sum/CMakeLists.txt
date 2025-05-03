@@ -11,4 +11,4 @@ add_library(prefix_sum_mpi
 
 target_include_directories(prefix_sum_mpi PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(prefix_sum_mpi PUBLIC prefix_sum_common MPI::MPI_CXX)
-target_link_libraries(prefix_sum_mpi PRIVATE my_default_flags)
+target_link_libraries(prefix_sum_mpi PRIVATE time_utils my_default_flags)

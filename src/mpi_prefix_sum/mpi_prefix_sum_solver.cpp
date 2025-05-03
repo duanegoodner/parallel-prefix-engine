@@ -15,6 +15,7 @@
 
 #include "common/matrix_init.hpp"
 #include "common/program_args.hpp"
+#include "common/time_utils.hpp"
 
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
@@ -35,10 +36,19 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
       )) {
 
   PopulateFullMatrix();
+  AttachTimeInterval("warmup");
+  AttachTimeInterval("total");
+  AttachTimeInterval("data_distribute");
+  AttachTimeInterval("compute");
+  AttachTimeInterval("data_gather");
 
   // TODO : Error if product of num_tile_rows and num_tile_cols is not equal to
   // mpi_environment_.size()
   // TODO : Error if num_tile_rows and num_tile_cols are not divisible by
+}
+
+void MpiPrefixSumSolver::AttachTimeInterval(std::string name) {
+  time_intervals_[name] = TimeInterval();
 }
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
@@ -77,85 +87,40 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
 
 void MpiPrefixSumSolver::Compute() {
 
-  StartDataDistrubuteTimer();
+  time_intervals_["data_distribute"].RecordStart();
   DistributeSubMatrices();
-  StopDataDistributeTimer();
+  time_intervals_["data_distribute"].RecordEnd();
 
-  StartComputeTimer();
+  time_intervals_["compute"].RecordStart();
   ComputeAndShareAssigned();
-  StopComputeTimer();
+  time_intervals_["compute"].RecordEnd();
 
-  StartDataGatherTimer();
+  time_intervals_["data_gather"].RecordStart();
   CollectSubMatrices();
-  StopDataGatherTimer();
+  time_intervals_["data_gather"].RecordEnd();
 }
 
 void MpiPrefixSumSolver::StartTimer() {
-  start_time_ = std::chrono::steady_clock::now();
+  time_intervals_["total"].RecordStart();
 }
 
 void MpiPrefixSumSolver::StopTimer() {
-  end_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StartDataDistrubuteTimer() {
-  data_distribute_start_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StopDataDistributeTimer() {
-  data_distribute_end_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StartComputeTimer() {
-  compute_start_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StopComputeTimer() {
-  compute_end_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StartDataGatherTimer() {
-  data_gather_start_time_ = std::chrono::steady_clock::now();
-}
-
-void MpiPrefixSumSolver::StopDataGatherTimer() {
-  data_gather_end_time_ = std::chrono::steady_clock::now();
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetElapsedTime() const {
-  return end_time_ - start_time_;
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetStartTime() const {
-  return std::chrono::duration<double>(start_time_.time_since_epoch());
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetEndTime() const {
-  return std::chrono::duration<double>(end_time_.time_since_epoch());
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetDataDistributeTime(
-) const {
-  return data_distribute_end_time_ - data_distribute_start_time_;
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetComputeTime() const {
-  return compute_end_time_ - compute_start_time_;
-}
-
-std::chrono::duration<double> MpiPrefixSumSolver::GetDataGatherTime() const {
-  return data_gather_end_time_ - data_gather_start_time_;
+  time_intervals_["total"].RecordEnd();
 }
 
 void MpiPrefixSumSolver::ReportTime() const {
 
-  auto local_start_time_s = GetStartTime().count();
-  auto local_end_time_s = GetEndTime().count();
-  auto local_elapsed_time_s = GetElapsedTime().count();
+  auto local_start_time_s = time_intervals_.at("total").StartTime().count();
+  auto local_end_time_s = time_intervals_.at("total").EndTime().count();
+  auto local_elapsed_time_s =
+      time_intervals_.at("total").ElapsedTime().count();
 
-  auto local_data_distribute_time_s = GetDataDistributeTime().count();
-  auto local_compute_time_s = GetComputeTime().count();
-  auto local_data_gather_time_s = GetDataGatherTime().count();
+  auto local_data_distribute_time_s =
+      time_intervals_.at("data_distribute").ElapsedTime().count();
+  auto local_compute_time_s =
+      time_intervals_.at("compute").ElapsedTime().count();
+  auto local_data_gather_time_s =
+      time_intervals_.at("data_gather").ElapsedTime().count();
 
   int rank = mpi_environment_.rank();
   int size = mpi_environment_.size();

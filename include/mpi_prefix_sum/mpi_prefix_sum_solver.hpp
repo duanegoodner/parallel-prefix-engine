@@ -8,9 +8,12 @@
 #pragma once
 
 #include <chrono>
+#include <string>
+#include <unordered_map>
 
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
+#include "common/time_utils.hpp"
 
 #include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
 #include "mpi_prefix_sum/mpi_environment.hpp"
@@ -47,18 +50,8 @@ public:
 
   void StartTimer() override;
   void StopTimer() override;
-  void StartDataDistrubuteTimer();
-  void StopDataDistributeTimer();
-  void StartComputeTimer();
-  void StopComputeTimer();
-  void StartDataGatherTimer();
-  void StopDataGatherTimer();
-  std::chrono::duration<double> GetElapsedTime() const override;
-  std::chrono::duration<double> GetStartTime() const override;
-  std::chrono::duration<double> GetEndTime() const override;
-  std::chrono::duration<double> GetDataDistributeTime() const;
-  std::chrono::duration<double> GetComputeTime() const;
-  std::chrono::duration<double> GetDataGatherTime() const;
+
+  
   
 
   void ReportTime() const override;
@@ -69,12 +62,9 @@ private:
   MpiCartesianGrid grid_;
   PrefixSumBlockMatrix full_matrix_;
   PrefixSumBlockMatrix assigned_matrix_;
-  std::chrono::steady_clock::time_point start_time_, end_time_;
-  std::chrono::steady_clock::time_point data_distribute_start_time_,
-      data_distribute_end_time_;
-  std::chrono::steady_clock::time_point compute_start_time_, compute_end_time_;
-  std::chrono::steady_clock::time_point data_gather_start_time_,
-      data_gather_end_time_;
+  std::unordered_map<std::string, TimeInterval> time_intervals_;
   
+  void AttachTimeInterval(std::string name);
+
   
 };
