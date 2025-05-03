@@ -9,6 +9,7 @@
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
@@ -22,7 +23,10 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              return std::make_unique<MpiPrefixSumSolver>(args);
            }},
           {"cuda", [](ProgramArgs &args) {
-             return std::make_unique<CudaPrefixSumSolver>(args);
+             return std::make_unique<CudaPrefixSumSolver>(
+                 args,
+                 LaunchPrefixSumKernel
+             );
            }}};
 
   // Find the factory function for the requested backend
