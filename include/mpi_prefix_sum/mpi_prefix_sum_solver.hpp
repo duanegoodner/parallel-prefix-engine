@@ -48,11 +48,9 @@ public:
 
   void PrintAssignedMatrix() { assigned_matrix_.Print(); }
 
+  void WarmUp() override;
   void StartTimer() override;
   void StopTimer() override;
-
-  
-  
 
   void ReportTime() const override;
 
@@ -63,8 +61,6 @@ private:
   PrefixSumBlockMatrix full_matrix_;
   PrefixSumBlockMatrix assigned_matrix_;
   std::unordered_map<std::string, TimeInterval> time_intervals_;
-  
-  void AttachTimeInterval(std::string name);
 
-  
+  void AttachTimeInterval(std::string name);
 };

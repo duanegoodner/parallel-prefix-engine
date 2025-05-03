@@ -25,6 +25,8 @@ public:
 
   virtual void PrintFullMatrix(std::string title = "") = 0;
 
+  virtual void WarmUp() = 0;
+
   // ⏱️ Time tracking (backend-specific implementations)
   virtual void StartTimer() = 0;
   virtual void StopTimer() = 0;

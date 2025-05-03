@@ -25,6 +25,7 @@ public:
 
   const ProgramArgs &program_args() const;
 
+  void WarmUp() override;
   void StartTimer() override;
   void StopTimer() override;
 

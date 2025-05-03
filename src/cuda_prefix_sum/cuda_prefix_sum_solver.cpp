@@ -95,6 +95,12 @@ void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {
   }
 }
 
+void CudaPrefixSumSolver::WarmUp() {
+  time_intervals_.at("warmup").RecordStart();
+  cudaFree(0);
+  time_intervals_.at("warmup").RecordEnd();
+}
+
 void CudaPrefixSumSolver::StartTimer() {
   time_intervals_["total"].RecordStart();
 }

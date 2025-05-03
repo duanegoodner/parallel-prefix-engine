@@ -51,6 +51,12 @@ void MpiPrefixSumSolver::AttachTimeInterval(std::string name) {
   time_intervals_[name] = TimeInterval();
 }
 
+void MpiPrefixSumSolver::WarmUp() {
+  // For now this solver does not need to do anything for warm up
+  time_intervals_.at("warmup").RecordStart();
+  time_intervals_.at("warmup").RecordEnd();
+}
+
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
     auto full_matrix_data = GenerateRandomMatrix<int>(
