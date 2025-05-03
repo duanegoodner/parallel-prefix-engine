@@ -7,10 +7,12 @@
 
 #include <chrono>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
+#include "common/time_utils.hpp"
 
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
@@ -23,28 +25,20 @@ public:
 
   const ProgramArgs &program_args() const;
 
+  void WarmUp() override;
   void StartTimer() override;
   void StopTimer() override;
-  void StartCopyToDeviceTimer();
-  void StopCopyToDeviceTimer();
-  void StartDeviceComputeTimer();
-  void StopDeviceComputeTimer();
-  void StartCopyFromDeviceTimer();
-  void StopCopyFromDeviceTimer();
 
-  std::chrono::duration<double> GetElapsedTime() const;
-  std::chrono::duration<double> GetStartTime() const override;
-  std::chrono::duration<double> GetEndTime() const override;
-
-  std::chrono::duration<double> GetCopyToDeviceTime() const;
-  std::chrono::duration<double> GetDeviceComputeTime() const;
-  std::chrono::duration<double> GetCopyFromDeviceTime() const;
 
   void ReportTime() const override;
 
 private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
+  std::unordered_map<std::string, TimeInterval> time_intervals_;
+  void AttachTimeInterval(std::string name);
+
+
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
 

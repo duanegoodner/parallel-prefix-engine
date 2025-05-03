@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
       program_args.seed()
   );
 
+
+  solver->WarmUp();
   solver->PrintFullMatrix("Starting matrix");
   solver->StartTimer();
   solver->Compute();

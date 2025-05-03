@@ -18,12 +18,18 @@ target_link_libraries(solver_dispatch PUBLIC MPI::MPI_CXX)
 target_link_libraries(solver_dispatch PRIVATE my_default_flags)
 
 
+add_library(time_utils time_utils.cpp)
+target_include_directories(time_utils PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(time_utils PRIVATE my_default_flags)
+
+
 # Executable that links in all necessary components
 add_executable(prefix_sum main.cpp)
 target_link_libraries(prefix_sum
     PRIVATE
         arg_parser
         solver_dispatch
+        time_utils
         prefix_sum_common
         prefix_sum_mpi
         prefix_sum_cuda
