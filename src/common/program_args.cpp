@@ -15,6 +15,7 @@ ProgramArgs::ProgramArgs(
     LogLevel log_level,
     std::vector<int> full_matrix_dim,
     std::vector<int> tile_dim,
+    std::string cuda_kernel,
     int orig_argc,
     char **orig_argv
 )
@@ -23,6 +24,7 @@ ProgramArgs::ProgramArgs(
     , log_level_(log_level)
     , full_matrix_dim_(std::move(full_matrix_dim))
     , tile_dim_(std::move(tile_dim))
+    , cuda_kernel_(cuda_kernel)
     , orig_argc_(orig_argc)
     , orig_argv_(orig_argv) {
   if (full_matrix_dim_.size() != tile_dim_.size()) {

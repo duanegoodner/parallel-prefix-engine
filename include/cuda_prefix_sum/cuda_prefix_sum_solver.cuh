@@ -4,14 +4,8 @@
 
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
-void LaunchPrefixSumKernelTiled(
-    KernelLaunchParams kernel_params,
-    cudaStream_t stream
-);
+void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params);
 
-void LaunchPrefixSumKernelSingleElement(
-    KernelLaunchParams kernel_params,
-    cudaStream_t cuda_stream
-);
+void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params);
 
-void LaunchPrefixSumKernelWarp(const int* d_input, int* d_output);
+void LaunchPrefixSumKernelWarp(const int *d_input, int *d_output);

@@ -7,7 +7,7 @@ namespace config {
     // constexpr int NumElems = TileDim * TileDim;
 }
 
-__global__ void PrefixSumTile32x32(const int* input, int* output) {
+__global__ void PrefixSumKernelWarp(const int* input, int* output) {
     __shared__ int tile[config::TileDim * config::TilePitch];
 
     // Original thread indices
@@ -53,5 +53,5 @@ __global__ void PrefixSumTile32x32(const int* input, int* output) {
 // Kernel launcher
 void LaunchPrefixSumKernelWarp(const int* d_input, int* d_output) {
     dim3 block(config::TileDim, config::TileDim);
-    PrefixSumTile32x32<<<1, block>>>(d_input, d_output);
+    PrefixSumKernelWarp<<<1, block>>>(d_input, d_output);
 }

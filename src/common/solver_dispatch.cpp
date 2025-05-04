@@ -23,9 +23,23 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              return std::make_unique<MpiPrefixSumSolver>(args);
            }},
           {"cuda", [](ProgramArgs &args) {
+             using KLF = CudaPrefixSumSolver::KernelLaunchFunction;
+
+             // Map string tag to function pointer
+             static const std::unordered_map<std::string, KLF> kernel_map = {
+                 {"tiled", LaunchPrefixSumKernelTiled},
+                 {"single_element", LaunchPrefixSumKernelSingleElement},
+             };
+
+             auto it = kernel_map.find(args.cuda_kernel());
+             if (it == kernel_map.end()) {
+               throw std::runtime_error(
+                   "Unsupported CUDA kernel: " + args.cuda_kernel()
+               );
+             }
              return std::make_unique<CudaPrefixSumSolver>(
                  args,
-                 LaunchPrefixSumKernelTiled
+                 it->second
              );
            }}};
 

@@ -17,6 +17,7 @@ ProgramArgs GenerateProgramArgsForTest(
       LogLevel::OFF,
       full_matrix_dim,
       tile_dim,
+      "tiled",
       1,
       nullptr
   );

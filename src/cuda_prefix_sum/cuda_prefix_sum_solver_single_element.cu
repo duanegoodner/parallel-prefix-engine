@@ -119,10 +119,7 @@ __global__ void PrefixSumKernelSingleElement(
   // PrintGlobalMemArray(d_data);
 }
 
-void LaunchPrefixSumKernelSingleElement(
-    KernelLaunchParams kernel_params,
-    cudaStream_t stream
-) {
+void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params) {
 
   dim3 blockDim(kernel_params.array.size.x, kernel_params.array.size.y);
   dim3 gridDim(1, 1); // Single block for now
@@ -130,7 +127,8 @@ void LaunchPrefixSumKernelSingleElement(
   int shared_mem_size = 2 * kernel_params.array.size.x *
                         kernel_params.array.size.y * sizeof(int);
 
-  PrefixSumKernelSingleElement<<<gridDim, blockDim, shared_mem_size, stream>>>(
+  // use ddefault stream = 0
+  PrefixSumKernelSingleElement<<<gridDim, blockDim, shared_mem_size, 0>>>(
       kernel_params.array.d_address
   );
 

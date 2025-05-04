@@ -31,8 +31,16 @@ TEST_F(ProgramArgsTest, TestInit) {
   std::vector<int> grid_dim_ = std::vector<int>({2, 2});
   std::vector<int> tile_dim_ = std::vector<int>({3, 3});
 
-  ProgramArgs program_args =
-      ProgramArgs(1234, "mpi", LogLevel::OFF, full_matrix_dim_, tile_dim_, 1, nullptr);
+  ProgramArgs program_args = ProgramArgs(
+      1234,
+      "mpi",
+      LogLevel::OFF,
+      full_matrix_dim_,
+      tile_dim_,
+      "tiled",
+      1,
+      nullptr
+  );
 
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");

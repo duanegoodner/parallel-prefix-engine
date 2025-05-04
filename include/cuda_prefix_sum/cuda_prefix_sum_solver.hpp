@@ -21,7 +21,7 @@
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
   using KernelLaunchFunction =
-      void (*)(const KernelLaunchParams, cudaStream_t);
+      void (*)(const KernelLaunchParams);
 
   explicit CudaPrefixSumSolver(
       const ProgramArgs &program_args,

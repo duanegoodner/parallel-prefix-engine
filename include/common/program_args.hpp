@@ -25,6 +25,7 @@ public:
       LogLevel log_level,
       std::vector<int> full_matrix_dim,
       std::vector<int> tile_dim,
+      std::string cuda_kernel,
       int orig_argc,
       char **orig_argv
   );
@@ -36,6 +37,8 @@ public:
     return full_matrix_dim_;
   }
   [[nodiscard]] const std::vector<int> &tile_dim() const { return tile_dim_; }
+
+  [[nodiscard]] std::string cuda_kernel() const { return cuda_kernel_; }
 
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
   [[nodiscard]] char **orig_argv() const { return orig_argv_; }
@@ -85,6 +88,7 @@ private:
 
   std::vector<int> full_matrix_dim_ = {4, 4};
   std::vector<int> tile_dim_ = {2, 2};
+  std::string cuda_kernel_ = "tiled";
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;
