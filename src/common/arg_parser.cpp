@@ -26,7 +26,9 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
       ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
   app.add_option("-k, --kernel", cuda_kernel, "CUDA kernel type")
-      ->check(CLI::IsMember({"tiled", "single_element", "warp", "warp_naive"}))
+      ->check(CLI::IsMember(
+          {"tiled", "single_element", "warp", "warp_naive", "accum"}
+      ))
       ->default_val("tiled");
 
   app.add_option(

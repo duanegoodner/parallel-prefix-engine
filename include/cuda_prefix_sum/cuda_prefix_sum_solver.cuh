@@ -11,3 +11,5 @@ void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params);
 void LaunchPrefixSumKernelWarp(KernelLaunchParams kernel_params);
 
 void LaunchPrefixSumKernelWarpNaive(KernelLaunchParams kernel_params);
+
+void LaunchPrefixSumKernelAccum(KernelLaunchParams kernel_params);
