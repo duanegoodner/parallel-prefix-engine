@@ -8,4 +8,4 @@ void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params);
 
 void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params);
 
-void LaunchPrefixSumKernelWarp(const int *d_input, int *d_output);
+void LaunchPrefixSumKernelWarp(KernelLaunchParams kernel_params);

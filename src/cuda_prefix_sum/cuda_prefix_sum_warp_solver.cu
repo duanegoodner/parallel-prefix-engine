@@ -7,7 +7,7 @@ namespace config {
     // constexpr int NumElems = TileDim * TileDim;
 }
 
-__global__ void PrefixSumKernelWarp(const int* input, int* output) {
+__global__ void PrefixSumKernelWarp(KernelLaunchParams params) {
     __shared__ int tile[config::TileDim * config::TilePitch];
 
     // Original thread indices
@@ -18,7 +18,7 @@ __global__ void PrefixSumKernelWarp(const int* input, int* output) {
     int smem_idx   = ty * config::TilePitch + tx;
 
     // Load global memory into shared memory
-    tile[smem_idx] = input[global_idx];
+    tile[smem_idx] = params.array.d_address[global_idx];
     __syncthreads();
 
     // --- Row-wise inclusive scan (1 warp per row) ---
@@ -47,11 +47,11 @@ __global__ void PrefixSumKernelWarp(const int* input, int* output) {
 
     // Restore thread indices to write final result
     int final_idx = ty * config::TilePitch + tx;
-    output[global_idx] = tile[final_idx];
+    params.array.d_address[global_idx] = tile[final_idx];
 }
 
 // Kernel launcher
-void LaunchPrefixSumKernelWarp(const int* d_input, int* d_output) {
+void LaunchPrefixSumKernelWarp(KernelLaunchParams params) {
     dim3 block(config::TileDim, config::TileDim);
-    PrefixSumKernelWarp<<<1, block>>>(d_input, d_output);
+    PrefixSumKernelWarp<<<1, block>>>(params);
 }

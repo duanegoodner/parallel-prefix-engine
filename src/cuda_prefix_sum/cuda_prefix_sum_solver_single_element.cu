@@ -61,25 +61,9 @@ __global__ void PrefixSumKernelSingleElement(
 
   int index = tx * blockDim.y + ty;
 
-  // Debug statement: Print thread and block indices
-  // printf(
-  //     "Block (%d, %d), Thread (%d, %d), Global Index: %d\n",
-  //     blockIdx.x,
-  //     blockIdx.y,
-  //     tx,
-  //     ty,
-  //     index
-  // );
-
   // === Phase 1: Load input from global memory to shared memory ===
   arrayA[tx * blockDim.y + ty] = d_data[index];
   __syncthreads();
-
-  // Debug statement: Print contents of arrayA after loading from global memory
-  // PrintSharedMemoryArray(
-  //     arrayA,
-  //     "Contents of arrayA after loading from global memory"
-  // );
 
   // === Phase 2: Row-wise prefix sum into arrayB ===
   int sum = 0;
@@ -92,11 +76,6 @@ __global__ void PrefixSumKernelSingleElement(
 
   __syncthreads();
 
-  // PrintSharedMemoryArray(
-  //     arrayB,
-  //     "Contents of arrayB after row-wise prefix sum"
-  // );
-
   // === Phase 3: Column-wise prefix sum (over arrayB) into arrayA ===
   sum = 0;
   for (int row = 0; row <= tx; ++row) {
@@ -106,12 +85,6 @@ __global__ void PrefixSumKernelSingleElement(
   arrayA[tx * blockDim.y + ty] = sum;
 
   __syncthreads();
-
-  // Debug: Print contents of arrayA after column-wise prefix sum
-  // PrintSharedMemoryArray(
-  //     arrayA,
-  //     "Contents of arrayA after column-wise prefix sum"
-  // );
 
   // === Phase 4: Write final result back to global memory ===
   d_data[index] = arrayA[tx * blockDim.y + ty];
