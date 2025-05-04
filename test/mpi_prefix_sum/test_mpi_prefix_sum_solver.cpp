@@ -20,6 +20,7 @@ protected:
       LogLevel::OFF,
       full_matrix_dim_,
       tile_dim_,
+      "tiled",
       1,
       nullptr
   );

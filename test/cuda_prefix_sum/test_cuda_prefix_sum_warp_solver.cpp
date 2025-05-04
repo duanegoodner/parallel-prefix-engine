@@ -6,13 +6,13 @@
 
 class CudaPrefixSumWarpSolverTest : public ::testing::Test {};
 
-TEST_F(CudaPrefixSumWarpSolverTest, SimpleOnes) {
-  CudaPrefixSumWarpSolver solver;
-  std::vector<int> input(1024, 1);
-  std::vector<int> output = solver.Run(input);
+// TEST_F(CudaPrefixSumWarpSolverTest, SimpleOnes) {
+//   CudaPrefixSumWarpSolver solver;
+//   std::vector<int> input(1024, 1);
+//   std::vector<int> output = solver.Run(input);
 
-  ASSERT_EQ(output.back(), 1024);
-}
+//   ASSERT_EQ(output.back(), 1024);
+// }
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

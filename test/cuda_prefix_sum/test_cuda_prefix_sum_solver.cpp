@@ -4,6 +4,7 @@
 
 #include "common/program_args.hpp"
 
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 ProgramArgs GenerateProgramArgsForTest(
@@ -16,6 +17,7 @@ ProgramArgs GenerateProgramArgsForTest(
       LogLevel::OFF,
       full_matrix_dim,
       tile_dim,
+      "tiled",
       1,
       nullptr
   );
@@ -30,7 +32,7 @@ TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
 
   auto program_args = GenerateProgramArgsForTest(full_matrix_dim, tile_dim);
 
-  CudaPrefixSumSolver cuda_solver{program_args};
+  CudaPrefixSumSolver cuda_solver{program_args, LaunchPrefixSumKernelTiled};
 
   std::cout << "Before computation:";
   cuda_solver.PrintFullMatrix();

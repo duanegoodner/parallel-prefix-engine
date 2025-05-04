@@ -7,7 +7,15 @@ include(GoogleTest)
 
 
 # Enable CUDA
-enable_language(CUDA)
+# enable_language(CUDA)
+# ===========================
+# ENABLE CUDA
+# ===========================
+find_package(CUDAToolkit REQUIRED)
+
+# Define the shared interface target
+add_library(cuda_headers INTERFACE)
+target_include_directories(cuda_headers INTERFACE ${CUDAToolkit_INCLUDE_DIRS})
 
 
 # ===========================

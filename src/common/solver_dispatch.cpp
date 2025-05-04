@@ -9,6 +9,7 @@
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
+#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
@@ -22,7 +23,25 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              return std::make_unique<MpiPrefixSumSolver>(args);
            }},
           {"cuda", [](ProgramArgs &args) {
-             return std::make_unique<CudaPrefixSumSolver>(args);
+             using KLF = CudaPrefixSumSolver::KernelLaunchFunction;
+
+             // Map string tag to function pointer
+             static const std::unordered_map<std::string, KLF> kernel_map = {
+                 {"tiled", LaunchPrefixSumKernelTiled},
+                 {"single_element", LaunchPrefixSumKernelSingleElement},
+                 {"warp", LaunchPrefixSumKernelWarp}
+             };
+
+             auto it = kernel_map.find(args.cuda_kernel());
+             if (it == kernel_map.end()) {
+               throw std::runtime_error(
+                   "Unsupported CUDA kernel: " + args.cuda_kernel()
+               );
+             }
+             return std::make_unique<CudaPrefixSumSolver>(
+                 args,
+                 it->second
+             );
            }}};
 
   // Find the factory function for the requested backend

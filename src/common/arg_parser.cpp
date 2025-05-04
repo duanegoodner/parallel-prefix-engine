@@ -5,15 +5,18 @@
 // ----------------------------------------------------------------------------
 
 #include "common/arg_parser.hpp"
-#include "common/logger.hpp"
+
 #include <CLI/CLI.hpp>
 #include <utility>
+
+#include "common/logger.hpp"
 
 ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   CLI::App app{"Distributed prefix sum runner"};
 
   int seed = 1234;
   std::string backend = "mpi";
+  std::string cuda_kernel = "tiled";
   std::string log_level = "off";
   std::vector<int> full_matrix_dim = {4, 4};
   std::vector<int> tile_dim = {2, 2};
@@ -22,7 +25,15 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   app.add_option("-b, --backend", backend, "Backend to use (mpi or cuda)")
       ->check(CLI::IsMember({"mpi", "cuda"}))
       ->default_val("mpi");
-  app.add_option("-L, --log-level", log_level, "Logging level (off, info, debug or error)")
+  app.add_option("-k, --kernel", cuda_kernel, "CUDA kernel type")
+      ->check(CLI::IsMember({"tiled", "single_element", "warp"}))
+      ->default_val("tiled");
+
+  app.add_option(
+         "-L, --log-level",
+         log_level,
+         "Logging level (off, info, debug or error)"
+  )
       ->check(CLI::IsMember({"off", "info", "debug", "error"}))
       ->default_val("off");
 
@@ -50,6 +61,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
       LogLevelUtils::FromString(log_level),
       full_matrix_dim,
       tile_dim,
+      cuda_kernel,
       argc,
       const_cast<char **>(argv)
   );

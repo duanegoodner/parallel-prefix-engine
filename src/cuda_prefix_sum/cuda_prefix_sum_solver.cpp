@@ -13,8 +13,12 @@
 // void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream =
 // 0);
 
-CudaPrefixSumSolver::CudaPrefixSumSolver(const ProgramArgs &program_args)
-    : program_args_(program_args) {
+CudaPrefixSumSolver::CudaPrefixSumSolver(
+    const ProgramArgs &program_args,
+    KernelLaunchFunction kernel_launch_func
+)
+    : program_args_(program_args)
+    , kernel_launch_func_(kernel_launch_func) {
   PopulateFullMatrix();
   AttachTimeInterval("warmup");
   AttachTimeInterval("total");
@@ -38,7 +42,6 @@ void CudaPrefixSumSolver::AttachTimeInterval(std::string name) {
 void CudaPrefixSumSolver::Compute() {
   int *d_data = nullptr;
 
-  // StartCopyToDeviceTimer();
   time_intervals_.at("copy_to_device").RecordStart();
 
   // Allocate device memory
@@ -51,23 +54,15 @@ void CudaPrefixSumSolver::Compute() {
   );
 
   time_intervals_.at("copy_to_device").RecordEnd();
-  // StopCopyToDeviceTimer();
 
-  // StartDeviceComputeTimer();
   time_intervals_.at("compute").RecordStart();
 
   auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
-
-  // Launch kernel
-  LaunchPrefixSumKernel(launch_params, 0);
-  // LaunchPrefixSumKernelSingleElement(launch_params, 0);
-
+  kernel_launch_func_(launch_params);
   cudaDeviceSynchronize();
 
-  // StopDeviceComputeTimer();
   time_intervals_.at("compute").RecordEnd();
 
-  // StartCopyFromDeviceTimer();
   time_intervals_.at("copy_from_device").RecordStart();
 
   // Copy results back
@@ -77,10 +72,8 @@ void CudaPrefixSumSolver::Compute() {
       program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyDeviceToHost
   );
-
   cudaFree(d_data);
 
-  // StopCopyFromDeviceTimer();
   time_intervals_.at("copy_from_device").RecordEnd();
 }
 
