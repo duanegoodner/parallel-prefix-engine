@@ -92,4 +92,17 @@ private:
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;
+
+  bool IsFullMatrixDimDivisibleByTileDim() {
+    for (size_t i = 0; i < full_matrix_dim_.size(); ++i) {
+      if (full_matrix_dim_[i] % tile_dim_[i] != 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool TileAndFullMatrixHaveSameNumDims() {
+    return full_matrix_dim_.size() == tile_dim_.size();
+  }
 };
