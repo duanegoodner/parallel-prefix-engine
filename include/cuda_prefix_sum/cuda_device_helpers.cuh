@@ -308,5 +308,3 @@ __device__ void BroadcastBottomEdges(
     }
   }
 }
-
-
