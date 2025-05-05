@@ -44,10 +44,10 @@ ProgramArgs::ProgramArgs(
   std::cout << "Backend: " << backend_ << std::endl;
   std::cout << "Kernel: " << cuda_kernel_ << std::endl;
 
-  if ((backend_ != "cuda") || (cuda_kernel_ != "accum")) {
+  if ((backend_ != "cuda") || (cuda_kernel_ != "arch")) {
     if (!IsFullMatrixDimDivisibleByTileDim()) {
       throw std::invalid_argument("full_matrix dim must be divisible by "
-                                  "tile_dim unless using cuda accum backend");
+                                  "tile_dim unless using cuda arch backend");
     }
 
     for (size_t i = 0; i < full_matrix_dim_.size(); ++i) {

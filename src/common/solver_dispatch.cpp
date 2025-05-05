@@ -31,7 +31,8 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
                  {"single_element", LaunchPrefixSumKernelSingleElement},
                  {"warp", LaunchPrefixSumKernelWarp},
                  {"warp_naive", LaunchPrefixSumKernelWarpNaive},
-                 {"accum", LaunchPrefixSumKernelAccum}
+                //  {"accum", LaunchPrefixSumKernelAccum},
+                 {"arch", LaunchPrefixSumKernelHierarchical}
              };
 
              auto it = kernel_map.find(args.cuda_kernel());
