@@ -310,3 +310,6 @@ __device__ void BroadcastBottomEdges(
 }
 
 
+
+// hierarchichal helpers
+

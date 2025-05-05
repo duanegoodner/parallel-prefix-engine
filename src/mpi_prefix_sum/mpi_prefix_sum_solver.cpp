@@ -107,6 +107,7 @@ void MpiPrefixSumSolver::Compute() {
 }
 
 void MpiPrefixSumSolver::StartTimer() {
+  MPI_Barrier(MPI_COMM_WORLD);
   time_intervals_["total"].RecordStart();
 }
 

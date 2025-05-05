@@ -5,9 +5,10 @@
 // ----------------------------------------------------------------------------
 
 #include "common/program_args.hpp"
-#include "common/logger.hpp"
 
 #include <utility>
+
+#include "common/logger.hpp"
 
 ProgramArgs::ProgramArgs(
     int seed,
@@ -27,18 +28,35 @@ ProgramArgs::ProgramArgs(
     , cuda_kernel_(cuda_kernel)
     , orig_argc_(orig_argc)
     , orig_argv_(orig_argv) {
-  if (full_matrix_dim_.size() != tile_dim_.size()) {
-    throw std::invalid_argument(
-        "full_matrix_dim and tile_dim must have the same number of dimensions"
-    );
+
+  if (!TileAndFullMatrixHaveSameNumDims()) {
+    throw std::invalid_argument("full_matrix_dim and tile_dim must have the "
+                                "same number of dimensions");
   }
 
-  for (size_t i = 0; i < full_matrix_dim_.size(); ++i) {
-    if (full_matrix_dim_[i] % tile_dim_[i] != 0) {
-      throw std::invalid_argument(
-          "full_matrix_dim[" + std::to_string(i) +
-          "] is not divisible by tile_dim[" + std::to_string(i) + "]"
-      );
+  // if (!(backend_ == "cuda") && !(cuda_kernel_ == "accum")) {
+  //   if (!IsFullMatrixDimDivisibleByTileDim()) {
+  //     throw std::invalid_argument("full_matrix_dim must be divisible by "
+  //       "tile_dim unless using Cuda accum backend");
+  //   }
+  // }
+
+  std::cout << "Backend: " << backend_ << std::endl;
+  std::cout << "Kernel: " << cuda_kernel_ << std::endl;
+
+  if ((backend_ != "cuda") || (cuda_kernel_ != "arch")) {
+    if (!IsFullMatrixDimDivisibleByTileDim()) {
+      throw std::invalid_argument("full_matrix dim must be divisible by "
+                                  "tile_dim unless using cuda arch backend");
+    }
+
+    for (size_t i = 0; i < full_matrix_dim_.size(); ++i) {
+      if (full_matrix_dim_[i] % tile_dim_[i] != 0) {
+        throw std::invalid_argument(
+            "full_matrix_dim[" + std::to_string(i) +
+            "] is not divisible by tile_dim[" + std::to_string(i) + "]"
+        );
+      }
     }
   }
 }

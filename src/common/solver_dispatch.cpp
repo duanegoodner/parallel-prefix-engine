@@ -29,7 +29,10 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              static const std::unordered_map<std::string, KLF> kernel_map = {
                  {"tiled", LaunchPrefixSumKernelTiled},
                  {"single_element", LaunchPrefixSumKernelSingleElement},
-                 {"warp", LaunchPrefixSumKernelWarp}
+                 {"warp", LaunchPrefixSumKernelWarp},
+                 {"warp_naive", LaunchPrefixSumKernelWarpNaive},
+                //  {"accum", LaunchPrefixSumKernelAccum},
+                 {"arch", LaunchPrefixSumKernelHierarchical}
              };
 
              auto it = kernel_map.find(args.cuda_kernel());
