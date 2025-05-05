@@ -142,12 +142,6 @@ __device__ void BroadcastRightEdges(
 ) {
   // iterate over each tile to right of cur_tile
   for (int block_col = threadIdx.x + 1; block_col < blockDim.x; ++block_col) {
-    printf(
-        "Thread (%d, %d) broadcasting to thread in block col %d\n",
-        threadIdx.x,
-        threadIdx.y,
-        block_col
-    );
     // iterate over each row of cur_tile
     for (int local_row = 0; local_row < tile_size.y; ++local_row) {
       int full_array_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
@@ -160,15 +154,8 @@ __device__ void BroadcastRightEdges(
             METLocalColToFullArrayCol(tile_size.x - 1, tile_size.x);
         // int dest_full_array_col =
         //     METLocalColToFullArrayCol(downstream_tile_col, tile_size.x);
-        int dest_full_array_col = block_col * tile_size.x + downstream_tile_col;
-
-        printf(
-            "(%d, %d)->(%d, %d)\n",
-            full_array_row,
-             source_full_array_col,
-             full_array_row,
-             dest_full_array_col
-        );
+        int dest_full_array_col =
+            block_col * tile_size.x + downstream_tile_col;
         int dest_index_1d = ArrayIndex1D(
             full_array_row,
             dest_full_array_col,
@@ -204,8 +191,17 @@ __device__ void BroadcastBottomEdges(
         int full_array_col = METLocalColToFullArrayCol(local_col, tile_size.x);
         int source_full_array_row =
             METLocalRowToFullArrayRow(tile_size.y - 1, tile_size.y);
-        int dest_full_array_row =
-            METLocalRowToFullArrayRow(downstream_tile_row, tile_size.y);
+        // int dest_full_array_row =
+        //     METLocalRowToFullArrayRow(downstream_tile_row, tile_size.y);
+        int dest_full_array_row = block_row * tile_size.y + downstream_tile_row;
+
+        printf(
+            "(%d, %d)->(%d, %d)\n",
+            source_full_array_row,
+            full_array_col,
+            dest_full_array_row,
+            full_array_col
+        );
 
         int dest_index_1d = ArrayIndex1D(
             dest_full_array_row,
