@@ -13,10 +13,10 @@ __global__ void PrefixSumKernelHierarchical(
     int *right_edges, // [array_height][tiles_y - 1]
     int *bottom_edges // [tiles_x - 1][array_width]
 ) {
-  const int array_width = params.array.size.y;
-  const int array_height = params.array.size.x;
-  const int tile_width = params.tile_size.y;
-  const int tile_height = params.tile_size.x;
+  const int array_width = params.array.size.num_cols;
+  const int array_height = params.array.size.num_rows;
+  const int tile_width = params.tile_size.num_cols;
+  const int tile_height = params.tile_size.num_rows;
 
   int tiles_x = gridDim.x;
   int tiles_y = gridDim.y;
@@ -86,10 +86,10 @@ __global__ void PrefixSumKernelHierarchical(
 }
 
 void LaunchPrefixSumKernelHierarchical(KernelLaunchParams params) {
-  int array_height = params.array.size.x;
-  int array_width = params.array.size.y;
-  int tile_height = params.tile_size.x;
-  int tile_width = params.tile_size.y;
+  int array_height = params.array.size.num_rows;
+  int array_width = params.array.size.num_cols;
+  int tile_height = params.tile_size.num_rows;
+  int tile_width = params.tile_size.num_cols;
 
   int tiles_x = (array_height + tile_height - 1) / tile_height;
   int tiles_y = (array_width + tile_width - 1) / tile_width;

@@ -50,8 +50,8 @@ __device__ void ComputeAndStoreTilePrefixSum(
     int grid_dim_x,
     int grid_dim_y
 ) {
-  const int array_width = params.array.size.y;
-  const int array_height = params.array.size.x;
+  const int array_width = params.array.size.num_cols;
+  const int array_height = params.array.size.num_rows;
 
   // Check bounds
   if (global_x >= array_height || global_y >= array_width)

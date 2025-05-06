@@ -41,8 +41,8 @@ ProgramArgs::ProgramArgs(
   //   }
   // }
 
-  std::cout << "Backend: " << backend_ << std::endl;
-  std::cout << "Kernel: " << cuda_kernel_ << std::endl;
+  // std::cout << "Backend: " << backend_ << std::endl;
+  // std::cout << "Kernel: " << cuda_kernel_ << std::endl;
 
   if ((backend_ != "cuda") || (cuda_kernel_ != "arch")) {
     if (!IsFullMatrixDimDivisibleByTileDim()) {

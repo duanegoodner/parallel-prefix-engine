@@ -22,7 +22,7 @@ __global__ void PrefixSumKernelTiled(
   // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
   KernelArray array_b{
-      .d_address = shared_mem + array_a.size.x * array_a.size.y,
+      .d_address = shared_mem + array_a.size.num_rows * array_a.size.num_cols,
       .size = params.array.size
   };
 
@@ -30,6 +30,8 @@ __global__ void PrefixSumKernelTiled(
   // CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
   CopyMETTiledArray(params.array, array_a, params.tile_size);
   __syncthreads();
+
+  PrintKernelArray(array_a, "array_a after copy from global memory");
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   // for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
@@ -97,15 +99,25 @@ __global__ void PrefixSumKernelTiled(
 
 void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
 
-  int num_tiles_x = kernel_params.array.size.x / kernel_params.tile_size.x;
-  int num_tiles_y = kernel_params.array.size.y / kernel_params.tile_size.y;
+  int num_tile_cols =
+      kernel_params.array.size.num_cols / kernel_params.tile_size.num_cols;
+  int num_tile_rows =
+      kernel_params.array.size.num_rows / kernel_params.tile_size.num_rows;
+  
+  printf("array_num_rows = %d\n", kernel_params.array.size.num_rows);
+  printf("array_num_cols = %d\n\n", kernel_params.array.size.num_cols);
+  printf("num_tile_rows = %d\n", num_tile_rows);
+  printf("num_tile_cols = %d\n\n", num_tile_cols);
+  printf("tile_size_num_rows = %d\n", kernel_params.tile_size.num_rows);
+  printf("tile_size_num_cols = %d\n", kernel_params.tile_size.num_cols);
+  
 
   // dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
-  dim3 blockDim(num_tiles_x, num_tiles_y);
+  dim3 blockDim(num_tile_cols, num_tile_rows);
   dim3 gridDim(1, 1); // Single block for now
 
-  int shared_mem_size = 2 * kernel_params.array.size.x *
-                        kernel_params.array.size.y * sizeof(int);
+  int shared_mem_size = 2 * kernel_params.array.size.num_rows *
+                        kernel_params.array.size.num_cols * sizeof(int);
 
   PrefixSumKernelTiled<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params
   );

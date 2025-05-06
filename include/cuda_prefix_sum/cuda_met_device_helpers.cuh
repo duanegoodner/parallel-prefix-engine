@@ -14,8 +14,8 @@ __device__ void PrintThreadAndBlockIndices() {
   );
 }
 
-__device__ int ArrayIndex1D(int row, int col, int array_size_x) {
-  return row * array_size_x + col;
+__device__ int ArrayIndex1D(int row, int col, int num_cols) {
+  return row * num_cols + col;
 }
 
 __device__ int METLocalColToFullArrayCol(int local_col, int tile_size_x) {
@@ -35,12 +35,14 @@ __device__ void PrintMETTileContents(
   if (threadIdx.x == tile_col && threadIdx.y == tile_row) {
 
     PrintThreadAndBlockIndices();
-    for (int local_row = 0; local_row < tile_size.y; ++local_row) {
-      for (int local_col = 0; local_col < tile_size.x; ++local_col) {
-        int global_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
-        int global_col = METLocalColToFullArrayCol(local_col, tile_size.x);
-        int index_1d = ArrayIndex1D(global_row, global_col, array.size.y);
-        printf("%d\t", array.d_address[index_1d]);
+    for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
+      for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
+        int global_row =
+            METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
+        int global_col =
+            METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+        int index_1d =
+            ArrayIndex1D(global_row, global_col, array.size.num_rows);
       }
       printf("\n");
     }
@@ -52,13 +54,26 @@ __device__ void CopyMETTiledArray(
     KernelArray dest,
     ArraySize2D tile_size
 ) {
-  for (int local_row = 0; local_row < tile_size.y; ++local_row) {
-    for (int local_col = 0; local_col < tile_size.x; ++local_col) {
-      int full_array_col = METLocalColToFullArrayCol(local_col, tile_size.x);
-      int full_array_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
+  if (threadIdx.x == 0 & threadIdx.y == 0) {
+    printf("source array size: num_rows = %d, num_cols = %d\n", source.size.num_rows, source.size.num_cols);
+  }
+  
+  for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
+    for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
+      int full_array_col =
+          METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+      int full_array_row =
+          METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
 
       int index_1d =
-          ArrayIndex1D(full_array_col, full_array_row, source.size.x);
+          ArrayIndex1D(full_array_row, full_array_col, source.size.num_cols);
+      printf(
+          "full_array_row = %d, full_array_col = %d, index_1d = %d\n",
+          full_array_row,
+          full_array_col,
+          index_1d
+      );
+      printf("index_1d = %d\n", index_1d);
       dest.d_address[index_1d] = source.d_address[index_1d];
     }
   }
@@ -67,9 +82,12 @@ __device__ void CopyMETTiledArray(
 __device__ void PrintKernelArray(KernelArray array, const char *label) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
-    for (int row = 0; row < array.size.y; ++row) {
-      for (int col = 0; col < array.size.x; ++col) {
-        printf("%d\t", array.d_address[ArrayIndex1D(row, col, array.size.x)]);
+    for (int row = 0; row < array.size.num_rows; ++row) {
+      for (int col = 0; col < array.size.num_cols; ++col) {
+        printf(
+            "%d\t",
+            array.d_address[ArrayIndex1D(row, col, array.size.num_cols)]
+        );
       }
       printf("\n");
     }
@@ -85,8 +103,8 @@ __device__ void CombineElementInto(
     int cur_col
 ) {
 
-  int cur_idx_1d = ArrayIndex1D(cur_row, cur_col, arr.size.x);
-  int other_idx_1d = ArrayIndex1D(other_row, other_col, arr.size.x);
+  int cur_idx_1d = ArrayIndex1D(cur_row, cur_col, arr.size.num_cols);
+  int other_idx_1d = ArrayIndex1D(other_row, other_col, arr.size.num_cols);
   arr.d_address[cur_idx_1d] += arr.d_address[other_idx_1d];
 }
 
@@ -95,12 +113,14 @@ __device__ void ComputeLocalRowWisePrefixSums(
     ArraySize2D tile_size
 ) {
   __syncthreads();
-  for (int local_col = 1; local_col < tile_size.x; ++local_col) {
-    for (int local_row = 0; local_row < tile_size.y; ++local_row) {
-      int full_array_col = METLocalColToFullArrayCol(local_col, tile_size.x);
-      int full_array_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
+  for (int local_col = 1; local_col < tile_size.num_cols; ++local_col) {
+    for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
+      int full_array_col =
+          METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+      int full_array_row =
+          METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
       int full_array_col_prev =
-          METLocalColToFullArrayCol(local_col - 1, tile_size.x);
+          METLocalColToFullArrayCol(local_col - 1, tile_size.num_cols);
       CombineElementInto(
           arr,
           full_array_row,
@@ -117,12 +137,14 @@ __device__ void ComputeLocalColWisePrefixSums(
     ArraySize2D tile_size
 ) {
 
-  for (int local_row = 1; local_row < tile_size.y; ++local_row) {
-    for (int local_col = 0; local_col < tile_size.x; ++local_col) {
-      int full_array_col = METLocalColToFullArrayCol(local_col, tile_size.x);
-      int full_array_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
+  for (int local_row = 1; local_row < tile_size.num_rows; ++local_row) {
+    for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
+      int full_array_col =
+          METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+      int full_array_row =
+          METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
       int full_array_row_prev =
-          METLocalRowToFullArrayRow(local_row - 1, tile_size.y);
+          METLocalRowToFullArrayRow(local_row - 1, tile_size.num_rows);
 
       CombineElementInto(
           arr,
@@ -143,28 +165,33 @@ __device__ void BroadcastRightEdges(
   // iterate over each tile to right of cur_tile
   for (int block_col = threadIdx.x + 1; block_col < blockDim.x; ++block_col) {
     // iterate over each row of cur_tile
-    for (int local_row = 0; local_row < tile_size.y; ++local_row) {
-      int full_array_row = METLocalRowToFullArrayRow(local_row, tile_size.y);
+    for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
+      int full_array_row =
+          METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
 
       // iterate over each column of downstream tile
-      for (int downstream_tile_col = 0; downstream_tile_col < tile_size.x;
+      for (int downstream_tile_col = 0;
+           downstream_tile_col < tile_size.num_cols;
            ++downstream_tile_col) {
 
-        int source_full_array_col =
-            METLocalColToFullArrayCol(tile_size.x - 1, tile_size.x);
+        int source_full_array_col = METLocalColToFullArrayCol(
+            tile_size.num_cols - 1,
+            tile_size.num_cols
+        );
         // int dest_full_array_col =
-        //     METLocalColToFullArrayCol(downstream_tile_col, tile_size.x);
+        //     METLocalColToFullArrayCol(downstream_tile_col,
+        //     tile_size.num_cols);
         int dest_full_array_col =
-            block_col * tile_size.x + downstream_tile_col;
+            block_col * tile_size.num_cols + downstream_tile_col;
         int dest_index_1d = ArrayIndex1D(
             full_array_row,
             dest_full_array_col,
-            dest_array.size.x
+            dest_array.size.num_cols
         );
         int source_index_1d = ArrayIndex1D(
             full_array_row,
             source_full_array_col,
-            source_array.size.x
+            source_array.size.num_cols
         );
         dest_array.d_address[dest_index_1d] +=
             source_array.d_address[source_index_1d];
@@ -182,36 +209,34 @@ __device__ void BroadcastBottomEdges(
   // iterate over each tile below cur_tile
   for (int block_row = threadIdx.y + 1; block_row < blockDim.y; ++block_row) {
     // iterate over each col of cur_tile
-    for (int local_col = 0; local_col < tile_size.x; ++local_col) {
+    for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
       // iterate over each row of downstream tile
-      for (int downstream_tile_row = 0; downstream_tile_row < tile_size.y;
+      for (int downstream_tile_row = 0;
+           downstream_tile_row < tile_size.num_rows;
            ++downstream_tile_row) {
 
-        // int full_array_col = threadIdx.x * tile_size.x + local_col;
-        int full_array_col = METLocalColToFullArrayCol(local_col, tile_size.x);
-        int source_full_array_row =
-            METLocalRowToFullArrayRow(tile_size.y - 1, tile_size.y);
-        // int dest_full_array_row =
-        //     METLocalRowToFullArrayRow(downstream_tile_row, tile_size.y);
-        int dest_full_array_row = block_row * tile_size.y + downstream_tile_row;
-
-        printf(
-            "(%d, %d)->(%d, %d)\n",
-            source_full_array_row,
-            full_array_col,
-            dest_full_array_row,
-            full_array_col
+        // int full_array_col = threadIdx.x * tile_size.num_cols + local_col;
+        int full_array_col =
+            METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+        int source_full_array_row = METLocalRowToFullArrayRow(
+            tile_size.num_rows - 1,
+            tile_size.num_rows
         );
+        // int dest_full_array_row =
+        //     METLocalRowToFullArrayRow(downstream_tile_row,
+        //     tile_size.num_rows);
+        int dest_full_array_row =
+            block_row * tile_size.num_rows + downstream_tile_row;
 
         int dest_index_1d = ArrayIndex1D(
             dest_full_array_row,
             full_array_col,
-            dest_array.size.x
+            dest_array.size.num_cols
         );
         int source_index_1d = ArrayIndex1D(
             source_full_array_row,
             full_array_col,
-            source_array.size.x
+            source_array.size.num_cols
         );
         dest_array.d_address[dest_index_1d] +=
             source_array.d_address[source_index_1d];

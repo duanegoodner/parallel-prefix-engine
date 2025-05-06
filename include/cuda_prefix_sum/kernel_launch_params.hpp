@@ -3,8 +3,8 @@
 #include "common/program_args.hpp"
 
 struct ArraySize2D {
-  int x;
-  int y;
+  int num_rows;
+  int num_cols;
 };
 
 struct KernelArray {
