@@ -51,10 +51,4 @@ private:
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
 
-  std::chrono::steady_clock::time_point copy_to_device_start_time_,
-      copy_to_device_end_time_;
-  std::chrono::steady_clock::time_point device_compute_start_time_,
-      device_compute_end_time_;
-  std::chrono::steady_clock::time_point copy_from_device_start_time_,
-      copy_from_device_end_time_;
 };
