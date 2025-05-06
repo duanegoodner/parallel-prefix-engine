@@ -94,11 +94,11 @@ __global__ void PrefixSumKernelSingleElement(
 
 void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params) {
 
-  dim3 blockDim(kernel_params.array.size.x, kernel_params.array.size.y);
+  dim3 blockDim(kernel_params.array.size.num_cols, kernel_params.array.size.num_rows);
   dim3 gridDim(1, 1); // Single block for now
 
-  int shared_mem_size = 2 * kernel_params.array.size.x *
-                        kernel_params.array.size.y * sizeof(int);
+  int shared_mem_size = 2 * kernel_params.array.size.num_rows *
+                        kernel_params.array.size.num_cols * sizeof(int);
 
   // use ddefault stream = 0
   PrefixSumKernelSingleElement<<<gridDim, blockDim, shared_mem_size, 0>>>(

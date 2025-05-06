@@ -41,10 +41,10 @@ ProgramArgs::ProgramArgs(
   //   }
   // }
 
-  std::cout << "Backend: " << backend_ << std::endl;
-  std::cout << "Kernel: " << cuda_kernel_ << std::endl;
+  // std::cout << "Backend: " << backend_ << std::endl;
+  // std::cout << "Kernel: " << cuda_kernel_ << std::endl;
 
-  if ((backend_ != "cuda") || (cuda_kernel_ != "arch")) {
+  if ((backend_ != "cuda") || (cuda_kernel_ != "accum")) {
     if (!IsFullMatrixDimDivisibleByTileDim()) {
       throw std::invalid_argument("full_matrix dim must be divisible by "
                                   "tile_dim unless using cuda arch backend");
