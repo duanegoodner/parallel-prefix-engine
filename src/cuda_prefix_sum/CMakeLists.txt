@@ -7,8 +7,9 @@ add_library(prefix_sum_cuda
     cuda_prefix_sum_solver.cpp
     # cuda_prefix_sum_warp_solver.cpp
     # cuda_prefix_sum_warp_solver.cu
-    # cuda_prefix_sum_solver_accum.cu
-    cuda_prefix_sum_solver_hierarchical.cu
+    cuda_prefix_sum_solver_accum.cu
+    # cuda_prefix_sum_solver_hierarchical.cu
+    kernel_hybrid.cu
 )
 
 # Properly attach include paths

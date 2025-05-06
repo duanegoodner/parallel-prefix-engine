@@ -32,24 +32,12 @@ __global__ void PrefixSumKernelTiled(
   __syncthreads();
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
-  // for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
-  //   for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
-  //     ComputeRowWisePrefixSum(array_a, params.tile_size, tile_row,
-  //     tile_col);
-  //   }
-  // }
   ComputeLocalRowWisePrefixSums(array_a, params.tile_size);
   __syncthreads();
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
-  // for (int tile_row = 1; tile_row < params.tile_size.x; tile_row++) {
-  //   for (int tile_col = 0; tile_col < params.tile_size.y; ++tile_col) {
-  //     ComputeColWisePrefixSum(array_a, params.tile_size, tile_row,
-  //     tile_col);
-  //   }
-  // }
   ComputeLocalColWisePrefixSums(array_a, params.tile_size);
-  __syncthreads();
+  __syncthreads();  
 
   // === Phase 3: Copy array_a to array_b ===
 
@@ -74,10 +62,7 @@ __global__ void PrefixSumKernelTiled(
   __syncthreads();
 
   // === Phase 5: Write final result back to global memory ===
-  // CopySharedArrayToGlobalArray(array_a, params.array, params.tile_size);
   CopyMETTiledArray(array_a, params.array, params.tile_size);
-
-  // PrintGlobalMemArray(d_data);
 }
 
 void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {

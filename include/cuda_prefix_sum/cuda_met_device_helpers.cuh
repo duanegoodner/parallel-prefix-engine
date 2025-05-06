@@ -168,9 +168,6 @@ __device__ void BroadcastRightEdges(
             tile_size.num_cols - 1,
             tile_size.num_cols
         );
-        // int dest_full_array_col =
-        //     METLocalColToFullArrayCol(downstream_tile_col,
-        //     tile_size.num_cols);
         int dest_full_array_col =
             block_col * tile_size.num_cols + downstream_tile_col;
         int dest_index_1d = ArrayIndex1D(
@@ -205,16 +202,12 @@ __device__ void BroadcastBottomEdges(
            downstream_tile_row < tile_size.num_rows;
            ++downstream_tile_row) {
 
-        // int full_array_col = threadIdx.x * tile_size.num_cols + local_col;
         int full_array_col =
             METLocalColToFullArrayCol(local_col, tile_size.num_cols);
         int source_full_array_row = METLocalRowToFullArrayRow(
             tile_size.num_rows - 1,
             tile_size.num_rows
         );
-        // int dest_full_array_row =
-        //     METLocalRowToFullArrayRow(downstream_tile_row,
-        //     tile_size.num_rows);
         int dest_full_array_row =
             block_row * tile_size.num_rows + downstream_tile_row;
 

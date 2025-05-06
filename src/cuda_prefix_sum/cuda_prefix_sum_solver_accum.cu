@@ -4,16 +4,20 @@
 #include <iostream>
 
 // #include "cuda_prefix_sum/cuda_met_device_helpers.cuh"
-#include "cuda_prefix_sum/cuda_accum_kernel_helpers.cuh"
+// #include "cuda_prefix_sum/cuda_accum_kernel_helpers.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/prefix_sum_tile_workspace.hpp"
+// #include "cuda_prefix_sum/prefix_sum_tile_workspace.hpp"
+
+__device__ inline int index_2d(int x, int y, int width) {
+  return x * width + y;
+}
 
 __global__ void PrefixSumKernelAccum(KernelLaunchParams params) {
-  const int array_width = params.array.size.y;
-  const int array_height = params.array.size.x;
-  const int tile_width = params.tile_size.y;
-  const int tile_height = params.tile_size.x;
+  const int array_width = params.array.size.num_rows;
+  const int array_height = params.array.size.num_cols;
+  const int tile_width = params.tile_size.num_rows;
+  const int tile_height = params.tile_size.num_cols;
 
   extern __shared__ int tile[]; // size = tile_width * tile_height
 
@@ -60,20 +64,20 @@ __global__ void PrefixSumKernelAccum(KernelLaunchParams params) {
       tile[index_2d(local_x, local_y, tile_width)];
 }
 
-
-
 void LaunchPrefixSumKernelAccum(KernelLaunchParams kernel_params) {
-  int array_width = kernel_params.array.size.y;
-  int array_height = kernel_params.array.size.x;
-  int tile_width = kernel_params.tile_size.y;
-  int tile_height = kernel_params.tile_size.x;
+  int array_width = kernel_params.array.size.num_rows;
+  int array_height = kernel_params.array.size.num_cols;
+  int tile_width = kernel_params.tile_size.num_rows;
+  int tile_height = kernel_params.tile_size.num_cols;
 
   int threads_per_tile = tile_width * tile_height;
   size_t shared_mem_bytes = threads_per_tile * sizeof(int);
 
   dim3 grid(
-      (array_height + tile_height - 1) / tile_height,
-      (array_width + tile_width - 1) / tile_width
+      (array_width + tile_width - 1) /
+          tile_width, // grid.x → blocks across width
+      (array_height + tile_height - 1) /
+          tile_height // grid.y → blocks down height
   );
 
   dim3 block(threads_per_tile);
@@ -84,6 +88,10 @@ void LaunchPrefixSumKernelAccum(KernelLaunchParams kernel_params) {
   if (err != cudaSuccess) {
     fprintf(stderr, "CUDA kernel launch error: %s\n", cudaGetErrorString(err));
   }
-
   cudaDeviceSynchronize();
+
+  cudaError_t sync_err = cudaGetLastError();
+  if (sync_err != cudaSuccess) {
+    fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
+  }
 }
