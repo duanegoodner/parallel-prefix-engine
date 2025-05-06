@@ -21,10 +21,6 @@ __global__ void PrefixSumKernelTiled(
 
   // Divide shared memory into two arrays
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
-  KernelArray array_b{
-      .d_address = shared_mem + array_a.size.num_rows * array_a.size.num_cols,
-      .size = params.array.size
-  };
 
   // === Phase 1: Load input from global memory to shared memory ===
   // CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
@@ -37,42 +33,49 @@ __global__ void PrefixSumKernelTiled(
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
   ComputeLocalColWisePrefixSums(array_a, params.tile_size);
-  __syncthreads();  
+  __syncthreads();
 
-  // // === Phase 3: Copy array_a to array_b ===
-
-  // // CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
-  // CopyMETTiledArray(array_a, array_b, params.tile_size);
-  // __syncthreads();
-
-  // // === Phase 4: Broadcast array_a right edges to array_b
-
-  // BroadcastRightEdges(array_a, params.tile_size, array_b);
-  // __syncthreads();
-
-  // // === Phase 5: Copy array_b to array_a ===
-
-  // // CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
-  // CopyMETTiledArray(array_b, array_a, params.tile_size);
-  // __syncthreads();
-
-  // // ==== Phase 6: Broadcast array_b bottom edges to array_a
-
-  // BroadcastBottomEdges(array_b, params.tile_size, array_a);
-  // __syncthreads();
-
-
+  // === Phase 4: Broadcast right edge values to downstream elements ===
   BroadcastRightEdgesInPlace(array_a, params.tile_size);
-
   __syncthreads();
 
+  // === Phase 5: Broadcast bottom edge values to downstream elements ===
   BroadcastBottomEdgesInPlace(array_a, params.tile_size);
-
   __syncthreads();
 
-
-  // === Phase 5: Write final result back to global memory ===
+  // === Phase 6: Write final result back to global memory ===
   CopyMETTiledArray(array_a, params.array, params.tile_size);
+}
+
+void ConfigureSharedMemoryForKernel() {
+  cudaError_t err;
+
+  // Step 1: Prefer shared memory over L1 cache
+  err = cudaFuncSetCacheConfig(
+      PrefixSumKernelTiled,
+      cudaFuncCachePreferShared
+  );
+  if (err != cudaSuccess) {
+    fprintf(
+        stderr,
+        "Failed to set cache config: %s\n",
+        cudaGetErrorString(err)
+    );
+  }
+
+  // Step 2: Request max dynamic shared memory (96 KB = 98304 bytes)
+  err = cudaFuncSetAttribute(
+      PrefixSumKernelTiled,
+      cudaFuncAttributeMaxDynamicSharedMemorySize,
+      98304
+  );
+  if (err != cudaSuccess) {
+    fprintf(
+        stderr,
+        "Failed to set max shared memory: %s\n",
+        cudaGetErrorString(err)
+    );
+  }
 }
 
 void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
@@ -82,12 +85,13 @@ void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
   int num_tile_rows =
       kernel_params.array.size.num_rows / kernel_params.tile_size.num_rows;
 
-  // dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
   dim3 blockDim(num_tile_cols, num_tile_rows);
   dim3 gridDim(1, 1); // Single block for now
 
-  int shared_mem_size = 2 * kernel_params.array.size.num_rows *
+  int shared_mem_size = kernel_params.array.size.num_rows *
                         kernel_params.array.size.num_cols * sizeof(int);
+
+  ConfigureSharedMemoryForKernel();
 
   PrefixSumKernelTiled<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params
   );
