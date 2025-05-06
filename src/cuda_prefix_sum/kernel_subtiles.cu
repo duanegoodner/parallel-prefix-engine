@@ -39,27 +39,37 @@ __global__ void PrefixSumKernelTiled(
   ComputeLocalColWisePrefixSums(array_a, params.tile_size);
   __syncthreads();  
 
-  // === Phase 3: Copy array_a to array_b ===
+  // // === Phase 3: Copy array_a to array_b ===
 
-  // CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
-  CopyMETTiledArray(array_a, array_b, params.tile_size);
+  // // CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
+  // CopyMETTiledArray(array_a, array_b, params.tile_size);
+  // __syncthreads();
+
+  // // === Phase 4: Broadcast array_a right edges to array_b
+
+  // BroadcastRightEdges(array_a, params.tile_size, array_b);
+  // __syncthreads();
+
+  // // === Phase 5: Copy array_b to array_a ===
+
+  // // CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
+  // CopyMETTiledArray(array_b, array_a, params.tile_size);
+  // __syncthreads();
+
+  // // ==== Phase 6: Broadcast array_b bottom edges to array_a
+
+  // BroadcastBottomEdges(array_b, params.tile_size, array_a);
+  // __syncthreads();
+
+
+  BroadcastRightEdgesInPlace(array_a, params.tile_size);
+
   __syncthreads();
 
-  // === Phase 4: Broadcast array_a right edges to array_b
+  BroadcastBottomEdgesInPlace(array_a, params.tile_size);
 
-  BroadcastRightEdges(array_a, params.tile_size, array_b);
   __syncthreads();
 
-  // === Phase 5: Copy array_b to array_a ===
-
-  // CopySharedArrayToSharedArray(array_b, array_a, params.tile_size);
-  CopyMETTiledArray(array_b, array_a, params.tile_size);
-  __syncthreads();
-
-  // ==== Phase 6: Broadcast array_b bottom edges to array_a
-
-  BroadcastBottomEdges(array_b, params.tile_size, array_a);
-  __syncthreads();
 
   // === Phase 5: Write final result back to global memory ===
   CopyMETTiledArray(array_a, params.array, params.tile_size);

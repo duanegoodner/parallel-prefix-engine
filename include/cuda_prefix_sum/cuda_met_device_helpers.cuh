@@ -187,6 +187,35 @@ __device__ void BroadcastRightEdges(
   }
 }
 
+__device__ void BroadcastRightEdgesInPlace(
+    KernelArray arr,
+    ArraySize2D tile_size
+) {
+  // Each thread is responsible for broadcasting from one row
+  for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
+    int full_row = METLocalRowToFullArrayRow(local_row, tile_size.num_rows);
+
+    // === Step 1: Preload the source value *once*
+    int source_col =
+        METLocalColToFullArrayCol(tile_size.num_cols - 1, tile_size.num_cols);
+    int idx_src = ArrayIndex1D(full_row, source_col, arr.size.num_cols);
+    int edge_val = arr.d_address[idx_src];
+
+    __syncthreads(); // Ensure all source values are read before any writes
+
+    // === Step 2: Apply edge_val to downstream tiles
+    for (int block_col = threadIdx.x + 1; block_col < blockDim.x;
+         ++block_col) {
+      for (int downstream_col = 0; downstream_col < tile_size.num_cols;
+           ++downstream_col) {
+        int target_col = block_col * tile_size.num_cols + downstream_col;
+        int idx_dst = ArrayIndex1D(full_row, target_col, arr.size.num_cols);
+        arr.d_address[idx_dst] += edge_val;
+      }
+    }
+  }
+}
+
 __device__ void BroadcastBottomEdges(
     KernelArray source_array,
     ArraySize2D tile_size,
@@ -228,4 +257,31 @@ __device__ void BroadcastBottomEdges(
   }
 }
 
-// hierarchichal helpers
+__device__ void BroadcastBottomEdgesInPlace(
+    KernelArray arr,
+    ArraySize2D tile_size
+) {
+  // Each thread is responsible for broadcasting from one column
+  for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
+    int full_col = METLocalColToFullArrayCol(local_col, tile_size.num_cols);
+
+    // === Step 1: Preload bottom row value for this column
+    int source_row =
+        METLocalRowToFullArrayRow(tile_size.num_rows - 1, tile_size.num_rows);
+    int idx_src = ArrayIndex1D(source_row, full_col, arr.size.num_cols);
+    int edge_val = arr.d_address[idx_src];
+
+    __syncthreads();
+
+    // === Step 2: Broadcast down
+    for (int block_row = threadIdx.y + 1; block_row < blockDim.y;
+         ++block_row) {
+      for (int downstream_row = 0; downstream_row < tile_size.num_rows;
+           ++downstream_row) {
+        int target_row = block_row * tile_size.num_rows + downstream_row;
+        int idx_dst = ArrayIndex1D(target_row, full_col, arr.size.num_cols);
+        arr.d_address[idx_dst] += edge_val;
+      }
+    }
+  }
+}
