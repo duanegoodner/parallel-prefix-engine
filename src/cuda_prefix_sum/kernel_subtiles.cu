@@ -31,8 +31,6 @@ __global__ void PrefixSumKernelTiled(
   CopyMETTiledArray(params.array, array_a, params.tile_size);
   __syncthreads();
 
-  PrintKernelArray(array_a, "array_a after copy from global memory");
-
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
   // for (int tile_col = 1; tile_col < params.tile_size.y; tile_col++) {
   //   for (int tile_row = 0; tile_row < params.tile_size.x; ++tile_row) {
@@ -41,9 +39,6 @@ __global__ void PrefixSumKernelTiled(
   //   }
   // }
   ComputeLocalRowWisePrefixSums(array_a, params.tile_size);
-  __syncthreads();
-
-  PrintKernelArray(array_a, "array_a after local row-wise sums");
   __syncthreads();
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
@@ -56,27 +51,15 @@ __global__ void PrefixSumKernelTiled(
   ComputeLocalColWisePrefixSums(array_a, params.tile_size);
   __syncthreads();
 
-  PrintKernelArray(array_a, "array_a after local col-wise sums");
-  __syncthreads();
-
   // === Phase 3: Copy array_a to array_b ===
 
   // CopySharedArrayToSharedArray(array_a, array_b, params.tile_size);
   CopyMETTiledArray(array_a, array_b, params.tile_size);
   __syncthreads();
 
-  PrintKernelArray(array_b, "array_b after copyting from array_a");
-  __syncthreads();
-
   // === Phase 4: Broadcast array_a right edges to array_b
 
   BroadcastRightEdges(array_a, params.tile_size, array_b);
-  __syncthreads();
-
-  PrintKernelArray(
-      array_b,
-      "array_b after broadcasting right edges from array_a"
-  );
   __syncthreads();
 
   // === Phase 5: Copy array_b to array_a ===
@@ -103,14 +86,6 @@ void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
       kernel_params.array.size.num_cols / kernel_params.tile_size.num_cols;
   int num_tile_rows =
       kernel_params.array.size.num_rows / kernel_params.tile_size.num_rows;
-  
-  printf("array_num_rows = %d\n", kernel_params.array.size.num_rows);
-  printf("array_num_cols = %d\n\n", kernel_params.array.size.num_cols);
-  printf("num_tile_rows = %d\n", num_tile_rows);
-  printf("num_tile_cols = %d\n\n", num_tile_cols);
-  printf("tile_size_num_rows = %d\n", kernel_params.tile_size.num_rows);
-  printf("tile_size_num_cols = %d\n", kernel_params.tile_size.num_cols);
-  
 
   // dim3 blockDim(full_matrix_dim_x, full_matrix_dim_y);
   dim3 blockDim(num_tile_cols, num_tile_rows);

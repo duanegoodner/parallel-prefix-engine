@@ -54,10 +54,7 @@ __device__ void CopyMETTiledArray(
     KernelArray dest,
     ArraySize2D tile_size
 ) {
-  if (threadIdx.x == 0 & threadIdx.y == 0) {
-    printf("source array size: num_rows = %d, num_cols = %d\n", source.size.num_rows, source.size.num_cols);
-  }
-  
+
   for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
     for (int local_col = 0; local_col < tile_size.num_cols; ++local_col) {
       int full_array_col =
@@ -67,13 +64,6 @@ __device__ void CopyMETTiledArray(
 
       int index_1d =
           ArrayIndex1D(full_array_row, full_array_col, source.size.num_cols);
-      printf(
-          "full_array_row = %d, full_array_col = %d, index_1d = %d\n",
-          full_array_row,
-          full_array_col,
-          index_1d
-      );
-      printf("index_1d = %d\n", index_1d);
       dest.d_address[index_1d] = source.d_address[index_1d];
     }
   }
