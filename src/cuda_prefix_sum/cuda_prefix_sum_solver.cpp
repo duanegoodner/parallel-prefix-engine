@@ -20,11 +20,28 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(
     : program_args_(program_args)
     , kernel_launch_func_(kernel_launch_func) {
   PopulateFullMatrix();
-  AttachTimeInterval("warmup");
-  AttachTimeInterval("total");
-  AttachTimeInterval("copy_to_device");
-  AttachTimeInterval("compute");
-  AttachTimeInterval("copy_from_device");
+  AllocateDeviceMemory();
+  std::vector<std::string> time_interval_names{
+      "warmup",
+      "total",
+      "copy_to_device",
+      "compute",
+      "copy_from_device"};
+  time_intervals_.AttachIntervals(time_interval_names);
+  WarmUp();
+}
+
+CudaPrefixSumSolver::~CudaPrefixSumSolver() { FreeDeviceMemory(); }
+
+void CudaPrefixSumSolver::AllocateDeviceMemory() {
+  cudaMalloc(&device_data_, program_args_.FullMatrixSize() * sizeof(int));
+}
+
+void CudaPrefixSumSolver::FreeDeviceMemory() {
+  if (device_data_) {
+    cudaFree(device_data_);
+    device_data_ = nullptr;
+  }
 }
 
 void CudaPrefixSumSolver::PopulateFullMatrix() {
@@ -35,46 +52,46 @@ void CudaPrefixSumSolver::PopulateFullMatrix() {
   );
 }
 
-void CudaPrefixSumSolver::AttachTimeInterval(std::string name) {
-  time_intervals_[name] = TimeInterval();
+void CudaPrefixSumSolver::WarmUp() {
+  time_intervals_.RecordStart("warmup");
+  cudaFree(0);
+  time_intervals_.RecordEnd("warmup");
 }
 
-void CudaPrefixSumSolver::Compute() {
-  int *d_data = nullptr;
-
-  time_intervals_.at("copy_to_device").RecordStart();
-
-  // Allocate device memory
-  cudaMalloc(&d_data, program_args_.FullMatrixSize() * sizeof(int));
+void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
+  time_intervals_.RecordStart("copy_to_device");
   cudaMemcpy(
-      d_data,
+      device_data_,
       full_matrix_.data(),
       program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyHostToDevice
   );
+  time_intervals_.RecordEnd("copy_to_device");
+}
 
-  time_intervals_.at("copy_to_device").RecordEnd();
-
-  time_intervals_.at("compute").RecordStart();
-
-  auto launch_params = CreateKernelLaunchParams(d_data, program_args_);
+void CudaPrefixSumSolver::RunKernel() {
+  time_intervals_.RecordStart("compute");
+  auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
   kernel_launch_func_(launch_params);
   cudaDeviceSynchronize();
+  time_intervals_.RecordEnd("compute");
+}
 
-  time_intervals_.at("compute").RecordEnd();
-
-  time_intervals_.at("copy_from_device").RecordStart();
-
-  // Copy results back
+void CudaPrefixSumSolver::CopyDataFromDeviceToHost() {
+  time_intervals_.RecordStart("copy_from_device");
   cudaMemcpy(
       full_matrix_.data(),
-      d_data,
+      device_data_,
       program_args_.FullMatrixSize() * sizeof(int),
       cudaMemcpyDeviceToHost
   );
-  cudaFree(d_data);
+  time_intervals_.RecordEnd("copy_from_device");
+}
 
-  time_intervals_.at("copy_from_device").RecordEnd();
+void CudaPrefixSumSolver::Compute() {
+  CopyDataFromHostToDevice();
+  RunKernel();
+  CopyDataFromDeviceToHost();
 }
 
 void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {
@@ -88,35 +105,29 @@ void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {
   }
 }
 
-void CudaPrefixSumSolver::WarmUp() {
-  time_intervals_.at("warmup").RecordStart();
-  cudaFree(0);
-  time_intervals_.at("warmup").RecordEnd();
-}
-
 void CudaPrefixSumSolver::StartTimer() {
-  time_intervals_["total"].RecordStart();
+  time_intervals_.RecordStart("total");
 }
 
-void CudaPrefixSumSolver::StopTimer() { time_intervals_["total"].RecordEnd(); }
+void CudaPrefixSumSolver::StopTimer() { time_intervals_.RecordEnd("total"); }
 
 void CudaPrefixSumSolver::ReportTime() const {
-  double elapsed_time_s = time_intervals_.at("total").ElapsedTime().count();
+  double elapsed_time_s = time_intervals_.ElapsedTime("total").count();
   std::cout << "\n=== Runtime Report ===\n";
   std::cout << "Total Time: " << elapsed_time_s * 1000 << " ms" << std::endl;
 
   double copy_to_device_time_s =
-      time_intervals_.at("copy_to_device").ElapsedTime().count();
+      time_intervals_.ElapsedTime("copy_to_device").count();
   std::cout << "Copy to Device Time: " << copy_to_device_time_s * 1000 << " ms"
             << std::endl;
 
   double device_compute_time_s =
-      time_intervals_.at("compute").ElapsedTime().count();
+      time_intervals_.ElapsedTime("compute").count();
   std::cout << "Device Compute Time: " << device_compute_time_s * 1000 << " ms"
             << std::endl;
 
   double copy_from_device_time_s =
-      time_intervals_.at("copy_from_device").ElapsedTime().count();
+      time_intervals_.ElapsedTime("copy_from_device").count();
   std::cout << "Copy From Devcie Time: " << copy_from_device_time_s * 1000
             << " ms" << std::endl;
 }

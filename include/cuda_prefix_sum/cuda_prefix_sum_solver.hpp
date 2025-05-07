@@ -28,27 +28,32 @@ public:
       KernelLaunchFunction kernel_launch_func
   );
 
-  void PopulateFullMatrix() override;
-  void Compute() override;
+  ~CudaPrefixSumSolver();
 
   void PrintFullMatrix(std::string title = "") override;
+  void PopulateFullMatrix() override;
+  void StartTimer() override;
+  void Compute() override;
+  void StopTimer() override;
+  void ReportTime() const override;
 
   const ProgramArgs &program_args() const;
-
-  void WarmUp() override;
-  void StartTimer() override;
-  void StopTimer() override;
-
-  void ReportTime() const override;
+  void WarmUp();
 
 private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
-  std::unordered_map<std::string, TimeInterval> time_intervals_;
+  TimeIntervals time_intervals_;
   KernelLaunchFunction kernel_launch_func_;
-  void AttachTimeInterval(std::string name);
 
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
+  int *device_data_ = nullptr;
+
+  void AllocateDeviceMemory();
+  void CopyDataFromHostToDevice();
+  void CopyDataFromDeviceToHost();
+  void RunKernel();
+  void FreeDeviceMemory();
 
 };

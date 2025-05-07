@@ -18,3 +18,4 @@ void LaunchPrefixSumKernelAccum(KernelLaunchParams kernel_params);
 void LaunchPrefixSumKernelHierarchical(KernelLaunchParams params);
 
 void LaunchPrefixSumKernelHybrid(KernelLaunchParams params);
+

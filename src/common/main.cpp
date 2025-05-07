@@ -73,7 +73,6 @@ int main(int argc, char *argv[]) {
   );
 
 
-  solver->WarmUp();
   solver->PrintFullMatrix("Starting matrix");
   solver->StartTimer();
   solver->Compute();

@@ -6,6 +6,9 @@
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+#include "cuda_prefix_sum/kernel_launch_params.hpp"
+
+void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }
 
 ProgramArgs GenerateProgramArgsForTest(
     std::vector<int> full_matrix_dim,
@@ -23,16 +26,28 @@ ProgramArgs GenerateProgramArgsForTest(
   );
 }
 
-class CudaPrefixSumSolverTest : public ::testing::Test {};
+class CudaPrefixSumSolverTest : public ::testing::Test {
+protected:
+  std::vector<int> full_matrix_dim_ = std::vector<int>({4, 4});
+  std::vector<int> tile_dim_ = std::vector<int>({2, 2});
+  ProgramArgs program_args_ =
+      GenerateProgramArgsForTest(full_matrix_dim_, tile_dim_);
+};
 
+TEST_F(CudaPrefixSumSolverTest, Init) {
 
-TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
-  std::vector<int> full_matrix_dim = std::vector<int>({4, 4});
-  std::vector<int> tile_dim = std::vector<int>({2, 2});
+  CudaPrefixSumSolver cuda_solver(program_args_, DummyKernelLauncher);
+}
 
-  auto program_args = GenerateProgramArgsForTest(full_matrix_dim, tile_dim);
+TEST_F(CudaPrefixSumSolverTest, PublicTimer) {
+  CudaPrefixSumSolver cuda_solver(program_args_, DummyKernelLauncher);
+  cuda_solver.StartTimer();
+  cuda_solver.StopTimer();
+}
 
-  CudaPrefixSumSolver cuda_solver{program_args, LaunchPrefixSumKernelTiled};
+TEST_F(CudaPrefixSumSolverTest, Compute) {
+
+  CudaPrefixSumSolver cuda_solver{program_args_, LaunchPrefixSumKernelTiled};
 
   std::cout << "Before computation:";
   cuda_solver.PrintFullMatrix();
@@ -40,6 +55,14 @@ TEST_F(CudaPrefixSumSolverTest, FullSize4x4_TileSize2x2) {
   std::cout << std::endl;
   std::cout << "After computation:";
   cuda_solver.PrintFullMatrix();
+}
+
+TEST_F(CudaPrefixSumSolverTest, ReportTime) {
+  CudaPrefixSumSolver cuda_solver{program_args_, LaunchPrefixSumKernelTiled};
+  cuda_solver.StartTimer();
+  cuda_solver.Compute();
+  cuda_solver.StopTimer();
+  cuda_solver.ReportTime();
 }
 
 int main(int argc, char **argv) {

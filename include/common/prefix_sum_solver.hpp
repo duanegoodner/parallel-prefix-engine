@@ -11,8 +11,6 @@
 #include <string>
 #include <vector>
 
-
-
 // Class PrefixSumSolver: Abstract interface for performing 2D prefix sums
 // using different backends (MPI, CUDA, etc).
 class PrefixSumSolver {
@@ -24,8 +22,6 @@ public:
   virtual void Compute() = 0;
 
   virtual void PrintFullMatrix(std::string title = "") = 0;
-
-  virtual void WarmUp() = 0;
 
   // ⏱️ Time tracking (backend-specific implementations)
   virtual void StartTimer() = 0;
