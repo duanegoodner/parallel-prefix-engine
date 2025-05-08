@@ -2,7 +2,8 @@
 
 add_library(prefix_sum_cuda
     kernel_launch_params.cpp
-    kernel_subtiles.cu
+    subtile_kernel.cu
+    subtile_kernel_launcher.cu
     cuda_prefix_sum_solver_single_element.cu
     cuda_prefix_sum_solver.cpp
     # cuda_prefix_sum_warp_solver.cpp

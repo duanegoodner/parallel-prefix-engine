@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 
 #include <chrono>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,44 +18,46 @@
 #include "common/time_utils.hpp"
 
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
-  using KernelLaunchFunction =
-      void (*)(const KernelLaunchParams);
+  // using KernelLaunchFunction =
+  //     void (*)(const KernelLaunchParams);
 
   explicit CudaPrefixSumSolver(
       const ProgramArgs &program_args,
-      KernelLaunchFunction kernel_launch_func
+      std::unique_ptr<KernelLauncher> kernel_launcher
+      // KernelLaunchFunction kernel_launch_func
   );
 
-  void PopulateFullMatrix() override;
-  void Compute() override;
+  ~CudaPrefixSumSolver();
 
   void PrintFullMatrix(std::string title = "") override;
+  void PopulateFullMatrix() override;
+  void StartTimer() override;
+  void Compute() override;
+  void StopTimer() override;
+  void ReportTime() const override;
 
   const ProgramArgs &program_args() const;
-
-  void WarmUp() override;
-  void StartTimer() override;
-  void StopTimer() override;
-
-  void ReportTime() const override;
+  void WarmUp();
 
 private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
-  std::unordered_map<std::string, TimeInterval> time_intervals_;
-  KernelLaunchFunction kernel_launch_func_;
-  void AttachTimeInterval(std::string name);
+  TimeIntervals time_intervals_;
+  // KernelLaunchFunction kernel_launch_func_;
+  std::unique_ptr<KernelLauncher> kernel_launcher_;
 
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
+  int *device_data_ = nullptr;
 
-  std::chrono::steady_clock::time_point copy_to_device_start_time_,
-      copy_to_device_end_time_;
-  std::chrono::steady_clock::time_point device_compute_start_time_,
-      device_compute_end_time_;
-  std::chrono::steady_clock::time_point copy_from_device_start_time_,
-      copy_from_device_end_time_;
+  void AllocateDeviceMemory();
+  void CopyDataFromHostToDevice();
+  void CopyDataFromDeviceToHost();
+  void RunKernel();
+  void FreeDeviceMemory();
+
 };

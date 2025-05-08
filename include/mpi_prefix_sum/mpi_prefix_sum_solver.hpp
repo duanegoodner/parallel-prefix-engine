@@ -48,7 +48,6 @@ public:
 
   void PrintAssignedMatrix() { assigned_matrix_.Print(); }
 
-  void WarmUp() override;
   void StartTimer() override;
   void StopTimer() override;
 
@@ -60,7 +59,5 @@ private:
   MpiCartesianGrid grid_;
   PrefixSumBlockMatrix full_matrix_;
   PrefixSumBlockMatrix assigned_matrix_;
-  std::unordered_map<std::string, TimeInterval> time_intervals_;
-
-  void AttachTimeInterval(std::string name);
+  TimeIntervals time_intervals_;
 };

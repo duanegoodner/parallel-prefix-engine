@@ -11,6 +11,7 @@
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
   // Define a map of backend strings to factory functions
@@ -23,18 +24,15 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              return std::make_unique<MpiPrefixSumSolver>(args);
            }},
           {"cuda", [](ProgramArgs &args) {
-             using KLF = CudaPrefixSumSolver::KernelLaunchFunction;
+             using LauncherCreator =
+                 std::function<std::unique_ptr<KernelLauncher>()>;
 
-             // Map string tag to function pointer
-             static const std::unordered_map<std::string, KLF> kernel_map = {
-                 {"tiled", LaunchPrefixSumKernelTiled},
-                 {"single_element", LaunchPrefixSumKernelSingleElement},
-                //  {"warp", LaunchPrefixSumKernelWarp},
-                //  {"warp_naive", LaunchPrefixSumKernelWarpNaive},
-                 {"accum", LaunchPrefixSumKernelAccum},
-                //  {"hybrid", LaunchPrefixSumKernelHybrid}
-                //  {"arch", LaunchPrefixSumKernelHierarchical}
-             };
+             // Map string to kernel factory
+             static const std::unordered_map<std::string, LauncherCreator>
+                 kernel_map = {{
+                     "tiled",
+                     [] { return std::make_unique<SubTileKernelLauncher>(); },
+                 }};
 
              auto it = kernel_map.find(args.cuda_kernel());
              if (it == kernel_map.end()) {
@@ -42,10 +40,7 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
                    "Unsupported CUDA kernel: " + args.cuda_kernel()
                );
              }
-             return std::make_unique<CudaPrefixSumSolver>(
-                 args,
-                 it->second
-             );
+             return std::make_unique<CudaPrefixSumSolver>(args, it->second());
            }}};
 
   // Find the factory function for the requested backend

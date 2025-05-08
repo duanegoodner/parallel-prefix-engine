@@ -39,3 +39,32 @@ std::chrono::duration<double> TimeInterval::ElapsedTime() const {
   }
   return end_ - start_;
 }
+
+void TimeIntervals::AttachIntervals(std::vector<std::string> names) {
+  for (const auto &name : names) {
+    if (data_.count(name)) {
+      throw std::runtime_error("Duplicate interval name: " + name);
+    }
+    data_[name] = TimeInterval();
+  }
+}
+
+void TimeIntervals::RecordStart(std::string name) {
+  data_.at(name).RecordStart();
+}
+
+void TimeIntervals::RecordEnd(std::string name) { data_.at(name).RecordEnd(); }
+
+std::chrono::duration<double> TimeIntervals::StartTime(std::string name
+) const {
+  return data_.at(name).StartTime();
+}
+
+std::chrono::duration<double> TimeIntervals::EndTime(std::string name) const {
+  return data_.at(name).EndTime();
+}
+
+std::chrono::duration<double> TimeIntervals::ElapsedTime(std::string name
+) const {
+  return data_.at(name).ElapsedTime();
+}

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "common/matrix_init.hpp"
@@ -36,26 +37,20 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
       )) {
 
   PopulateFullMatrix();
-  AttachTimeInterval("warmup");
-  AttachTimeInterval("total");
-  AttachTimeInterval("data_distribute");
-  AttachTimeInterval("compute");
-  AttachTimeInterval("data_gather");
+  std::vector<std::string> time_interval_names = {
+    "warmup", "total", "data_distribute", "compute", "data_gather"
+  };
+  time_intervals_.AttachIntervals(time_interval_names);
 
   // TODO : Error if product of num_tile_rows and num_tile_cols is not equal to
   // mpi_environment_.size()
   // TODO : Error if num_tile_rows and num_tile_cols are not divisible by
 }
 
-void MpiPrefixSumSolver::AttachTimeInterval(std::string name) {
-  time_intervals_[name] = TimeInterval();
-}
+// void MpiPrefixSumSolver::AttachTimeInterval(std::string name) {
+//   time_intervals_[name] = TimeInterval();
+// }
 
-void MpiPrefixSumSolver::WarmUp() {
-  // For now this solver does not need to do anything for warm up
-  time_intervals_.at("warmup").RecordStart();
-  time_intervals_.at("warmup").RecordEnd();
-}
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
@@ -93,41 +88,41 @@ void MpiPrefixSumSolver::CollectSubMatrices() {
 
 void MpiPrefixSumSolver::Compute() {
 
-  time_intervals_["data_distribute"].RecordStart();
+  time_intervals_.RecordStart("data_distribute");
   DistributeSubMatrices();
-  time_intervals_["data_distribute"].RecordEnd();
+  time_intervals_.RecordEnd("data_distribute");
 
-  time_intervals_["compute"].RecordStart();
+  time_intervals_.RecordStart("compute");
   ComputeAndShareAssigned();
-  time_intervals_["compute"].RecordEnd();
+  time_intervals_.RecordEnd("compute");
 
-  time_intervals_["data_gather"].RecordStart();
+  time_intervals_.RecordStart("data_gather");
   CollectSubMatrices();
-  time_intervals_["data_gather"].RecordEnd();
+  time_intervals_.RecordEnd("data_gather");
 }
 
 void MpiPrefixSumSolver::StartTimer() {
   MPI_Barrier(MPI_COMM_WORLD);
-  time_intervals_["total"].RecordStart();
+  time_intervals_.RecordStart("total");
 }
 
 void MpiPrefixSumSolver::StopTimer() {
-  time_intervals_["total"].RecordEnd();
+  time_intervals_.RecordEnd("total");
 }
 
 void MpiPrefixSumSolver::ReportTime() const {
 
-  auto local_start_time_s = time_intervals_.at("total").StartTime().count();
-  auto local_end_time_s = time_intervals_.at("total").EndTime().count();
+  auto local_start_time_s = time_intervals_.StartTime("total").count();
+  auto local_end_time_s = time_intervals_.EndTime("total").count();
   auto local_elapsed_time_s =
-      time_intervals_.at("total").ElapsedTime().count();
+      time_intervals_.ElapsedTime("total").count();
 
   auto local_data_distribute_time_s =
-      time_intervals_.at("data_distribute").ElapsedTime().count();
+      time_intervals_.ElapsedTime("data_distribute").count();
   auto local_compute_time_s =
-      time_intervals_.at("compute").ElapsedTime().count();
+      time_intervals_.ElapsedTime("compute").count();
   auto local_data_gather_time_s =
-      time_intervals_.at("data_gather").ElapsedTime().count();
+      time_intervals_.ElapsedTime("data_gather").count();
 
   int rank = mpi_environment_.rank();
   int size = mpi_environment_.size();
