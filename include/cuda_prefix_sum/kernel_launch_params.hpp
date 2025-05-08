@@ -21,4 +21,3 @@ KernelLaunchParams CreateKernelLaunchParams(
     int *d_arr,
     const ProgramArgs &program_args
 );
-

@@ -3,11 +3,13 @@
 #include <cuda_runtime.h> // Required for cudaStream_t
 
 #include <iostream>
+#include <memory>
 
 #include "common/matrix_init.hpp"
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 
 // Ensure proper linkage between C++ and CUDA code
 // void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream =
@@ -15,10 +17,11 @@
 
 CudaPrefixSumSolver::CudaPrefixSumSolver(
     const ProgramArgs &program_args,
-    KernelLaunchFunction kernel_launch_func
+    std::unique_ptr<KernelLauncher> kernel_launcher
+    // KernelLaunchFunction kernel_launch_func
 )
     : program_args_(program_args)
-    , kernel_launch_func_(kernel_launch_func) {
+    , kernel_launcher_(std::move(kernel_launcher)) {
   PopulateFullMatrix();
   AllocateDeviceMemory();
   std::vector<std::string> time_interval_names{
@@ -72,7 +75,8 @@ void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
 void CudaPrefixSumSolver::RunKernel() {
   time_intervals_.RecordStart("compute");
   auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
-  kernel_launch_func_(launch_params);
+  // kernel_launch_func_(launch_params);
+  kernel_launcher_->Launch(launch_params);
   cudaDeviceSynchronize();
   time_intervals_.RecordEnd("compute");
 }

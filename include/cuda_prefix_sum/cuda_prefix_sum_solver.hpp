@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 
 #include <chrono>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,15 +18,17 @@
 #include "common/time_utils.hpp"
 
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
-  using KernelLaunchFunction =
-      void (*)(const KernelLaunchParams);
+  // using KernelLaunchFunction =
+  //     void (*)(const KernelLaunchParams);
 
   explicit CudaPrefixSumSolver(
       const ProgramArgs &program_args,
-      KernelLaunchFunction kernel_launch_func
+      std::unique_ptr<KernelLauncher> kernel_launcher
+      // KernelLaunchFunction kernel_launch_func
   );
 
   ~CudaPrefixSumSolver();
@@ -44,7 +47,8 @@ private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
   TimeIntervals time_intervals_;
-  KernelLaunchFunction kernel_launch_func_;
+  // KernelLaunchFunction kernel_launch_func_;
+  std::unique_ptr<KernelLauncher> kernel_launcher_;
 
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;

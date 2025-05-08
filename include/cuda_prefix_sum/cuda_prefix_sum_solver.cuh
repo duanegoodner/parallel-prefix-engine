@@ -5,7 +5,7 @@
 
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
-void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params);
+void LaunchSubtileKernel(KernelLaunchParams kernel_params);
 
 void LaunchPrefixSumKernelSingleElement(KernelLaunchParams kernel_params);
 

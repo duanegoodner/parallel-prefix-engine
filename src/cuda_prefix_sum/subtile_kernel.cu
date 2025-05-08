@@ -10,10 +10,11 @@
 
 #include "cuda_prefix_sum/cuda_met_device_helpers.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include "cuda_prefix_sum/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
-
-__global__ void PrefixSumKernelTiled(
+__global__ void SubtileKernel(
     // int *d_data,
     KernelLaunchParams params
 ) {
@@ -48,38 +49,8 @@ __global__ void PrefixSumKernelTiled(
   CopyMETTiledArray(array_a, params.array, params.tile_size);
 }
 
-void ConfigureSharedMemoryForKernel() {
-  cudaError_t err;
 
-  // Step 1: Prefer shared memory over L1 cache
-  err = cudaFuncSetCacheConfig(
-      PrefixSumKernelTiled,
-      cudaFuncCachePreferShared
-  );
-  if (err != cudaSuccess) {
-    fprintf(
-        stderr,
-        "Failed to set cache config: %s\n",
-        cudaGetErrorString(err)
-    );
-  }
-
-  // Step 2: Request max dynamic shared memory (96 KB = 98304 bytes)
-  err = cudaFuncSetAttribute(
-      PrefixSumKernelTiled,
-      cudaFuncAttributeMaxDynamicSharedMemorySize,
-      98304
-  );
-  if (err != cudaSuccess) {
-    fprintf(
-        stderr,
-        "Failed to set max shared memory: %s\n",
-        cudaGetErrorString(err)
-    );
-  }
-}
-
-void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
+void LaunchSubtileKernel(KernelLaunchParams kernel_params) {
 
   int num_tile_cols =
       kernel_params.array.size.num_cols / kernel_params.tile_size.num_cols;
@@ -92,10 +63,9 @@ void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
   int shared_mem_size = kernel_params.array.size.num_rows *
                         kernel_params.array.size.num_cols * sizeof(int);
 
-  ConfigureSharedMemoryForKernel();
+  ConfigureSharedMemoryForKernel(SubtileKernel, 98304);
 
-  PrefixSumKernelTiled<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params
-  );
+  SubtileKernel<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params);
 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -108,6 +78,3 @@ void LaunchPrefixSumKernelTiled(KernelLaunchParams kernel_params) {
     fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
   }
 }
-
-
-
