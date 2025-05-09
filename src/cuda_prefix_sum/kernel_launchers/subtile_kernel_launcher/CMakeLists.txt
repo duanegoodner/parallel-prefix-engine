@@ -6,6 +6,11 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/include
 )
 
+target_include_directories(subtile_kernel_launcher
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include
+)
+
+
 target_link_libraries(subtile_kernel_launcher
     PRIVATE
         subtile_kernel

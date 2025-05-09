@@ -12,6 +12,7 @@ add_library(prefix_sum_cuda
 target_include_directories(prefix_sum_cuda
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Link against CUDA runtime + any other libs

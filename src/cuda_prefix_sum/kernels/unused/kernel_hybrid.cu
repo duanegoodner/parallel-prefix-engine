@@ -1,6 +1,6 @@
 #include <cuda_runtime.h>
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/kernel_launch_params.hpp"
 
 __device__ inline int index_2d(int row, int col, int width) {

@@ -1,7 +1,7 @@
 #include "cuda_prefix_sum/subtile_kernel.cuh"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 #include "cuda_prefix_sum/kernel_config_utils.cuh"
-#include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
 void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
     // Set max dynamic shared memory and prefer shared over L1

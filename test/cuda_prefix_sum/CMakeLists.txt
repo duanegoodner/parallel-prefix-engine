@@ -9,6 +9,7 @@ add_executable(
 target_include_directories(
     test_cuda_prefix_sum_solver PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/cuda_prefix_sum/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(

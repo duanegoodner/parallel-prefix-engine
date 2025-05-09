@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
 // Debug statement: Print thread and block indices
 __device__ void PrintThreadAndBlockIndices() {

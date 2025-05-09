@@ -9,7 +9,7 @@
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 

@@ -7,8 +7,8 @@
 
 #include "common/matrix_init.hpp"
 
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
-#include "cuda_prefix_sum/kernel_launch_params.hpp"
+// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/kernel_launcher.hpp"
 
 // Ensure proper linkage between C++ and CUDA code

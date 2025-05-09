@@ -11,7 +11,7 @@
 #include "cuda_prefix_sum/cuda_met_device_helpers.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/kernel_config_utils.cuh"
-#include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
 __global__ void SubtileKernel(

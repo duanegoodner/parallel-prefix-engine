@@ -1,4 +1,4 @@
-#include "cuda_prefix_sum/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
 #include "common/program_args.hpp"
 
