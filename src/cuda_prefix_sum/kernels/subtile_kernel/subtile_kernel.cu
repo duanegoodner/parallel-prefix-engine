@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "cuda_prefix_sum/cuda_met_device_helpers.cuh"
-#include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
@@ -50,31 +50,31 @@ __global__ void SubtileKernel(
 }
 
 
-void LaunchSubtileKernel(KernelLaunchParams kernel_params) {
+// void LaunchSubtileKernel(KernelLaunchParams kernel_params) {
 
-  int num_tile_cols =
-      kernel_params.array.size.num_cols / kernel_params.tile_size.num_cols;
-  int num_tile_rows =
-      kernel_params.array.size.num_rows / kernel_params.tile_size.num_rows;
+//   int num_tile_cols =
+//       kernel_params.array.size.num_cols / kernel_params.tile_size.num_cols;
+//   int num_tile_rows =
+//       kernel_params.array.size.num_rows / kernel_params.tile_size.num_rows;
 
-  dim3 blockDim(num_tile_cols, num_tile_rows);
-  dim3 gridDim(1, 1); // Single block for now
+//   dim3 blockDim(num_tile_cols, num_tile_rows);
+//   dim3 gridDim(1, 1); // Single block for now
 
-  int shared_mem_size = kernel_params.array.size.num_rows *
-                        kernel_params.array.size.num_cols * sizeof(int);
+//   int shared_mem_size = kernel_params.array.size.num_rows *
+//                         kernel_params.array.size.num_cols * sizeof(int);
 
-  ConfigureSharedMemoryForKernel(SubtileKernel, 98304);
+//   ConfigureSharedMemoryForKernel(SubtileKernel, 98304);
 
-  SubtileKernel<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params);
+//   SubtileKernel<<<gridDim, blockDim, shared_mem_size, 0>>>(kernel_params);
 
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess) {
-    fprintf(stderr, "CUDA kernel launch error: %s\n", cudaGetErrorString(err));
-  }
+//   cudaError_t err = cudaGetLastError();
+//   if (err != cudaSuccess) {
+//     fprintf(stderr, "CUDA kernel launch error: %s\n", cudaGetErrorString(err));
+//   }
 
-  cudaDeviceSynchronize();
-  cudaError_t sync_err = cudaGetLastError();
-  if (sync_err != cudaSuccess) {
-    fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
-  }
-}
+//   cudaDeviceSynchronize();
+//   cudaError_t sync_err = cudaGetLastError();
+//   if (sync_err != cudaSuccess) {
+//     fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
+//   }
+// }
