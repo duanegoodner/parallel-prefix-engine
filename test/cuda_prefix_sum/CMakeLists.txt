@@ -18,7 +18,11 @@ target_link_libraries(
     program_args
     prefix_sum_mpi
     prefix_sum_cuda
+    subtile_kernel
+    subtile_kernel_launcher
     time_utils
+    my_default_flags
+    CUDA::cudart                       
+    cuda_headers
     )
-target_link_libraries(test_cuda_prefix_sum_solver PRIVATE my_default_flags)
 
