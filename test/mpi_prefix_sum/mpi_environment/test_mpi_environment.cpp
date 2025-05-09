@@ -1,5 +1,3 @@
-#include "test_cli_utils.hpp"
-
 #include <mpi.h>
 
 #include <gtest/gtest.h>
@@ -8,11 +6,6 @@
 
 class MpiEnvironmentTest : public ::testing::Test {
 protected:
-  // ArgvBuilder alt_args_ = ArgvBuilder(
-  //     "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
-  // );
-  // ProgramArgs alt_program_args_ =
-  //     ProgramArgs::Parse(alt_args_.argc(), alt_args_.argv_data());
 
   std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
   std::vector<int> grid_dim_ = std::vector<int>({2, 2});

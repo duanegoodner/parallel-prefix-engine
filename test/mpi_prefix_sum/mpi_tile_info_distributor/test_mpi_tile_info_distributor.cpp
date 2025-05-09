@@ -1,5 +1,3 @@
-#include "test_cli_utils.hpp"
-
 #include <gtest/gtest.h>
 
 #include "common/matrix_init.hpp"
@@ -12,12 +10,6 @@
 
 class MpiTileInfoDistributorTest : public ::testing::Test {
 protected:
-  // ArgvBuilder args_ = ArgvBuilder(
-  //     "--local-n 8 --full-matrix-dim 4 4 --seed 42 --backend mpi -v"
-  // );
-
-  // ProgramArgs program_args_ =
-  //     ProgramArgs::Parse(args_.argc(), args_.argv_data());
 
   std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
   std::vector<int> grid_dim_ = std::vector<int>({2, 2});

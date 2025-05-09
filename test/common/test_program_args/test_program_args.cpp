@@ -1,4 +1,3 @@
-#include "test_cli_utils.hpp"
 
 #include <gtest/gtest.h>
 
@@ -23,9 +22,6 @@ TEST_F(ProgramArgsTest, DefaultInit) {
 }
 
 TEST_F(ProgramArgsTest, TestInit) {
-  // ArgvBuilder args("-f 4 4 -g 2 2 --seed 42 --backend mpi -v");
-
-  // auto program_args = ProgramArgs::Parse(args.argc(), args.argv_data());
 
   std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
   std::vector<int> grid_dim_ = std::vector<int>({2, 2});

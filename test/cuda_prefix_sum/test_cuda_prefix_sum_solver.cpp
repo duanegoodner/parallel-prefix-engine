@@ -1,5 +1,3 @@
-#include "test_cli_utils.hpp"
-
 #include <gtest/gtest.h>
 
 #include <memory>
