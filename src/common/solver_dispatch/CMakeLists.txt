@@ -6,4 +6,5 @@ target_link_libraries(
     PRIVATE
     my_default_flags
     subtile_kernel_launcher
+    prefix_sum_mpi
     )

@@ -4,7 +4,7 @@
 // Mpi utils implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/mpi_utils.hpp"
+#include "mpi_prefix_sum/internal/mpi_utils.hpp"
 
 #include <cstdlib>
 #include <iostream>

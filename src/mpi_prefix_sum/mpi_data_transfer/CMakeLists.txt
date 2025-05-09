@@ -5,6 +5,7 @@ add_library(
     )
 
 target_include_directories(mpi_data_transfer PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(mpi_data_transfer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(
     mpi_data_transfer PUBLIC
     mpi_data_structs

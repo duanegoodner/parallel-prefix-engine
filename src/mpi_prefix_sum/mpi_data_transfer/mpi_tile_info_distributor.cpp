@@ -4,9 +4,9 @@
 // Prefix sum distributor implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/mpi_tile_info_distributor.hpp"
+#include "mpi_prefix_sum/internal/mpi_tile_info_distributor.hpp"
 
-#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/internal/mpi_cartesian_grid.hpp"
 
 MpiTileInfoDistributor::MpiTileInfoDistributor(
     PrefixSumBlockMatrix &tile,

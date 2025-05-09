@@ -4,7 +4,7 @@
 // Prefix sum block matrix implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
+#include "mpi_prefix_sum/internal/prefix_sum_block_matrix.hpp"
 
 PrefixSumBlockMatrix::PrefixSumBlockMatrix(int square_dim)
     : num_rows_(square_dim)

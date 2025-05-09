@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "mpi_prefix_sum/mpi_environment.hpp"
+#include "mpi_prefix_sum/internal/mpi_environment.hpp"
 
 class MpiEnvironmentTest : public ::testing::Test {
 protected:

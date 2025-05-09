@@ -4,7 +4,7 @@
 // Mpi environment implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/mpi_environment.hpp"
+#include "mpi_prefix_sum/internal/mpi_environment.hpp"
 
 MpiEnvironment::MpiEnvironment(const ProgramArgs &program_args) {
   int argc = program_args.orig_argc();

@@ -11,7 +11,7 @@
 
 #include <mpi.h>
 
-#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/internal/mpi_cartesian_grid.hpp"
 
 // Class MpiTileInfoDistributor: Handles communication between processes for
 // computing global prefix sums in a distributed setting.

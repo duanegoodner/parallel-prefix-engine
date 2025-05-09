@@ -4,8 +4,8 @@
 
 #include "common/program_args.hpp"
 
-#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
-#include "mpi_prefix_sum/mpi_environment.hpp"
+#include "mpi_prefix_sum/internal/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/internal/mpi_environment.hpp"
 
 class MpiCartesianGridTest : public ::testing::Test {
 protected:

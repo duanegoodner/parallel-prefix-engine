@@ -4,7 +4,7 @@
 // Mpi cartesian grid implementation.
 // ----------------------------------------------------------------------------
 
-#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/internal/mpi_cartesian_grid.hpp"
 
 #include <cmath>
 

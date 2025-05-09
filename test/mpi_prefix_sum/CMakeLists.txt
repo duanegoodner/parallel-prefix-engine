@@ -9,6 +9,7 @@ add_executable(
 target_include_directories(
     test_mpi_cartesian_grid PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/mpi_prefix_sum/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
@@ -32,6 +33,7 @@ add_executable(
 target_include_directories(
     test_mpi_environment PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/mpi_prefix_sum/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
@@ -78,6 +80,7 @@ add_executable(
 target_include_directories(
     test_mpi_tile_info_distributor PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/mpi_prefix_sum/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
     )
 target_link_libraries(
@@ -123,6 +126,7 @@ add_executable(
 target_include_directories(
     test_prefix_sum_block_matrix PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/mpi_prefix_sum/include
     )
 target_link_libraries(
     test_prefix_sum_block_matrix
