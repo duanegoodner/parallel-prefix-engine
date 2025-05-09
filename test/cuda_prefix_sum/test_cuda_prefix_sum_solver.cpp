@@ -9,7 +9,7 @@
 // #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/kernel_launcher.hpp"
+#include "cuda_prefix_sum/internal/kernel_launcher.hpp"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
 // void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }

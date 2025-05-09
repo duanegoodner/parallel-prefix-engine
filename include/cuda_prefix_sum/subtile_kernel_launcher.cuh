@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/kernel_launcher.hpp"
+#include "cuda_prefix_sum/internal/kernel_launcher.hpp"
 
 class SubTileKernelLauncher : public KernelLauncher {
 public:
