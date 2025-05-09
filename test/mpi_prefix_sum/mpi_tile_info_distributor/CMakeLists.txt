@@ -1,0 +1,21 @@
+# ===========================
+# MPI_TILE_INFO_DISTRIBUTOR
+# ===========================
+add_executable(
+    test_mpi_tile_info_distributor
+    test_mpi_tile_info_distributor.cpp
+    )
+target_include_directories(
+    test_mpi_tile_info_distributor PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src/mpi_prefix_sum/include
+    )
+target_link_libraries(
+    test_mpi_tile_info_distributor
+    PRIVATE
+    GTest::gtest_main
+    program_args
+    prefix_sum_mpi
+    MPI::MPI_CXX
+    )
+target_link_libraries(test_mpi_tile_info_distributor PRIVATE my_default_flags)

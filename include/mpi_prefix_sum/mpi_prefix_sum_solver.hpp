@@ -15,10 +15,10 @@
 #include "common/program_args.hpp"
 #include "common/time_utils.hpp"
 
-#include "mpi_prefix_sum/mpi_cartesian_grid.hpp"
-#include "mpi_prefix_sum/mpi_environment.hpp"
-#include "mpi_prefix_sum/mpi_utils.hpp"
-#include "mpi_prefix_sum/prefix_sum_block_matrix.hpp"
+#include "mpi_prefix_sum/internal/mpi_cartesian_grid.hpp"
+#include "mpi_prefix_sum/internal/mpi_environment.hpp"
+#include "mpi_prefix_sum/internal/mpi_utils.hpp"
+#include "mpi_prefix_sum/internal/prefix_sum_block_matrix.hpp"
 
 // Class MpiPrefixSumSolver: MPI-specific implementation of PrefixSumSolver.
 // Coordinates distributed computation.

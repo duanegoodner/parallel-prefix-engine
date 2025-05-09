@@ -193,10 +193,11 @@ FetchContent_MakeAvailable(googletest)
 # ===========================
 # INCLUDE DIRECTORIES WITH TARGETS
 # ===========================
-add_subdirectory(src/common)
-add_subdirectory(src/mpi_prefix_sum)
-add_subdirectory(src/cuda_prefix_sum)
+# add_subdirectory(src/common)
+# add_subdirectory(src/mpi_prefix_sum)
+# add_subdirectory(src/cuda_prefix_sum)
 
+add_subdirectory(src)
 add_subdirectory(test)
 
 
