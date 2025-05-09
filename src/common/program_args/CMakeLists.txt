@@ -1,0 +1,3 @@
+add_library(program_args program_args.cpp)
+target_include_directories(program_args PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(program_args PRIVATE my_default_flags)

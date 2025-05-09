@@ -15,7 +15,7 @@ target_link_libraries(
     test_cuda_prefix_sum_solver
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     time_utils

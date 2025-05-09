@@ -15,7 +15,7 @@ target_link_libraries(
     test_mpi_cartesian_grid
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     )
@@ -38,7 +38,7 @@ target_link_libraries(
     test_mpi_environment
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     )
@@ -61,7 +61,7 @@ target_link_libraries(
     test_mpi_prefix_sum_solver
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     )
@@ -84,7 +84,7 @@ target_link_libraries(
     test_mpi_tile_info_distributor
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     )
@@ -106,7 +106,7 @@ target_link_libraries(
     test_mpi_utils
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     )
 target_link_libraries(test_mpi_utils PRIVATE my_default_flags)
@@ -128,7 +128,7 @@ target_link_libraries(
     test_prefix_sum_block_matrix
     PRIVATE
     GTest::gtest_main
-    prefix_sum_common
+    program_args
     prefix_sum_mpi
     prefix_sum_cuda
     )
