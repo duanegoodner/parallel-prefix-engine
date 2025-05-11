@@ -11,6 +11,8 @@ protected:
   std::vector<int> full_matrix_dim_ = std::vector<int>({4, 4});
   // std::vector<int> grid_dim_ = std::vector<int>({2, 2});
   std::vector<int> tile_dim_ = std::vector<int>({2, 2});
+  std::optional<std::vector<int>> maybe_subtile_dim_ = std::nullopt;
+  std::optional<std::string> maybe_kernel_ = std::nullopt;
 
   ProgramArgs program_args_ = ProgramArgs(
       1234,
@@ -18,7 +20,8 @@ protected:
       LogLevel::OFF,
       full_matrix_dim_,
       tile_dim_,
-      "tiled",
+      maybe_subtile_dim_,
+      maybe_kernel_,
       1,
       nullptr
   );

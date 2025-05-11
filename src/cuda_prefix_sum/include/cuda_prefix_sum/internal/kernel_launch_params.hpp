@@ -15,6 +15,7 @@ struct KernelArray {
 struct KernelLaunchParams {
   KernelArray array;
   ArraySize2D tile_size;
+  ArraySize2D subtile_size;
 };
 
 KernelLaunchParams CreateKernelLaunchParams(
