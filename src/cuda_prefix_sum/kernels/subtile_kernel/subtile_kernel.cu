@@ -25,26 +25,26 @@ __global__ void SubtileKernel(
   KernelArray array_a{.d_address = shared_mem, .size = params.array.size};
 
   // === Phase 1: Load input from global memory to shared memory ===
-  // CopyGlobalArrayToSharedArray(params.array, array_a, params.tile_size);
-  CopyMETTiledArray(params.array, array_a, params.tile_size);
+  // CopyGlobalArrayToSharedArray(params.array, array_a, params.sub_tile_size);
+  CopyMETTiledArray(params.array, array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
-  ComputeLocalRowWisePrefixSums(array_a, params.tile_size);
+  ComputeLocalRowWisePrefixSums(array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 3: Column-wise prefix sum within each tile of arrayA ===
-  ComputeLocalColWisePrefixSums(array_a, params.tile_size);
+  ComputeLocalColWisePrefixSums(array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 4: Broadcast right edge values to downstream elements ===
-  BroadcastRightEdgesInPlace(array_a, params.tile_size);
+  BroadcastRightEdgesInPlace(array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 5: Broadcast bottom edge values to downstream elements ===
-  BroadcastBottomEdgesInPlace(array_a, params.tile_size);
+  BroadcastBottomEdgesInPlace(array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 6: Write final result back to global memory ===
-  CopyMETTiledArray(array_a, params.array, params.tile_size);
+  CopyMETTiledArray(array_a, params.array, params.sub_tile_size);
 }

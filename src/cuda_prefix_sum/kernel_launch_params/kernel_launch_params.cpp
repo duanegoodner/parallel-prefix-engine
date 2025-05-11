@@ -16,7 +16,7 @@ KernelLaunchParams CreateKernelLaunchParams(
 
   const auto &subtile = args.sub_tile_dim().value();  // Safe: we've checked
   ArraySize2D tile_size(args.tile_dim()[0], args.tile_dim()[1]);
-  ArraySize2D subtile_size(subtile[0], subtile[1]);
+  ArraySize2D sub_tile_size(subtile[0], subtile[1]);
 
   KernelArray kernel_array{
       .d_address = d_arr,
@@ -26,7 +26,7 @@ KernelLaunchParams CreateKernelLaunchParams(
   return KernelLaunchParams{
       .array = kernel_array,
       .tile_size = tile_size,
-      .subtile_size = subtile_size
+      .sub_tile_size = sub_tile_size
   };
 }
 
