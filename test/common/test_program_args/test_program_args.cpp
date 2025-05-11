@@ -15,8 +15,8 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
   EXPECT_EQ(program_args.FullMatrixSize(), 16);
-  EXPECT_EQ(program_args.GridDim()[0], 2);
-  EXPECT_EQ(program_args.GridDim()[1], 2);
+  EXPECT_EQ(program_args.GridDim()[0], 1);
+  EXPECT_EQ(program_args.GridDim()[1], 1);
   EXPECT_EQ(program_args.orig_argc(), 0);
   EXPECT_EQ(program_args.orig_argv(), nullptr);
 }

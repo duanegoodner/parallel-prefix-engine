@@ -27,3 +27,5 @@ target_link_libraries(
     cuda_headers
     )
 
+gtest_discover_tests(test_cuda_prefix_sum_solver)
+

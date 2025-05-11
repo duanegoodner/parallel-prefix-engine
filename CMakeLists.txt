@@ -5,6 +5,24 @@ include(CTest)
 enable_testing()
 include(GoogleTest)
 
+# # ===========================
+# # Fetch GoogleTest
+# # ===========================
+
+# include(FetchContent)
+# include(CMakeFindDependencyMacro)
+
+# # cmake_policy(SET CMP0135 NEW)
+
+# FetchContent_Declare(
+#         googletest
+#         URL
+#         https://github.com/google/googletest/archive/ec25eea8f8237cf86c30703f59747e42f34b6f75.zip)
+
+# # For Windows: Prevent overriding the parent project's compiler/linker settings
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
+
 
 # Enable CUDA
 # enable_language(CUDA)
