@@ -40,20 +40,10 @@ public:
   }
   [[nodiscard]] const std::vector<int> &tile_dim() const { return tile_dim_; }
   [[nodiscard]] const std::optional<std::vector<int>> &sub_tile_dim() const {
-    if (backend_ != "cuda") {
-      throw std::logic_error(
-          "sub_tile_dim is not set — only valid for CUDA backend."
-      );
-    }
     return sub_tile_dim_;
   }
 
   [[nodiscard]] std::optional<std::string> cuda_kernel() const {
-    if (backend_ != "cuda") {
-      throw std::logic_error(
-          "sub_tile_dim is not set — only valid for CUDA backend."
-      );
-    }
     return cuda_kernel_;
   }
 
