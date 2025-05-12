@@ -26,3 +26,5 @@ target_link_libraries(
     )
 target_link_libraries(test_mpi_prefix_sum_solver PRIVATE my_default_flags)
 
+gtest_discover_tests(test_mpi_prefix_sum_solver)
+

@@ -20,3 +20,5 @@ target_link_libraries(
     MPI::MPI_CXX
     )
 target_link_libraries(test_mpi_cartesian_grid PRIVATE my_default_flags)
+
+gtest_discover_tests(test_mpi_cartesian_grid)

@@ -19,3 +19,5 @@ target_link_libraries(
     MPI::MPI_CXX
     )
 target_link_libraries(test_prefix_sum_block_matrix PRIVATE my_default_flags)
+
+gtest_discover_tests(test_prefix_sum_block_matrix)

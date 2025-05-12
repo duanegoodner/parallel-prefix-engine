@@ -11,6 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -25,7 +26,8 @@ public:
       LogLevel log_level,
       std::vector<int> full_matrix_dim,
       std::vector<int> tile_dim,
-      std::string cuda_kernel,
+      std::optional<std::vector<int>> sub_tile_dim,
+      std::optional<std::string> cuda_kernel,
       int orig_argc,
       char **orig_argv
   );
@@ -37,8 +39,13 @@ public:
     return full_matrix_dim_;
   }
   [[nodiscard]] const std::vector<int> &tile_dim() const { return tile_dim_; }
+  [[nodiscard]] const std::optional<std::vector<int>> &sub_tile_dim() const {
+    return sub_tile_dim_;
+  }
 
-  [[nodiscard]] std::string cuda_kernel() const { return cuda_kernel_; }
+  [[nodiscard]] std::optional<std::string> cuda_kernel() const {
+    return cuda_kernel_;
+  }
 
   [[nodiscard]] int orig_argc() const { return orig_argc_; }
   [[nodiscard]] char **orig_argv() const { return orig_argv_; }
@@ -84,11 +91,12 @@ public:
 private:
   int seed_ = 1234;
   std::string backend_ = "mpi";
-  LogLevel log_level_ = LogLevel::OFF;
+  LogLevel log_level_ = LogLevel::WARNING;
 
   std::vector<int> full_matrix_dim_ = {4, 4};
-  std::vector<int> tile_dim_ = {2, 2};
-  std::string cuda_kernel_ = "tiled";
+  std::vector<int> tile_dim_ = {4, 4};
+  std::optional<std::vector<int>> sub_tile_dim_;
+  std::optional<std::string> cuda_kernel_;
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;
