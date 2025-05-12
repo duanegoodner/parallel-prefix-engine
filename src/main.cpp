@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
           std::to_string(program_args.full_matrix_dim()[0]) + " x " +
           std::to_string(program_args.full_matrix_dim()[1])
   );
+  std::cout << std::endl;
 
 
   auto solver = MakeSolver(program_args);

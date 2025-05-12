@@ -1,6 +1,10 @@
 #include <cuda_runtime.h>
 
+#include <iostream>
 #include <stdexcept>
+#include <string>
+
+#include "common/logger.hpp"
 
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
@@ -9,11 +13,7 @@
 
 void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
-  if (launch_params.array.size != launch_params.tile_size) {
-    throw std::runtime_error(
-        "For Subtile Kernel, tile size must match full array size."
-    );
-  }
+  CheckProvidedTileSize(launch_params);
 
   // Set max dynamic shared memory and prefer shared over L1
   constexpr size_t kMaxSharedMemBytes = 98304;
@@ -29,6 +29,10 @@ void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
   // Validate
   CheckErrors();
+}
+
+dim3 SubTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
+  return dim3(1, 1, 1);
 }
 
 dim3 SubTileKernelLauncher::GetBlockDim(
@@ -49,10 +53,6 @@ dim3 SubTileKernelLauncher::GetBlockDim(
   return dim3(num_tile_cols, num_tile_rows, 1);
 }
 
-dim3 SubTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
-  return dim3(1, 1, 1);
-}
-
 size_t SubTileKernelLauncher::GetSharedMemSize(
     const KernelLaunchParams &launch_params
 ) {
@@ -70,5 +70,34 @@ void SubTileKernelLauncher::CheckErrors() {
   cudaError_t sync_err = cudaGetLastError();
   if (sync_err != cudaSuccess) {
     fprintf(stderr, "CUDA sync error: %s\n", cudaGetErrorString(sync_err));
+  }
+}
+
+void SubTileKernelLauncher::CheckProvidedTileSize(
+    const KernelLaunchParams &launch_params
+) {
+  if (launch_params.array.size != launch_params.tile_size) {
+    std::cout << std::endl;
+    std::string tile_size = std::to_string(launch_params.tile_size.num_rows) +
+                            "x" +
+                            std::to_string(launch_params.tile_size.num_cols);
+    std::string full_matrix_size =
+        std::to_string(launch_params.array.size.num_rows) + "x" +
+        std::to_string(launch_params.array.size.num_cols) + ".";
+    Logger::Log(
+        LogLevel::WARNING,
+        "Specified tile size of " + tile_size +
+            " does not match full matrix size of " + full_matrix_size
+    );
+    Logger::Log(
+        LogLevel::WARNING,
+        "Subtile kernel uses single top level tile with size equal to "
+        "full matrix size."
+    );
+    Logger::Log(
+        LogLevel::WARNING,
+        "Ignoring provided tile size value of " + tile_size + "."
+    );
+    std::cout << std::endl;
   }
 }

@@ -1,1 +1,2 @@
+add_subdirectory(multi_block_kernel)
 add_subdirectory(subtile_kernel)

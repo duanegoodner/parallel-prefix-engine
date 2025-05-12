@@ -5,6 +5,7 @@ target_link_libraries(
     solver_dispatch
     PRIVATE
     my_default_flags
+    multi_block_kernel_launcher
     subtile_kernel_launcher
     prefix_sum_mpi
     )

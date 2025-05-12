@@ -1,8 +1,7 @@
 // ----------------------------------------------------------------------------
 // logger.hpp
 //
-// Minimal logging utility for optional verbose output. Currently unused but
-// available for future debug or profiling expansion.
+// Minimal logging utility for optional verbose output. 
 // ----------------------------------------------------------------------------
 
 #pragma once
@@ -15,17 +14,17 @@
 #include <string_view>
 #include <utility>
 
-enum class LogLevel { OFF, INFO, DEBUG, ERROR, COUNT };
+enum class LogLevel { OFF, INFO, WARNING, ERROR, COUNT };
 
 namespace LogLevelUtils {
 constexpr std::array<std::string_view, static_cast<size_t>(LogLevel::COUNT)>
-    level_strings{"off", "info", "debug", "error"};
+    level_strings{"off", "info", "warning", "error"};
 
 constexpr std::array<std::pair<std::string_view, LogLevel>, 4> string_to_level{
     {
         {"off", LogLevel::OFF},
         {"info", LogLevel::INFO},
-        {"debug", LogLevel::DEBUG},
+        {"warning", LogLevel::WARNING},
         {"error", LogLevel::ERROR},
     }};
 
@@ -50,7 +49,7 @@ public:
   static void SetLogLevel(LogLevel level) { log_level_ = level; }
 
   static void Log(LogLevel level, const std::string &message) {
-    if (log_level_ == LogLevel::OFF || level > log_level_)
+    if (log_level_ == LogLevel::OFF || level < log_level_)
       return;
 
     std::ostream &out = (level == LogLevel::ERROR) ? std::cerr : std::cout;

@@ -8,7 +8,9 @@
 #include "common/program_args.hpp"
 
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
+
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+#include "cuda_prefix_sum/multi_block_kernel_launcher.cuh"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
@@ -20,21 +22,26 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
            [](ProgramArgs &args) {
              return std::make_unique<MpiPrefixSumSolver>(args);
            }},
-          {"cuda",
-           [](ProgramArgs &args) {
+          {"cuda", [](ProgramArgs &args) {
              using LauncherCreator =
                  std::function<std::unique_ptr<KernelLauncher>()>;
 
              static const std::unordered_map<std::string, LauncherCreator>
                  kernel_map = {
                      {"tiled",
-                      [] { return std::make_unique<SubTileKernelLauncher>(); }},
+                      [] {
+                        return std::make_unique<SubTileKernelLauncher>();
+                      }},
+                     {"multiblock",
+                      [] {
+                        return std::make_unique<MultiBlockKernelLauncher>();
+                      }},
                      // Add more kernels here
                  };
 
              if (!args.cuda_kernel().has_value()) {
-               throw std::runtime_error(
-                   "Missing CUDA kernel name: --kernel is required with --backend=cuda");
+               throw std::runtime_error("Missing CUDA kernel name: --kernel "
+                                        "is required with --backend=cuda");
              }
 
              const std::string &kernel = args.cuda_kernel().value();

@@ -17,7 +17,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
 
   int seed = 1234;
   std::string backend = "mpi";
-  std::string log_level = "off";
+  std::string log_level = "warning";
   std::vector<int> full_matrix_dim = {4, 4};
   std::vector<int> tile_dim = {2, 2};
 
@@ -34,10 +34,10 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   app.add_option(
       "-L, --log-level",
       log_level,
-      "Logging level (off, info, debug or error)"
+      "Logging level"
   )
-      ->check(CLI::IsMember({"off", "info", "debug", "error"}))
-      ->default_val("off");
+      ->check(CLI::IsMember({"off", "info", "warning", "error"}))
+      ->default_val("warning");
 
   app.add_option(
       "-f, --full-matrix-dim",
