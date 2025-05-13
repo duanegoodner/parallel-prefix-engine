@@ -187,7 +187,7 @@ __device__ void ComputeLocalColWisePrefixSums(
   }
 }
 
-__device__ void BroadcastRightEdgesInPlace(
+__device__ void BroadcastSharedMemRightEdges(
     KernelArray shared_mem_array,
     const ArraySize2D tile_size
 ) {
@@ -197,6 +197,7 @@ __device__ void BroadcastRightEdgesInPlace(
     // === Step 1: Preload the source value *once*
     auto source_coords =
         GetElementCoords(local_row, tile_size.num_cols - 1, tile_size);
+    __syncthreads();
     int edge_val =
         shared_mem_array.d_address[source_coords.SharedArrayIndex1D()];
 
@@ -219,7 +220,7 @@ __device__ void BroadcastRightEdgesInPlace(
   }
 }
 
-__device__ void BroadcastBottomEdgesInPlace(
+__device__ void BroadcastSharedMemBottomEdges(
     KernelArray shared_mem_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -229,6 +230,7 @@ __device__ void BroadcastBottomEdgesInPlace(
     // === Step 1: Preload bottom row value for this column
     auto source_coords =
         GetElementCoords(sub_tile_size.num_rows - 1, local_col, sub_tile_size);
+    __syncthreads();
     auto edge_val =
         shared_mem_array.d_address[source_coords.SharedArrayIndex1D()];
 
@@ -249,4 +251,21 @@ __device__ void BroadcastBottomEdgesInPlace(
       }
     }
   }
+}
+
+__device__ void ComputeSharedMemArrayPrefixSum(
+    KernelArray shared_mem_array,
+    ArraySize2D sub_tile_size
+) {
+  ComputeLocalRowWisePrefixSums(shared_mem_array, sub_tile_size);
+  __syncthreads();
+
+  ComputeLocalColWisePrefixSums(shared_mem_array, sub_tile_size);
+  __syncthreads();
+
+  BroadcastSharedMemRightEdges(shared_mem_array, sub_tile_size);
+  __syncthreads();
+
+  BroadcastSharedMemBottomEdges(shared_mem_array, sub_tile_size);
+  __syncthreads();
 }

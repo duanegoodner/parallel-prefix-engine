@@ -1,29 +1,26 @@
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
+
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
 ARG COMPONENTS=./image_resources/components
 
-SHELL [ "/bin/bash", "--login", "-c" ]
+SHELL ["/bin/bash", "--login", "-c"]
 
-COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
-RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
-    && sudo rm -rf /tmp/create_sudo_user
+# --- Create group and user without sudo ---
+RUN groupadd -g ${PRIMARY_GID} ${PRIMARY_USER} && \
+    useradd -m -s /bin/bash -u ${PRIMARY_UID} -g ${PRIMARY_GID} ${PRIMARY_USER}
 
-# RUN apt-get update && apt-get install -y sudo \
-#  && echo "ubuntu ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-
-USER ${PRIMARY_USER}
-ARG BUILD_DIR=/home/${PRIMARY_USER}/docker_build
+# --- Build directory for all setup steps ---
+ARG BUILD_DIR=/tmp/build
+RUN mkdir -p ${BUILD_DIR}
 WORKDIR ${BUILD_DIR}
 
-RUN sudo apt-get update && \
-    sudo apt-get install -y --no-install-recommends \
+# --- Install dependencies as root ---
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     gdb \
-    # mpich \
-    # libmpich-dev \
     cmake \
     ca-certificates \
     libpq-dev \
@@ -34,29 +31,79 @@ RUN sudo apt-get update && \
     zsh \
     nano \
     clang-format \
-    && sudo rm -rf /var/lib/apt/lists/*
+    fontconfig \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
-RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} \
-    && sudo rm -rf ${BUILD_DIR}/*
-
-RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
-    && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/${PRIMARY_USER}/miniconda3/miniconda.sh \
-    && bash /home/${PRIMARY_USER}/miniconda3/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 \
-    && rm /home/${PRIMARY_USER}/miniconda3/miniconda.sh \
-    && source ~/miniconda3/bin/activate \
-    && conda init --all
-
-COPY ./env.yml /home/${PRIMARY_USER}
-RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /home/${PRIMARY_USER}/env.yml
-RUN echo "conda activate project_env" >> ~/.bashrc
-RUN echo "conda activate project_env" >> ~/.zshrc
+# --- Optional: Shell setup (Zsh etc.) ---
+# COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
+# RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} && \
+#     rm -rf ${BUILD_DIR}/zsh_setup
 
 
+# Install Oh My Zsh + plugins + fonts for PRIMARY_USER
+RUN git clone https://github.com/ohmyzsh/ohmyzsh.git /home/${PRIMARY_USER}/.oh-my-zsh && \
+    cp /home/${PRIMARY_USER}/.oh-my-zsh/templates/zshrc.zsh-template /home/${PRIMARY_USER}/.zshrc && \
+    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.oh-my-zsh /home/${PRIMARY_USER}/.zshrc && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
+    git clone https://github.com/zsh-users/zsh-completions /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-completions && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    git clone https://github.com/zsh-users/zsh-history-substring-search /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-history-substring-search && \
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/${PRIMARY_USER}/.oh-my-zsh/custom/themes/powerlevel10k && \
+    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.oh-my-zsh/custom
 
-RUN sudo mkdir /home/${PRIMARY_USER}/project
-WORKDIR /home/${PRIMARY_USER}/project
-RUN sudo rm -rf ${BUILD_DIR}
+# Activate plugins and theme in .zshrc
+RUN echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> /home/${PRIMARY_USER}/.zshrc && \
+    echo 'plugins=(git zsh-autosuggestions zsh-completions zsh-syntax-highlighting history-substring-search)' >> /home/${PRIMARY_USER}/.zshrc && \
+    echo '[ -f ~/.p10k.zsh ] && source ~/.p10k.zsh' >> /home/${PRIMARY_USER}/.zshrc
 
-RUN sudo mkdir -p /usr/local/entrypoints
+# Download MesloLGS Nerd Font (Powerlevel10k recommended font)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig \
+    unzip \
+    && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /usr/share/fonts/truetype/meslo && \
+    wget --show-progress --user-agent="Mozilla" \
+      https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip \
+      -O /tmp/Meslo.zip && \
+    unzip -j /tmp/Meslo.zip '*.ttf' -d /usr/share/fonts/truetype/meslo && \
+    fc-cache -fv && \
+    rm /tmp/Meslo.zip
+
+# --- Create project workspace owned by dev user ---
+RUN mkdir -p /home/${PRIMARY_USER}/project && \
+    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/project
+
+# --- Optional: entrypoint setup ---
+RUN mkdir -p /usr/local/entrypoints
 COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
+
+# --- Clean up build directory ---
+RUN rm -rf ${BUILD_DIR} /tmp/* /var/tmp/* ~/.cache
+
+# --- Switch to unprivileged user ---
+USER ${PRIMARY_USER}
+WORKDIR /home/${PRIMARY_USER}/project
+
+
+# -----------------------------
+# Switch to unprivileged user
+# -----------------------------
+    USER ${PRIMARY_USER}
+    WORKDIR /home/${PRIMARY_USER}/project
+    
+# -----------------------------
+# Install Miniconda (user scope)
+# -----------------------------
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 && \
+    rm /tmp/miniconda.sh && \
+    /home/${PRIMARY_USER}/miniconda3/bin/conda init zsh && \
+    echo "conda activate project_env" >> ~/.zshrc && \
+    echo "conda activate project_env" >> ~/.bashrc
+
+# -----------------------------
+# Set up conda environment
+# -----------------------------
+COPY ./env.yml /home/${PRIMARY_USER}/env.yml
+RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /home/${PRIMARY_USER}/env.yml
+    
