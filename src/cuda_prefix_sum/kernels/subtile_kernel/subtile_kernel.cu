@@ -25,7 +25,8 @@ __global__ void SubtileKernel(
 
   // === Phase 1: Load input from global memory to shared memory ===
   // CopyGlobalArrayToSharedArray(params.array, array_a, params.sub_tile_size);
-  CopyMETTiledArray(params.array, array_a, params.sub_tile_size);
+  // CopyMETTiledArray(params.array, array_a, params.sub_tile_size);
+  CopyFromGlobalToShared(params.array, array_a, params.sub_tile_size);
   __syncthreads();
 
   // === Phase 2: Row-wise prefix sum within each tile of arrayA ===
@@ -45,5 +46,6 @@ __global__ void SubtileKernel(
   __syncthreads();
 
   // === Phase 6: Write final result back to global memory ===
-  CopyMETTiledArray(array_a, params.array, params.sub_tile_size);
+  // CopyMETTiledArray(array_a, params.array, params.sub_tile_size);
+  CopyFromSharedToGlobal(array_a, params.array, params.sub_tile_size);
 }
