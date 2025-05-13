@@ -15,8 +15,8 @@ __forceinline__ __device__ int ArrayIndex1D(int row, int col, int num_cols) {
 // including automatic global and shared memory access.
 //
 struct ElementCoords {
-  int local_row;
-  int local_col;
+  const int local_row;
+  const int local_col;
   ArraySize2D subtile_size;
 
   __device__ int global_row() const {
@@ -51,8 +51,8 @@ struct ElementCoords {
 // Helper to construct an ElementCoords instance
 //
 __forceinline__ __device__ ElementCoords GetElementCoords(
-    int local_row,
-    int local_col,
+    const int local_row,
+    const int local_col,
     const ArraySize2D &subtile_size
 ) {
   return ElementCoords{local_row, local_col, subtile_size};
@@ -72,11 +72,11 @@ __device__ void PrintThreadAndBlockIndices() {
 
 __device__ void PrintSubTileContents(
     KernelArray shared_mem_array,
-    ArraySize2D sub_tile_size,
-    int tile_row_index = 0,
-    int tile_col_index = 0,
-    int sub_tile_row_index = 0,
-    int sub_tile_col_index = 0
+    const ArraySize2D sub_tile_size,
+    const int tile_row_index = 0,
+    const int tile_col_index = 0,
+    const int sub_tile_row_index = 0,
+    const int sub_tile_col_index = 0
 ) {
   if (blockIdx.x == tile_col_index && blockIdx.y == tile_row_index &&
       threadIdx.x == sub_tile_col_index && threadIdx.y == sub_tile_row_index) {
@@ -95,9 +95,9 @@ __device__ void PrintSubTileContents(
 }
 
 __device__ void CopyFromGlobalToShared(
-    KernelArray global_array,
+    const KernelArray global_array,
     KernelArray shared_mem_array,
-    ArraySize2D sub_tile_size
+    const ArraySize2D sub_tile_size
 ) {
 
   for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
@@ -113,9 +113,9 @@ __device__ void CopyFromGlobalToShared(
 }
 
 __device__ void CopyFromSharedToGlobal(
-    KernelArray shared_mem_array,
+    const KernelArray shared_mem_array,
     KernelArray global_array,
-    ArraySize2D sub_tile_size
+    const ArraySize2D sub_tile_size
 ) {
 
   for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
@@ -130,6 +130,8 @@ __device__ void CopyFromSharedToGlobal(
   }
 }
 
+// Prints the contents of a thread's assigned subtile from shared memory.
+// Only active for a specific blockIdx & threadIdx.
 __device__ void PrintKernelArray(KernelArray array, const char *label) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
@@ -148,8 +150,8 @@ __device__ void PrintKernelArray(KernelArray array, const char *label) {
 
 __device__ void CombineElementInto(
     KernelArray shared_mem_array,
-    ElementCoords other_element,
-    ElementCoords cur_element
+    const ElementCoords other_element,
+    const ElementCoords cur_element
 ) {
   shared_mem_array.d_address[cur_element.SharedArrayIndex1D()] +=
       shared_mem_array.d_address[other_element.SharedArrayIndex1D()];
@@ -157,7 +159,7 @@ __device__ void CombineElementInto(
 
 __device__ void ComputeLocalRowWisePrefixSums(
     KernelArray shared_mem_array,
-    ArraySize2D sub_tile_size
+    const ArraySize2D sub_tile_size
 ) {
   __syncthreads();
   for (int local_col = 1; local_col < sub_tile_size.num_cols; ++local_col) {
@@ -172,7 +174,7 @@ __device__ void ComputeLocalRowWisePrefixSums(
 
 __device__ void ComputeLocalColWisePrefixSums(
     KernelArray shared_mem_array,
-    ArraySize2D sub_tile_size
+    const ArraySize2D sub_tile_size
 ) {
 
   for (int local_row = 1; local_row < sub_tile_size.num_rows; ++local_row) {
@@ -187,7 +189,7 @@ __device__ void ComputeLocalColWisePrefixSums(
 
 __device__ void BroadcastRightEdgesInPlace(
     KernelArray shared_mem_array,
-    ArraySize2D tile_size
+    const ArraySize2D tile_size
 ) {
   // Each thread is responsible for broadcasting from one row
   for (int local_row = 0; local_row < tile_size.num_rows; ++local_row) {
@@ -219,7 +221,7 @@ __device__ void BroadcastRightEdgesInPlace(
 
 __device__ void BroadcastBottomEdgesInPlace(
     KernelArray shared_mem_array,
-    ArraySize2D sub_tile_size
+    const ArraySize2D sub_tile_size
 ) {
   // Each thread is responsible for broadcasting from one column
   for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
