@@ -37,6 +37,10 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp=unconfined
+    tmpfs:
+      - /tmp
+      - /dev/shm
+
   
 
   hpc_mpich:
@@ -70,6 +74,9 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp=unconfined
+    tmpfs:
+      - /tmp
+      - /dev/shm
 
   hpc_openmpi:
     image: hpc_openmpi
@@ -102,6 +109,9 @@ services:
       - SYS_PTRACE
     security_opt:
       - seccomp=unconfined
+    tmpfs:
+      - /tmp
+      - /dev/shm
 
 
 
