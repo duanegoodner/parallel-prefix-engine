@@ -1,8 +1,12 @@
 FROM hpc_base
 
-# Install MPICH
-RUN sudo apt-get update && sudo apt-get install -y \
-    mpich libmpich-dev \
-    && sudo rm -rf /var/lib/apt/lists/*
+ARG PRIMARY_USER
 
-# WORKDIR /home/${PRIMARY_USER}/project
+USER root
+
+# Install MPICH
+RUN apt-get update && apt-get install -y \
+    mpich libmpich-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+USER ${PRIMARY_USER}

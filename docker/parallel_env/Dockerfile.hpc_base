@@ -32,42 +32,10 @@ RUN apt-get update && \
     nano \
     clang-format \
     fontconfig \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Optional: Shell setup (Zsh etc.) ---
-# COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
-# RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} && \
-#     rm -rf ${BUILD_DIR}/zsh_setup
 
-
-# Install Oh My Zsh + plugins + fonts for PRIMARY_USER
-RUN git clone https://github.com/ohmyzsh/ohmyzsh.git /home/${PRIMARY_USER}/.oh-my-zsh && \
-    cp /home/${PRIMARY_USER}/.oh-my-zsh/templates/zshrc.zsh-template /home/${PRIMARY_USER}/.zshrc && \
-    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.oh-my-zsh /home/${PRIMARY_USER}/.zshrc && \
-    git clone https://github.com/zsh-users/zsh-autosuggestions /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
-    git clone https://github.com/zsh-users/zsh-completions /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-completions && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
-    git clone https://github.com/zsh-users/zsh-history-substring-search /home/${PRIMARY_USER}/.oh-my-zsh/custom/plugins/zsh-history-substring-search && \
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /home/${PRIMARY_USER}/.oh-my-zsh/custom/themes/powerlevel10k && \
-    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.oh-my-zsh/custom
-
-# Activate plugins and theme in .zshrc
-RUN echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> /home/${PRIMARY_USER}/.zshrc && \
-    echo 'plugins=(git zsh-autosuggestions zsh-completions zsh-syntax-highlighting history-substring-search)' >> /home/${PRIMARY_USER}/.zshrc && \
-    echo '[ -f ~/.p10k.zsh ] && source ~/.p10k.zsh' >> /home/${PRIMARY_USER}/.zshrc
-
-# Download MesloLGS Nerd Font (Powerlevel10k recommended font)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    fontconfig \
-    unzip \
-    && rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /usr/share/fonts/truetype/meslo && \
-    wget --show-progress --user-agent="Mozilla" \
-      https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip \
-      -O /tmp/Meslo.zip && \
-    unzip -j /tmp/Meslo.zip '*.ttf' -d /usr/share/fonts/truetype/meslo && \
-    fc-cache -fv && \
-    rm /tmp/Meslo.zip
 
 # --- Create project workspace owned by dev user ---
 RUN mkdir -p /home/${PRIMARY_USER}/project && \
@@ -80,30 +48,64 @@ COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
 # --- Clean up build directory ---
 RUN rm -rf ${BUILD_DIR} /tmp/* /var/tmp/* ~/.cache
 
-# --- Switch to unprivileged user ---
-USER ${PRIMARY_USER}
-WORKDIR /home/${PRIMARY_USER}/project
-
 
 # -----------------------------
 # Switch to unprivileged user
 # -----------------------------
-    USER ${PRIMARY_USER}
-    WORKDIR /home/${PRIMARY_USER}/project
+USER ${PRIMARY_USER}
+WORKDIR /home/${PRIMARY_USER}/project
     
+# -----------------------------
+# Install Oh My Zsh + plugins + theme
+# -----------------------------
+RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh && \
+    cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
+    git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search && \
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
+
+# -----------------------------
+# Fonts: install MesloLGS Nerd Font (user-local)
+# -----------------------------
+RUN mkdir -p ~/.local/share/fonts && \
+wget --show-progress --user-agent="Mozilla" \
+    https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip \
+    -O /tmp/Meslo.zip && \
+unzip -j /tmp/Meslo.zip '*.ttf' -d ~/.local/share/fonts && \
+fc-cache -fv && \
+rm /tmp/Meslo.zip
+
+# -----------------------------
+# Copy final Zsh and p10k configs (as root)
+# -----------------------------
+USER root
+COPY image_resources/components/zsh_setup/.zshrc /home/${PRIMARY_USER}/.zshrc
+COPY image_resources/components/zsh_setup/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
+RUN chown ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.zshrc /home/${PRIMARY_USER}/.p10k.zsh
+USER ${PRIMARY_USER}
+
+
 # -----------------------------
 # Install Miniconda (user scope)
 # -----------------------------
+USER ${PRIMARY_USER}
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
-    bash /tmp/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 && \
-    rm /tmp/miniconda.sh && \
-    /home/${PRIMARY_USER}/miniconda3/bin/conda init zsh && \
-    echo "conda activate project_env" >> ~/.zshrc && \
-    echo "conda activate project_env" >> ~/.bashrc
+bash /tmp/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 && \
+rm /tmp/miniconda.sh && \
+/home/${PRIMARY_USER}/miniconda3/bin/conda init zsh && \
+echo "conda activate project_env" >> ~/.zshrc && \
+echo "conda activate project_env" >> ~/.bashrc
 
-# -----------------------------
-# Set up conda environment
-# -----------------------------
 COPY ./env.yml /home/${PRIMARY_USER}/env.yml
 RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /home/${PRIMARY_USER}/env.yml
     
+# -----------------------------
+# Ensure we are devuser with WORKDIR = ~/project/
+# -----------------------------
+USER ${PRIMARY_USER}
+WORKDIR /home/${PRIMARY_USER}/project
+
+# Trigger Powerlevel10k to pre-fetch gitstatusd
+RUN zsh -i -c exit
