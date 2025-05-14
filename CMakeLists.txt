@@ -55,7 +55,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # BUILD CONFIGURATION OPTIONS
 # ===========================
 
-option(RESET_DEFAULTS "Reset all options to default settings" OFF)
 
 # Optimization levels (only one should be ON)
 option(ENABLE_O0 "No compiler optimization -O0" OFF)
@@ -71,24 +70,6 @@ option(ENABLE_PROFILING "Enable profiling with -p (for gprof)" OFF)
 option(ENABLE_CUDA_FAST_MATH "Enable CUDA --use_fast_math (not recommended for debug builds)" OFF)
 
 
-
-# ===========================
-# HANDLE RESET_DEFAULTS OPTION
-# ===========================
-
-if (RESET_DEFAULTS)
-    message(STATUS "Resetting all options to default settings (turning them OFF)...")
-
-    set(ENABLE_O0 OFF CACHE BOOL "Disable -O0" FORCE)
-    set(ENABLE_O1 OFF CACHE BOOL "Disable -O1" FORCE)
-    set(ENABLE_O2 OFF CACHE BOOL "Disable -O2" FORCE)
-    set(ENABLE_O3 OFF CACHE BOOL "Disable -O3" FORCE)
-    set(ENABLE_DEBUG OFF CACHE BOOL "Disable Debugging Symbols" FORCE)
-    set(ENABLE_PROFILING OFF CACHE BOOL "Disable Profiling" FORCE)
-    set(ENABLE_CUDA_FAST_MATH OFF CACHE BOOL "Disable CUDA Fast Math" FORCE)
-endif()
-
-
 # ===========================
 # CREATE INTERFACE TARGET FOR DEFAULT FLAGS
 # ===========================
@@ -98,7 +79,7 @@ add_library(my_default_flags INTERFACE)
 if (ENABLE_DEBUG)
     message(STATUS "Debugging is ENABLED: -g -O0 for host, -g -G -O0 for CUDA")
     target_compile_options(my_default_flags INTERFACE
-        $<$<COMPILE_LANGUAGE:CXX>:-g -O0 -march=native>
+        $<$<COMPILE_LANGUAGE:CXX>:-g -O0 -march=native -fno-omit-frame-pointer>
         $<$<COMPILE_LANGUAGE:CUDA>:-G;-g;-O0;-lineinfo>
     )
 else()
@@ -124,6 +105,13 @@ else()
             $<$<COMPILE_LANGUAGE:CUDA>:-O3>
         )
     endif()
+endif()
+
+# Apply gprof profiling flag
+if (ENABLE_PROFILING)
+    message(STATUS "Profiling is ENABLED: Adding -pg")
+    target_compile_options(my_default_flags INTERFACE -pg)
+    target_link_options(my_default_flags INTERFACE -pg)
 endif()
 
 # CUDA fast math (only for performance builds)

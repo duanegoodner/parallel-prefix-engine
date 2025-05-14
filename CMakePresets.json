@@ -1,0 +1,63 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20
+    },
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug (CUDA + Host)",
+            "description": "Debug build with symbols and CUDA -G enabled.",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_DEBUG": "ON",
+                "ENABLE_CUDA_FAST_MATH": "OFF",
+                "ENABLE_O0": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release (Optimized)",
+            "description": "Optimized build with CUDA fast math.",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENABLE_DEBUG": "OFF",
+                "ENABLE_O3": "ON",
+                "ENABLE_CUDA_FAST_MATH": "ON"
+            }
+        },
+        {
+            "name": "release-profiling",
+            "displayName": "Release with gprof",
+            "description": "Optimized build with gprof instrumentation (-pg).",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release-profiling",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENABLE_DEBUG": "OFF",
+                "ENABLE_O3": "ON",
+                "ENABLE_PROFILING": "ON",
+                "ENABLE_CUDA_FAST_MATH": "ON"
+            }
+        },
+        {
+            "name": "perf-profiling",
+            "displayName": "Perf Profiling (Linux)",
+            "description": "Optimized build with -g and frame pointers for perf stack traces.",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/perf-profiling",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_DEBUG": "ON",
+                "ENABLE_O3": "ON",
+                "ENABLE_PROFILING": "OFF",
+                "ENABLE_CUDA_FAST_MATH": "ON"
+            }
+        }
+    ]
+}
