@@ -33,6 +33,14 @@ services:
     init: true
     stdin_open: true
     tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    tmpfs:
+      - /tmp:exec
+      - /dev/shm:exec
+
   
 
   hpc_mpich:
@@ -62,6 +70,13 @@ services:
     init: true
     stdin_open: true
     tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    tmpfs:
+      - /tmp:exec
+      - /dev/shm:exec
 
   hpc_openmpi:
     image: hpc_openmpi
@@ -90,6 +105,13 @@ services:
     init: true
     stdin_open: true
     tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    tmpfs:
+      - /tmp:exec
+      - /dev/shm:exec
 
 
 
