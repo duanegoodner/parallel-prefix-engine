@@ -38,8 +38,8 @@ services:
     security_opt:
       - seccomp=unconfined
     tmpfs:
-      - /tmp
-      - /dev/shm
+      - /tmp:exec
+      - /dev/shm:exec
 
   
 
@@ -75,8 +75,8 @@ services:
     security_opt:
       - seccomp=unconfined
     tmpfs:
-      - /tmp
-      - /dev/shm
+      - /tmp:exec
+      - /dev/shm:exec
 
   hpc_openmpi:
     image: hpc_openmpi
@@ -110,8 +110,8 @@ services:
     security_opt:
       - seccomp=unconfined
     tmpfs:
-      - /tmp
-      - /dev/shm
+      - /tmp:exec
+      - /dev/shm:exec
 
 
 
