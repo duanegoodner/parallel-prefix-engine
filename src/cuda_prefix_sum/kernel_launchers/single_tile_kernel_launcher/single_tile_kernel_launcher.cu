@@ -8,8 +8,8 @@
 
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/subtile_kernel.cuh"
-#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/internal/single_tile_kernel.cuh"
+#include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
 void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
@@ -17,7 +17,7 @@ void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
   // Set max dynamic shared memory and prefer shared over L1
   constexpr size_t kMaxSharedMemBytes = 98304;
-  ConfigureSharedMemoryForKernel(SubtileKernel, kMaxSharedMemBytes);
+  ConfigureSharedMemoryForKernel(SingleTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
   dim3 block_dim = GetBlockDim(launch_params);
@@ -25,7 +25,7 @@ void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
   size_t shared_mem_size = GetSharedMemSize(launch_params);
 
   // Launch the kernel
-  SubtileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
+  SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
 
   // Validate
   CheckErrors();

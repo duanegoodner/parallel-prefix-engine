@@ -1,19 +1,19 @@
 add_library(
-    subtile_kernel
-    subtile_kernel.cu
+    single_tile_kernel
+    single_tile_kernel.cu
     )
 
 target_include_directories(
-    subtile_kernel
+    single_tile_kernel
     PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_include_directories(subtile_kernel
+target_include_directories(single_tile_kernel
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
-target_link_libraries(subtile_kernel
+target_link_libraries(single_tile_kernel
     PRIVATE
         CUDA::cudart
         cuda_headers

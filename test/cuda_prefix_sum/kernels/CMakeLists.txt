@@ -1,2 +1,2 @@
-add_subdirectory(subtile_kernel)
-add_subdirectory(multi_block_kernel)
+add_subdirectory(single_tile_kernel)
+add_subdirectory(multi_tile_kernel)

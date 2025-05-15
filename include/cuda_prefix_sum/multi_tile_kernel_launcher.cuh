@@ -3,7 +3,7 @@
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/kernel_launcher.hpp"
 
-class MultiBlockKernelLauncher : public KernelLauncher {
+class MultiTileKernelLauncher : public KernelLauncher {
 public:
   void Launch(const KernelLaunchParams &params) override;
 

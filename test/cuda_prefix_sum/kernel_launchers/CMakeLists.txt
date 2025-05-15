@@ -1,1 +1,1 @@
-add_subdirectory(multi_block_kernel_launcher)
+add_subdirectory(multi_tile_kernel_launcher)

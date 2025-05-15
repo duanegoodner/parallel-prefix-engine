@@ -22,8 +22,8 @@ target_link_libraries(
     program_args
     prefix_sum_mpi
     prefix_sum_cuda
-    subtile_kernel
-    subtile_kernel_launcher
+    single_tile_kernel
+    single_tile_kernel_launcher
     time_utils
     my_default_flags
     CUDA::cudart                       

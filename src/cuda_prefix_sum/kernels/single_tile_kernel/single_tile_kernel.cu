@@ -10,10 +10,10 @@
 
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/subtile_device_helpers.cuh"
-#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/internal/device_helpers.cuh"
+#include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
-__global__ void SubtileKernel(
+__global__ void SingleTileKernel(
     // int *d_data,
     KernelLaunchParams params
 ) {

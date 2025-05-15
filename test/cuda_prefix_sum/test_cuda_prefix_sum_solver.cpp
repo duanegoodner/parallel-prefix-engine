@@ -8,7 +8,7 @@
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/kernel_launcher.hpp"
-#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
 // void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }
 
@@ -44,7 +44,7 @@ protected:
   std::unique_ptr<KernelLauncher> dummy_kernel_launcher_ =
       std::make_unique<DummyKernelLauncher>();
 
-  std::unique_ptr<KernelLauncher> subtile_kernel_launcher_ =
+  std::unique_ptr<KernelLauncher> single_tile_kernel_launcher_ =
       std::make_unique<SingleTileKernelLauncher>();
 };
 
@@ -69,7 +69,7 @@ TEST_F(CudaPrefixSumSolverTest, Compute) {
 
   CudaPrefixSumSolver cuda_solver{
       program_args_,
-      std::move(subtile_kernel_launcher_)};
+      std::move(single_tile_kernel_launcher_)};
 
   std::cout << "Before computation:";
   cuda_solver.PrintFullMatrix();
@@ -82,7 +82,7 @@ TEST_F(CudaPrefixSumSolverTest, Compute) {
 TEST_F(CudaPrefixSumSolverTest, ReportTime) {
   CudaPrefixSumSolver cuda_solver{
       program_args_,
-      std::move(subtile_kernel_launcher_)};
+      std::move(single_tile_kernel_launcher_)};
   cuda_solver.StartTimer();
   cuda_solver.Compute();
   cuda_solver.StopTimer();
