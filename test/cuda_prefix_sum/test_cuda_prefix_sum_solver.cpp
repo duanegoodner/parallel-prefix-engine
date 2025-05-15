@@ -28,7 +28,7 @@ ProgramArgs GenerateProgramArgsForTest(
       full_matrix_dim,
       tile_dim,
       subtile_dim,
-      "tiled",
+      "single_tile",
       1,
       nullptr
   );

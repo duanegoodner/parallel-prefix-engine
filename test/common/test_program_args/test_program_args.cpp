@@ -59,7 +59,7 @@ TEST_F(ProgramArgsTest, TestInitForCuda) {
   std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
   std::vector<int> tile_dim_ = std::vector<int>({6, 6});
   std::optional<std::vector<int>> maybe_subtile_dim = std::vector<int>({3, 3});
-  std::optional<std::string> maybe_kernel = "tiled";
+  std::optional<std::string> maybe_kernel = "single_tile";
 
 
   ProgramArgs program_args = ProgramArgs(
@@ -82,7 +82,7 @@ TEST_F(ProgramArgsTest, TestInitForCuda) {
   EXPECT_EQ(program_args.GridDim()[1], 1);
   EXPECT_EQ(program_args.sub_tile_dim().value()[0], 3);
   EXPECT_EQ(program_args.sub_tile_dim().value()[1], 3);
-  EXPECT_EQ(program_args.cuda_kernel(), "tiled");
+  EXPECT_EQ(program_args.cuda_kernel(), "single_tile");
 }
 
 

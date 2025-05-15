@@ -91,7 +91,7 @@ void SingleTileKernelLauncher::CheckProvidedTileSize(
     );
     Logger::Log(
         LogLevel::WARNING,
-        "Subtile kernel uses single top level tile with size equal to "
+        "Single tile kernel uses single top level tile with size equal to "
         "full matrix size."
     );
     Logger::Log(

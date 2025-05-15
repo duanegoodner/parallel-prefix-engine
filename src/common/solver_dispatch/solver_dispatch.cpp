@@ -28,7 +28,7 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
 
              static const std::unordered_map<std::string, LauncherCreator>
                  kernel_map = {
-                     {"tiled",
+                     {"single_tile",
                       [] {
                         return std::make_unique<SingleTileKernelLauncher>();
                       }},
