@@ -13,7 +13,7 @@ target_include_directories(multi_block_kernel_launcher
 
 target_link_libraries(multi_block_kernel_launcher
     PRIVATE
-        multi_block_kernel
+        multi_tile_kernel
         CUDA::cudart
         cuda_headers
         kernel_launch_params

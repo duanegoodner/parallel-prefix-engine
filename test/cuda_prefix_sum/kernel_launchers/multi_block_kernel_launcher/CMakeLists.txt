@@ -13,6 +13,6 @@ target_link_libraries(
     CUDA::cudart
     cuda_headers
     my_default_flags
-    multi_block_kernel
+    multi_tile_kernel
     multi_block_kernel_launcher
 )

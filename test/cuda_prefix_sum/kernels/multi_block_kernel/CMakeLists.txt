@@ -10,7 +10,7 @@ target_link_libraries(
     test_multi_block_kernel
     PRIVATE
     GTest::gtest_main
-    multi_block_kernel
+    multi_tile_kernel
     my_default_flags
     CUDA::cudart
     cuda_headers
