@@ -45,7 +45,7 @@ protected:
       std::make_unique<DummyKernelLauncher>();
 
   std::unique_ptr<KernelLauncher> subtile_kernel_launcher_ =
-      std::make_unique<SubTileKernelLauncher>();
+      std::make_unique<SingleTileKernelLauncher>();
 };
 
 TEST_F(CudaPrefixSumSolverTest, Init) {

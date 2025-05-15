@@ -11,7 +11,7 @@
 #include "cuda_prefix_sum/internal/subtile_kernel.cuh"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
-void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
+void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
   CheckProvidedTileSize(launch_params);
 
@@ -31,11 +31,11 @@ void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
   CheckErrors();
 }
 
-dim3 SubTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
+dim3 SingleTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
   return dim3(1, 1, 1);
 }
 
-dim3 SubTileKernelLauncher::GetBlockDim(
+dim3 SingleTileKernelLauncher::GetBlockDim(
     const KernelLaunchParams &launch_params
 ) {
   if (launch_params.sub_tile_size.num_rows == 0 ||
@@ -53,14 +53,14 @@ dim3 SubTileKernelLauncher::GetBlockDim(
   return dim3(num_tile_cols, num_tile_rows, 1);
 }
 
-size_t SubTileKernelLauncher::GetSharedMemSize(
+size_t SingleTileKernelLauncher::GetSharedMemSize(
     const KernelLaunchParams &launch_params
 ) {
   return static_cast<size_t>(launch_params.array.size.num_rows) *
          static_cast<size_t>(launch_params.array.size.num_cols) * sizeof(int);
 }
 
-void SubTileKernelLauncher::CheckErrors() {
+void SingleTileKernelLauncher::CheckErrors() {
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
     fprintf(stderr, "CUDA kernel launch error: %s\n", cudaGetErrorString(err));
@@ -73,7 +73,7 @@ void SubTileKernelLauncher::CheckErrors() {
   }
 }
 
-void SubTileKernelLauncher::CheckProvidedTileSize(
+void SingleTileKernelLauncher::CheckProvidedTileSize(
     const KernelLaunchParams &launch_params
 ) {
   if (launch_params.array.size != launch_params.tile_size) {

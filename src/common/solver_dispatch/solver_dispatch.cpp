@@ -30,7 +30,7 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
                  kernel_map = {
                      {"tiled",
                       [] {
-                        return std::make_unique<SubTileKernelLauncher>();
+                        return std::make_unique<SingleTileKernelLauncher>();
                       }},
                      {"multiblock",
                       [] {
