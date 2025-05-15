@@ -220,11 +220,96 @@ __device__ void BroadcastSharedMemRightEdges(
   }
 }
 
+__device__ void CollectRightEdges(
+    KernelArray shared_array,
+    const ArraySize2D sub_tile_size
+) {
+
+  // Each thread iterates over each row in its sub_tile
+  for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
+    // Index of full shared mem array row we are working in
+    int shared_array_row = blockIdx.y * sub_tile_size.num_rows + local_row;
+
+    // initialize accumulator register var to zero
+    __syncthreads();
+    int accumulator = 0;
+    __syncthreads();
+
+    // Each thread iterates over the sub-tiles (threads) upstream of it
+    for (int src_thread_idx_x = 0; src_thread_idx_x < threadIdx.x;
+         ++src_thread_idx_x) {
+      // read current row's right edge value from upstream subtile and add to
+      // accumulator
+      int src_shared_array_col = src_thread_idx_x * sub_tile_size.num_cols +
+                                 sub_tile_size.num_cols - 1;
+      int src_shared_array_idx_1d = ArrayIndex1D(
+          shared_array_row,
+          src_shared_array_col,
+          shared_array.size.num_cols
+      );
+
+      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+    }
+
+    // wait until all threads have read all upstream edge vals in local_row
+    __syncthreads();
+
+    // iterate over each element in local row, and add accumulator val to it
+    for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
+      auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
+      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+    }
+  }
+}
+
+__device__ void CollectBottomEdges(
+    KernelArray shared_array,
+    const ArraySize2D sub_tile_size
+) {
+  // Each thread iterates over each col in its sub_tile
+  for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
+    // Index of full shared mem array col we are working in
+    int shared_array_col= blockIdx.x * sub_tile_size.num_cols + local_col;
+
+    // initialize accumulator register var to zero
+    __syncthreads();
+    int accumulator = 0;
+    __syncthreads();
+
+    // Each thread iterates over the sub-tiles (threads) upstream of it
+    for (int src_thread_idx_y = 0; src_thread_idx_y < threadIdx.y;
+         ++src_thread_idx_y) {
+      
+      // read current col's bottom edge value from upstream subtile and add to
+      // accumulator
+      int src_shared_array_row = src_thread_idx_y * sub_tile_size.num_rows +
+                                 sub_tile_size.num_rows - 1;
+      int src_shared_array_idx_1d = ArrayIndex1D(
+          src_shared_array_row,
+          shared_array_col,
+          shared_array.size.num_cols
+      );
+
+      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+    }
+
+    // wait until all threads have read all upstream edge vals in current col
+    __syncthreads();
+
+    // iterate over each element in local col, and add accumulator val to it
+    for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
+      auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
+      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+    }
+  }
+}
+
 __device__ void BroadcastSharedMemBottomEdges(
     KernelArray shared_mem_array,
     const ArraySize2D sub_tile_size
 ) {
-  // Each thread is responsible for broadcasting from one column
+  // Each thread is responsible for broadcasting from one row.
+  // Iterate over each element in this row
   for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
 
     // === Step 1: Preload bottom row value for this column
@@ -263,9 +348,11 @@ __device__ void ComputeSharedMemArrayPrefixSum(
   ComputeLocalColWisePrefixSums(shared_mem_array, sub_tile_size);
   __syncthreads();
 
-  BroadcastSharedMemRightEdges(shared_mem_array, sub_tile_size);
+  // BroadcastSharedMemRightEdges(shared_mem_array, sub_tile_size);
+  CollectRightEdges(shared_mem_array, sub_tile_size);
   __syncthreads();
 
-  BroadcastSharedMemBottomEdges(shared_mem_array, sub_tile_size);
+  // BroadcastSharedMemBottomEdges(shared_mem_array, sub_tile_size);
+  CollectBottomEdges(shared_mem_array, sub_tile_size);
   __syncthreads();
 }
