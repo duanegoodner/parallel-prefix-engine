@@ -1,3 +1,6 @@
+add_subdirectory(kernels)
+add_subdirectory(kernel_launchers)
+
 # ===========================
 # CUDA_PREFIX_SUM_SOLVER
 # ===========================

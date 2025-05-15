@@ -1,0 +1,1 @@
+add_subdirectory(multi_block_kernel_launcher)
