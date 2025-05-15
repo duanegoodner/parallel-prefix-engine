@@ -8,9 +8,9 @@
 #include <cstdio>
 #include <iostream>
 
-#include "cuda_prefix_sum/internal/subtile_device_helpers.cuh"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/subtile_device_helpers.cuh"
 #include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
 
 __global__ void SubtileKernel(
@@ -20,6 +20,8 @@ __global__ void SubtileKernel(
   // Declare dynamic shared memory
   extern __shared__ int shared_mem[];
 
+  __syncthreads();
+
   // Declare shared memory
   KernelArray array_a{.d_address = shared_mem, .size = params.tile_size};
   __syncthreads();
@@ -27,7 +29,7 @@ __global__ void SubtileKernel(
   // === Phase 1: Load input from global memory to shared memory ===
   CopyFromGlobalToShared(params.array, array_a, params.sub_tile_size);
   __syncthreads();
-  
+
   // === Phase 2: Compute 2D prefix sum on shared mem array ===
   ComputeSharedMemArrayPrefixSum(array_a, params.sub_tile_size);
   __syncthreads();

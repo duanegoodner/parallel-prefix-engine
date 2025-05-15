@@ -71,7 +71,7 @@ __device__ void PrintThreadAndBlockIndices() {
 }
 
 __device__ void PrintSubTileContents(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ArraySize2D sub_tile_size,
     const int tile_row_index = 0,
     const int tile_col_index = 0,
@@ -87,7 +87,7 @@ __device__ void PrintSubTileContents(
            ++local_col) {
         auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
         auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-        printf(" %d", shared_mem_array.d_address[shared_mem_index_1d]);
+        printf(" %d", shared_array.d_address[shared_mem_index_1d]);
       }
       printf("\n");
     }
@@ -96,7 +96,7 @@ __device__ void PrintSubTileContents(
 
 __device__ void CopyFromGlobalToShared(
     const KernelArray global_array,
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -106,14 +106,14 @@ __device__ void CopyFromGlobalToShared(
       auto global_index_1d =
           coords.GlobalArrayIndex1D(global_array.size.num_cols);
       auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-      shared_mem_array.d_address[shared_mem_index_1d] =
+      shared_array.d_address[shared_mem_index_1d] =
           global_array.d_address[global_index_1d];
     }
   }
 }
 
 __device__ void CopyFromSharedToGlobal(
-    const KernelArray shared_mem_array,
+    const KernelArray shared_array,
     KernelArray global_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -125,7 +125,7 @@ __device__ void CopyFromSharedToGlobal(
           coords.GlobalArrayIndex1D(global_array.size.num_cols);
       auto shared_mem_index_1d = coords.SharedArrayIndex1D();
       global_array.d_address[shared_mem_index_1d] =
-          shared_mem_array.d_address[global_index_1d];
+          shared_array.d_address[global_index_1d];
     }
   }
 }
@@ -149,16 +149,16 @@ __device__ void PrintKernelArray(KernelArray array, const char *label) {
 }
 
 __device__ void CombineElementInto(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ElementCoords other_element,
     const ElementCoords cur_element
 ) {
-  shared_mem_array.d_address[cur_element.SharedArrayIndex1D()] +=
-      shared_mem_array.d_address[other_element.SharedArrayIndex1D()];
+  shared_array.d_address[cur_element.SharedArrayIndex1D()] +=
+      shared_array.d_address[other_element.SharedArrayIndex1D()];
 }
 
 __device__ void ComputeLocalRowWisePrefixSums(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
   __syncthreads();
@@ -167,13 +167,13 @@ __device__ void ComputeLocalRowWisePrefixSums(
       auto cur_coords = GetElementCoords(local_row, local_col, sub_tile_size);
       auto other_coords =
           GetElementCoords(local_row, local_col - 1, sub_tile_size);
-      CombineElementInto(shared_mem_array, other_coords, cur_coords);
+      CombineElementInto(shared_array, other_coords, cur_coords);
     }
   }
 }
 
 __device__ void ComputeLocalColWisePrefixSums(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -182,13 +182,13 @@ __device__ void ComputeLocalColWisePrefixSums(
       auto cur_coords = GetElementCoords(local_row, local_col, sub_tile_size);
       auto other_coords =
           GetElementCoords(local_row - 1, local_col, sub_tile_size);
-      CombineElementInto(shared_mem_array, other_coords, cur_coords);
+      CombineElementInto(shared_array, other_coords, cur_coords);
     }
   }
 }
 
 __device__ void BroadcastSharedMemRightEdges(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     const ArraySize2D tile_size
 ) {
   // Each thread is responsible for broadcasting from one row
@@ -199,7 +199,7 @@ __device__ void BroadcastSharedMemRightEdges(
         GetElementCoords(local_row, tile_size.num_cols - 1, tile_size);
     __syncthreads();
     int edge_val =
-        shared_mem_array.d_address[source_coords.SharedArrayIndex1D()];
+        shared_array.d_address[source_coords.SharedArrayIndex1D()];
 
     __syncthreads(); // Ensure all source values are read before any writes
 
@@ -212,19 +212,104 @@ __device__ void BroadcastSharedMemRightEdges(
         int idx_dst = ArrayIndex1D(
             source_coords.shared_row(),
             target_col,
-            shared_mem_array.size.num_cols
+            shared_array.size.num_cols
         );
-        shared_mem_array.d_address[idx_dst] += edge_val;
+        shared_array.d_address[idx_dst] += edge_val;
       }
     }
   }
 }
 
-__device__ void BroadcastSharedMemBottomEdges(
-    KernelArray shared_mem_array,
+__device__ void CollectRightEdges(
+    KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
-  // Each thread is responsible for broadcasting from one column
+
+  // Each thread iterates over each row in its sub_tile
+  for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
+    // Index of full shared mem array row we are working in
+    int shared_array_row = threadIdx.y * sub_tile_size.num_rows + local_row;
+
+    // initialize accumulator register var to zero
+    __syncthreads();
+    int accumulator = 0;
+    __syncthreads();
+
+    // Each thread iterates over the sub-tiles (threads) upstream of it
+    for (int src_thread_idx_x = 0; src_thread_idx_x < threadIdx.x;
+         ++src_thread_idx_x) {
+      // read current row's right edge value from upstream subtile and add to
+      // accumulator
+      int src_shared_array_col = src_thread_idx_x * sub_tile_size.num_cols +
+                                 sub_tile_size.num_cols - 1;
+      int src_shared_array_idx_1d = ArrayIndex1D(
+          shared_array_row,
+          src_shared_array_col,
+          shared_array.size.num_cols
+      );
+
+      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+    }
+
+    // wait until all threads have read all upstream edge vals in local_row
+    __syncthreads();
+
+    // iterate over each element in local row, and add accumulator val to it
+    for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
+      auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
+      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+    }
+  }
+}
+
+__device__ void CollectBottomEdges(
+    KernelArray shared_array,
+    const ArraySize2D sub_tile_size
+) {
+  // Each thread iterates over each col in its sub_tile
+  for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
+    // Index of full shared mem array col we are working in
+    int shared_array_col= threadIdx.x * sub_tile_size.num_cols + local_col;
+
+    // initialize accumulator register var to zero
+    __syncthreads();
+    int accumulator = 0;
+    __syncthreads();
+
+    // Each thread iterates over the sub-tiles (threads) upstream of it
+    for (int src_thread_idx_y = 0; src_thread_idx_y < threadIdx.y;
+         ++src_thread_idx_y) {
+      
+      // read current col's bottom edge value from upstream subtile and add to
+      // accumulator
+      int src_shared_array_row = src_thread_idx_y * sub_tile_size.num_rows +
+                                 sub_tile_size.num_rows - 1;
+      int src_shared_array_idx_1d = ArrayIndex1D(
+          src_shared_array_row,
+          shared_array_col,
+          shared_array.size.num_cols
+      );
+
+      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+    }
+
+    // wait until all threads have read all upstream edge vals in current col
+    __syncthreads();
+
+    // iterate over each element in local col, and add accumulator val to it
+    for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
+      auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
+      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+    }
+  }
+}
+
+__device__ void BroadcastSharedMemBottomEdges(
+    KernelArray shared_array,
+    const ArraySize2D sub_tile_size
+) {
+  // Each thread is responsible for broadcasting from one row.
+  // Iterate over each element in this row
   for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
 
     // === Step 1: Preload bottom row value for this column
@@ -232,7 +317,7 @@ __device__ void BroadcastSharedMemBottomEdges(
         GetElementCoords(sub_tile_size.num_rows - 1, local_col, sub_tile_size);
     __syncthreads();
     auto edge_val =
-        shared_mem_array.d_address[source_coords.SharedArrayIndex1D()];
+        shared_array.d_address[source_coords.SharedArrayIndex1D()];
 
     __syncthreads();
 
@@ -245,27 +330,28 @@ __device__ void BroadcastSharedMemBottomEdges(
         int idx_dst = ArrayIndex1D(
             target_row,
             source_coords.shared_col(),
-            shared_mem_array.size.num_cols
+            shared_array.size.num_cols
         );
-        shared_mem_array.d_address[idx_dst] += edge_val;
+        shared_array.d_address[idx_dst] += edge_val;
       }
     }
   }
 }
 
 __device__ void ComputeSharedMemArrayPrefixSum(
-    KernelArray shared_mem_array,
+    KernelArray shared_array,
     ArraySize2D sub_tile_size
 ) {
-  ComputeLocalRowWisePrefixSums(shared_mem_array, sub_tile_size);
+  ComputeLocalRowWisePrefixSums(shared_array, sub_tile_size);
   __syncthreads();
 
-  ComputeLocalColWisePrefixSums(shared_mem_array, sub_tile_size);
+  ComputeLocalColWisePrefixSums(shared_array, sub_tile_size);
   __syncthreads();
 
-  BroadcastSharedMemRightEdges(shared_mem_array, sub_tile_size);
+  // BroadcastSharedMemRightEdges(shared_array, sub_tile_size);
+  CollectRightEdges(shared_array, sub_tile_size);
   __syncthreads();
 
-  BroadcastSharedMemBottomEdges(shared_mem_array, sub_tile_size);
-  __syncthreads();
+  // BroadcastSharedMemBottomEdges(shared_array, sub_tile_size);
+  CollectBottomEdges(shared_array, sub_tile_size);
 }
