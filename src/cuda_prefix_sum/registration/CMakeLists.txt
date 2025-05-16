@@ -10,6 +10,7 @@ target_include_directories(cuda_solver_registration
 
 target_link_libraries(cuda_solver_registration
     PRIVATE
+        cuda_kernel_launcher_selector
         CUDA::cudart
         cuda_headers  # if you use it inside the registration code
 )

@@ -68,8 +68,7 @@ int main(int argc, char *argv[]) {
   );
   std::cout << std::endl;
 
-
-  const auto& force_cuda_registration = (ForceCudaSolverRegistration(), 0);
+  RegisterAllSolvers();
 
     // auto solver = MakeSolver(program_args);
   auto solver = PrefixSumSolverFactory::Create(program_args);
