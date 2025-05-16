@@ -59,8 +59,8 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   auto cuda_kernel_option = app.add_option(
       "-k, --kernel",
       cuda_kernel,
-      "CUDA kernel type (tiled, single_element, accum)"
-  )->check(CLI::IsMember({"tiled", "single_element", "accum"}));
+      "CUDA kernel type (single_tile, multi_tile)"
+  )->check(CLI::IsMember({"single_tile", "multi_tile"}));
 
   auto subtile_option = app.add_option(
       "-s, --sub-tile-dim",
@@ -88,7 +88,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
     sub_tile_dim = std::nullopt;
   } else {
     if (!cuda_kernel_option->count()) {
-      cuda_kernel = "tiled";  // Default kernel if not set
+      cuda_kernel = "single_tile";  // Default kernel if not set
     }
 
     if (!subtile_option->count()) {

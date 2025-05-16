@@ -10,8 +10,8 @@
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
-#include "cuda_prefix_sum/multi_block_kernel_launcher.cuh"
-#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
   static const std::unordered_map<
@@ -28,13 +28,13 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
 
              static const std::unordered_map<std::string, LauncherCreator>
                  kernel_map = {
-                     {"tiled",
+                     {"single_tile",
                       [] {
-                        return std::make_unique<SubTileKernelLauncher>();
+                        return std::make_unique<SingleTileKernelLauncher>();
                       }},
-                     {"multiblock",
+                     {"multi_tile",
                       [] {
-                        return std::make_unique<MultiBlockKernelLauncher>();
+                        return std::make_unique<MultiTileKernelLauncher>();
                       }},
                      // Add more kernels here
                  };

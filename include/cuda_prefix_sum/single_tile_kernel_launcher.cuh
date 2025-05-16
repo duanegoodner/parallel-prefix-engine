@@ -8,7 +8,7 @@
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/kernel_launcher.hpp"
 
-class SubTileKernelLauncher : public KernelLauncher {
+class SingleTileKernelLauncher : public KernelLauncher {
 public:
   void Launch(const KernelLaunchParams &launch_params) override;
 

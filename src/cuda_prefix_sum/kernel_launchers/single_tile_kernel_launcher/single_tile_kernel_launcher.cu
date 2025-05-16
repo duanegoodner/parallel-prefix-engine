@@ -8,16 +8,16 @@
 
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/subtile_kernel.cuh"
-#include "cuda_prefix_sum/subtile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/internal/single_tile_kernel.cuh"
+#include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
-void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
+void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
 
   CheckProvidedTileSize(launch_params);
 
   // Set max dynamic shared memory and prefer shared over L1
   constexpr size_t kMaxSharedMemBytes = 98304;
-  ConfigureSharedMemoryForKernel(SubtileKernel, kMaxSharedMemBytes);
+  ConfigureSharedMemoryForKernel(SingleTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
   dim3 block_dim = GetBlockDim(launch_params);
@@ -25,17 +25,17 @@ void SubTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
   size_t shared_mem_size = GetSharedMemSize(launch_params);
 
   // Launch the kernel
-  SubtileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
+  SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
 
   // Validate
   CheckErrors();
 }
 
-dim3 SubTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
+dim3 SingleTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
   return dim3(1, 1, 1);
 }
 
-dim3 SubTileKernelLauncher::GetBlockDim(
+dim3 SingleTileKernelLauncher::GetBlockDim(
     const KernelLaunchParams &launch_params
 ) {
   if (launch_params.sub_tile_size.num_rows == 0 ||
@@ -53,14 +53,14 @@ dim3 SubTileKernelLauncher::GetBlockDim(
   return dim3(num_tile_cols, num_tile_rows, 1);
 }
 
-size_t SubTileKernelLauncher::GetSharedMemSize(
+size_t SingleTileKernelLauncher::GetSharedMemSize(
     const KernelLaunchParams &launch_params
 ) {
   return static_cast<size_t>(launch_params.array.size.num_rows) *
          static_cast<size_t>(launch_params.array.size.num_cols) * sizeof(int);
 }
 
-void SubTileKernelLauncher::CheckErrors() {
+void SingleTileKernelLauncher::CheckErrors() {
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
     fprintf(stderr, "CUDA kernel launch error: %s\n", cudaGetErrorString(err));
@@ -73,7 +73,7 @@ void SubTileKernelLauncher::CheckErrors() {
   }
 }
 
-void SubTileKernelLauncher::CheckProvidedTileSize(
+void SingleTileKernelLauncher::CheckProvidedTileSize(
     const KernelLaunchParams &launch_params
 ) {
   if (launch_params.array.size != launch_params.tile_size) {
@@ -91,7 +91,7 @@ void SubTileKernelLauncher::CheckProvidedTileSize(
     );
     Logger::Log(
         LogLevel::WARNING,
-        "Subtile kernel uses single top level tile with size equal to "
+        "Single tile kernel uses single top level tile with size equal to "
         "full matrix size."
     );
     Logger::Log(

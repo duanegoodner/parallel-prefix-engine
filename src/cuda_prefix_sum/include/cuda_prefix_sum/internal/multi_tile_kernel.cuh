@@ -2,4 +2,4 @@
 
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
-__global__ void MultiBlockKernel(KernelLaunchParams params);
+__global__ void MultiTileKernel(KernelLaunchParams params);

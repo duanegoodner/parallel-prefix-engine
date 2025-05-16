@@ -19,29 +19,29 @@ struct ElementCoords {
   const int local_col;
   ArraySize2D subtile_size;
 
-  __device__ int global_row() const {
+  __forceinline__ __device__ int global_row() const {
     return blockIdx.y * blockDim.y * subtile_size.num_rows +
            threadIdx.y * subtile_size.num_rows + local_row;
   }
 
-  __device__ int global_col() const {
+  __forceinline__ __device__ int global_col() const {
     return blockIdx.x * blockDim.x * subtile_size.num_cols +
            threadIdx.x * subtile_size.num_cols + local_col;
   }
 
-  __device__ int shared_row() const {
+  __forceinline__ __device__ int shared_row() const {
     return threadIdx.y * subtile_size.num_rows + local_row;
   }
 
-  __device__ int shared_col() const {
+  __forceinline__ __device__ int shared_col() const {
     return threadIdx.x * subtile_size.num_cols + local_col;
   }
 
-  __device__ int GlobalArrayIndex1D(int global_width) const {
+  __forceinline__ __device__ int GlobalArrayIndex1D(int global_width) const {
     return ArrayIndex1D(global_row(), global_col(), global_width);
   }
 
-  __device__ int SharedArrayIndex1D() const {
+  __forceinline__ __device__ int SharedArrayIndex1D() const {
     int tile_width = blockDim.x * subtile_size.num_cols;
     return ArrayIndex1D(shared_row(), shared_col(), tile_width);
   }
@@ -59,7 +59,7 @@ __forceinline__ __device__ ElementCoords GetElementCoords(
 }
 
 // Debug statement: Print thread and block indices
-__device__ void PrintThreadAndBlockIndices() {
+static __device__ void PrintThreadAndBlockIndices() {
   printf(
       "Block (%d, %d), Thread (%d, %d), Global Index: %d\n",
       blockIdx.x,
@@ -70,7 +70,7 @@ __device__ void PrintThreadAndBlockIndices() {
   );
 }
 
-__device__ void PrintSubTileContents(
+static __device__ void PrintSubTileContents(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size,
     const int tile_row_index = 0,
@@ -94,7 +94,7 @@ __device__ void PrintSubTileContents(
   }
 }
 
-__device__ void CopyFromGlobalToShared(
+static __device__ void CopyFromGlobalToShared(
     const KernelArray global_array,
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
@@ -112,7 +112,7 @@ __device__ void CopyFromGlobalToShared(
   }
 }
 
-__device__ void CopyFromSharedToGlobal(
+static __device__ void CopyFromSharedToGlobal(
     const KernelArray shared_array,
     KernelArray global_array,
     const ArraySize2D sub_tile_size
@@ -124,15 +124,15 @@ __device__ void CopyFromSharedToGlobal(
       auto global_index_1d =
           coords.GlobalArrayIndex1D(global_array.size.num_cols);
       auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-      global_array.d_address[shared_mem_index_1d] =
-          shared_array.d_address[global_index_1d];
+      global_array.d_address[global_index_1d] =
+          shared_array.d_address[shared_mem_index_1d];
     }
   }
 }
 
 // Prints the contents of a thread's assigned subtile from shared memory.
 // Only active for a specific blockIdx & threadIdx.
-__device__ void PrintKernelArray(KernelArray array, const char *label) {
+static __device__ void PrintKernelArray(KernelArray array, const char *label) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
     for (int row = 0; row < array.size.num_rows; ++row) {
@@ -148,7 +148,7 @@ __device__ void PrintKernelArray(KernelArray array, const char *label) {
   }
 }
 
-__device__ void CombineElementInto(
+static __device__ void CombineElementInto(
     KernelArray shared_array,
     const ElementCoords other_element,
     const ElementCoords cur_element
@@ -157,7 +157,7 @@ __device__ void CombineElementInto(
       shared_array.d_address[other_element.SharedArrayIndex1D()];
 }
 
-__device__ void ComputeLocalRowWisePrefixSums(
+static __device__ void ComputeLocalRowWisePrefixSums(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -172,7 +172,7 @@ __device__ void ComputeLocalRowWisePrefixSums(
   }
 }
 
-__device__ void ComputeLocalColWisePrefixSums(
+static __device__ void ComputeLocalColWisePrefixSums(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -187,7 +187,7 @@ __device__ void ComputeLocalColWisePrefixSums(
   }
 }
 
-__device__ void BroadcastSharedMemRightEdges(
+static __device__ void BroadcastSharedMemRightEdges(
     KernelArray shared_array,
     const ArraySize2D tile_size
 ) {
@@ -220,7 +220,7 @@ __device__ void BroadcastSharedMemRightEdges(
   }
 }
 
-__device__ void CollectRightEdges(
+static __device__ void CollectRightEdges(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -262,7 +262,7 @@ __device__ void CollectRightEdges(
   }
 }
 
-__device__ void CollectBottomEdges(
+static __device__ void CollectBottomEdges(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -304,7 +304,7 @@ __device__ void CollectBottomEdges(
   }
 }
 
-__device__ void BroadcastSharedMemBottomEdges(
+static __device__ void BroadcastSharedMemBottomEdges(
     KernelArray shared_array,
     const ArraySize2D sub_tile_size
 ) {
@@ -338,7 +338,7 @@ __device__ void BroadcastSharedMemBottomEdges(
   }
 }
 
-__device__ void ComputeSharedMemArrayPrefixSum(
+static __device__ void ComputeSharedMemArrayPrefixSum(
     KernelArray shared_array,
     ArraySize2D sub_tile_size
 ) {

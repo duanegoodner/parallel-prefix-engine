@@ -3,4 +3,4 @@
 
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
-__global__ void SubtileKernel(KernelLaunchParams params);
+__global__ void SingleTileKernel(KernelLaunchParams params);
