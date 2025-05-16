@@ -11,14 +11,14 @@ void MultiTileKernelLauncher::Launch(
     const KernelLaunchParams &launch_params
 ) {
   constexpr size_t kMaxSharedMemBytes = 98304;
-  ConfigureSharedMemoryForKernel(MultiBlockKernel, kMaxSharedMemBytes);
+  ConfigureSharedMemoryForKernel(MultiTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
   dim3 block_dim = GetBlockDim(launch_params);
   dim3 grid_dim = GetGridDim(launch_params);
   size_t shared_mem_size = GetSharedMemPerBlock(launch_params);
 
-  MultiBlockKernel<<<grid_dim, block_dim, shared_mem_size>>>(launch_params);
+  MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(launch_params);
 
   CheckErrors();
 }

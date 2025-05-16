@@ -34,7 +34,7 @@ ProgramArgs GenerateProgramArgsForTest(
   );
 }
 
-class CudaPrefixSumSolverTest : public ::testing::Test {
+class CudaPrefixSumSolverSingleTileTest : public ::testing::Test {
 protected:
   std::vector<int> full_matrix_dim_ = std::vector<int>({4, 4});
   std::vector<int> tile_dim_ = std::vector<int>({4, 4});
@@ -48,7 +48,7 @@ protected:
       std::make_unique<SingleTileKernelLauncher>();
 };
 
-TEST_F(CudaPrefixSumSolverTest, Init) {
+TEST_F(CudaPrefixSumSolverSingleTileTest, Init) {
 
   CudaPrefixSumSolver cuda_solver(
       program_args_,
@@ -56,7 +56,7 @@ TEST_F(CudaPrefixSumSolverTest, Init) {
   );
 }
 
-TEST_F(CudaPrefixSumSolverTest, PublicTimer) {
+TEST_F(CudaPrefixSumSolverSingleTileTest, PublicTimer) {
   CudaPrefixSumSolver cuda_solver(
       program_args_,
       std::move(dummy_kernel_launcher_)
@@ -65,7 +65,7 @@ TEST_F(CudaPrefixSumSolverTest, PublicTimer) {
   cuda_solver.StopTimer();
 }
 
-TEST_F(CudaPrefixSumSolverTest, Compute) {
+TEST_F(CudaPrefixSumSolverSingleTileTest, Compute) {
 
   CudaPrefixSumSolver cuda_solver{
       program_args_,
@@ -79,7 +79,7 @@ TEST_F(CudaPrefixSumSolverTest, Compute) {
   cuda_solver.PrintFullMatrix();
 }
 
-TEST_F(CudaPrefixSumSolverTest, ReportTime) {
+TEST_F(CudaPrefixSumSolverSingleTileTest, ReportTime) {
   CudaPrefixSumSolver cuda_solver{
       program_args_,
       std::move(single_tile_kernel_launcher_)};
