@@ -7,6 +7,7 @@ add_executable(prefix_sum main.cpp)
 target_link_libraries(prefix_sum
     PRIVATE
         arg_parser
+        cuda_solver_registration
         solver_dispatch
         time_utils
         program_args

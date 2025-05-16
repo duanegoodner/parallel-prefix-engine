@@ -1,6 +1,5 @@
 add_library(cuda_solver_registration STATIC
     cuda_solver_registration.cpp
-    cuda_solver_linker_anchor.cpp
 )
 
 target_include_directories(cuda_solver_registration
