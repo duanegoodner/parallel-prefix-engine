@@ -38,6 +38,9 @@
 #include "common/program_args.hpp"
 #include "common/solver_dispatch.hpp"
 
+#include "cuda_prefix_sum/cuda_solver_registration.hpp"
+
+
 int main(int argc, char *argv[]) {
   auto program_args = ArgParser::Parse(argc, argv);
 
@@ -65,14 +68,16 @@ int main(int argc, char *argv[]) {
   );
   std::cout << std::endl;
 
+  RegisterAllSolvers();
 
-  auto solver = MakeSolver(program_args);
+    // auto solver = MakeSolver(program_args);
+  auto solver = PrefixSumSolverFactory::Create(program_args);
+
   auto local_mat = GenerateRandomMatrix<int>(
       program_args.full_matrix_dim()[0],
       program_args.full_matrix_dim()[1],
       program_args.seed()
   );
-
 
   solver->PrintFullMatrix("Starting matrix");
   solver->StartTimer();

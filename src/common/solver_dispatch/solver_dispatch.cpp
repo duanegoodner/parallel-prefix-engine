@@ -10,8 +10,12 @@
 #include "mpi_prefix_sum/mpi_prefix_sum_solver.hpp"
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
+#include "cuda_prefix_sum/cuda_kernel_launcher_selector.hpp"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 #include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
+#include "cuda_prefix_sum/cuda_solver_registration.hpp"
+#include "mpi_prefix_sum/mpi_solver_registration.hpp"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
   static const std::unordered_map<
@@ -61,3 +65,26 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
     throw std::runtime_error("Unsupported backend: " + program_args.backend());
   }
 }
+
+
+
+void RegisterAllSolvers() {
+  ForceCudaSolverRegistration();
+  ForceMpiSolverRegistration();
+}
+
+// Registration
+static bool registered = [] {
+    PrefixSumSolverFactory::RegisterBackend("mpi",
+        [](const ProgramArgs& args) {
+            return std::make_unique<MpiPrefixSumSolver>(args);
+        });
+
+    PrefixSumSolverFactory::RegisterBackend("cuda",
+        [](const ProgramArgs& args) {
+            return std::make_unique<CudaPrefixSumSolver>(args, CreateCudaKernelLauncher(args));
+        });
+
+    return true;
+}();
+

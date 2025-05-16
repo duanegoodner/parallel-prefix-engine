@@ -4,6 +4,7 @@ add_subdirectory(mpi_data_structs)
 add_subdirectory(mpi_data_transfer)
 add_subdirectory(mpi_environment)
 add_subdirectory(mpi_utils)
+add_subdirectory(registration)
 
 
 add_library(prefix_sum_mpi mpi_prefix_sum_solver.cpp)

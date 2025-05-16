@@ -10,7 +10,7 @@
 
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/kernel_launcher.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 
 class CudaPrefixSumSolverMultiTileTest : public ::testing::Test{
