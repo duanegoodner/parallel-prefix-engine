@@ -3,6 +3,7 @@
 
 #include "common/prefix_sum_solver.hpp"
 #include "common/program_args.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 
 std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args);
 
@@ -31,4 +32,4 @@ private:
   }
 };
 
-// std::unique_ptr<KernelLauncher> CreateCudaKernelLauncher(const ProgramArgs& args);
+std::unique_ptr<KernelLauncher> CreateCudaKernelLauncher(const ProgramArgs& args);
