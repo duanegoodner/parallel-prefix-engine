@@ -61,3 +61,37 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
     throw std::runtime_error("Unsupported backend: " + program_args.backend());
   }
 }
+
+// CUDA kernel selector
+// std::unique_ptr<KernelLauncher> CreateCudaKernelLauncher(const ProgramArgs& args) {
+//     using LauncherCreator = std::function<std::unique_ptr<KernelLauncher>()>;
+
+//     static const std::unordered_map<std::string, LauncherCreator> kernel_map = {
+//         {"single_tile", [] { return std::make_unique<SingleTileKernelLauncher>(); }},
+//         {"multi_tile",  [] { return std::make_unique<MultiTileKernelLauncher>(); }},
+//     };
+
+//     const auto& kernel = args.cuda_kernel().value_or("");
+//     auto it = kernel_map.find(kernel);
+//     if (it == kernel_map.end()) {
+//         throw std::runtime_error("Unsupported CUDA kernel: " + kernel);
+//     }
+
+//     return it->second();
+// }
+
+// // Registration
+// static bool registered = [] {
+//     PrefixSumSolverFactory::RegisterBackend("mpi",
+//         [](const ProgramArgs& args) {
+//             return std::make_unique<MpiPrefixSumSolver>(args);
+//         });
+
+//     PrefixSumSolverFactory::RegisterBackend("cuda",
+//         [](const ProgramArgs& args) {
+//             return std::make_unique<CudaPrefixSumSolver>(args, CreateCudaKernelLauncher(args));
+//         });
+
+//     return true;
+// }();
+

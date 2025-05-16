@@ -9,7 +9,7 @@
 
 // #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/kernel_launcher.hpp"
+#include "cuda_prefix_sum/kernel_launcher.hpp"
 
 // Ensure proper linkage between C++ and CUDA code
 // void LaunchPrefixSumKernel(int* d_data, int tile_dim, cudaStream_t stream =
