@@ -32,25 +32,25 @@ public:
       char **orig_argv
   );
 
-  [[nodiscard]] int seed() const { return seed_; }
-  [[nodiscard]] const std::string &backend() const { return backend_; }
-  [[nodiscard]] LogLevel log_level() const { return log_level_; }
-  [[nodiscard]] const std::vector<int> &full_matrix_dim() const {
+   int seed() const { return seed_; }
+   const std::string &backend() const { return backend_; }
+   LogLevel log_level() const { return log_level_; }
+   const std::vector<int> &full_matrix_dim() const {
     return full_matrix_dim_;
   }
-  [[nodiscard]] const std::vector<int> &tile_dim() const { return tile_dim_; }
-  [[nodiscard]] const std::optional<std::vector<int>> &sub_tile_dim() const {
+   const std::vector<int> &tile_dim() const { return tile_dim_; }
+   const std::optional<std::vector<int>> &sub_tile_dim() const {
     return sub_tile_dim_;
   }
 
-  [[nodiscard]] std::optional<std::string> cuda_kernel() const {
+   std::optional<std::string> cuda_kernel() const {
     return cuda_kernel_;
   }
 
-  [[nodiscard]] int orig_argc() const { return orig_argc_; }
-  [[nodiscard]] char **orig_argv() const { return orig_argv_; }
+   int orig_argc() const { return orig_argc_; }
+   char **orig_argv() const { return orig_argv_; }
 
-  [[nodiscard]] int FullMatrixSize() const {
+   int FullMatrixSize() const {
     return std::accumulate(
         full_matrix_dim_.begin(),
         full_matrix_dim_.end(),
@@ -59,7 +59,7 @@ public:
     );
   }
 
-  [[nodiscard]] std::vector<int> GridDim() const {
+   std::vector<int> GridDim() const {
     std::vector<int> result(full_matrix_dim_.size());
     std::transform(
         full_matrix_dim_.begin(),
@@ -71,7 +71,7 @@ public:
     return result;
   }
 
-  [[nodiscard]] int ElementsPerTile() const {
+   int ElementsPerTile() const {
     return std::accumulate(
         tile_dim().begin(),
         tile_dim().end(),
