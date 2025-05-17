@@ -23,7 +23,7 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(
     : program_args_(program_args)
     , kernel_launcher_(std::move(kernel_launcher)) {
   PopulateFullMatrix();
-  AllocateDeviceMemory();
+  // AllocateDeviceMemory();
   std::vector<std::string> time_interval_names{
       "warmup",
       "total",
@@ -34,18 +34,18 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(
   WarmUp();
 }
 
-CudaPrefixSumSolver::~CudaPrefixSumSolver() { FreeDeviceMemory(); }
+// CudaPrefixSumSolver::~CudaPrefixSumSolver() { FreeDeviceMemory(); }
 
-void CudaPrefixSumSolver::AllocateDeviceMemory() {
-  cudaMalloc(&device_data_, program_args_.FullMatrixSize() * sizeof(int));
-}
+// void CudaPrefixSumSolver::AllocateDeviceMemory() {
+//   cudaMalloc(&device_data_, program_args_.FullMatrixSize() * sizeof(int));
+// }
 
-void CudaPrefixSumSolver::FreeDeviceMemory() {
-  if (device_data_) {
-    cudaFree(device_data_);
-    device_data_ = nullptr;
-  }
-}
+// void CudaPrefixSumSolver::FreeDeviceMemory() {
+//   if (device_data_) {
+//     cudaFree(device_data_);
+//     device_data_ = nullptr;
+//   }
+// }
 
 void CudaPrefixSumSolver::PopulateFullMatrix() {
   full_matrix_ = GenerateRandomMatrix<int>(
@@ -61,41 +61,41 @@ void CudaPrefixSumSolver::WarmUp() {
   time_intervals_.RecordEnd("warmup");
 }
 
-void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
-  time_intervals_.RecordStart("copy_to_device");
-  cudaMemcpy(
-      device_data_,
-      full_matrix_.data(),
-      program_args_.FullMatrixSize() * sizeof(int),
-      cudaMemcpyHostToDevice
-  );
-  time_intervals_.RecordEnd("copy_to_device");
-}
+// void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
+//   time_intervals_.RecordStart("copy_to_device");
+//   cudaMemcpy(
+//       device_data_,
+//       full_matrix_.data(),
+//       program_args_.FullMatrixSize() * sizeof(int),
+//       cudaMemcpyHostToDevice
+//   );
+//   time_intervals_.RecordEnd("copy_to_device");
+// }
 
 void CudaPrefixSumSolver::RunKernel() {
   time_intervals_.RecordStart("compute");
-  auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
+  // auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
   // kernel_launch_func_(launch_params);
-  kernel_launcher_->Launch(launch_params);
+  kernel_launcher_->Launch();
   cudaDeviceSynchronize();
   time_intervals_.RecordEnd("compute");
 }
 
-void CudaPrefixSumSolver::CopyDataFromDeviceToHost() {
-  time_intervals_.RecordStart("copy_from_device");
-  cudaMemcpy(
-      full_matrix_.data(),
-      device_data_,
-      program_args_.FullMatrixSize() * sizeof(int),
-      cudaMemcpyDeviceToHost
-  );
-  time_intervals_.RecordEnd("copy_from_device");
-}
+// void CudaPrefixSumSolver::CopyDataFromDeviceToHost() {
+//   time_intervals_.RecordStart("copy_from_device");
+//   cudaMemcpy(
+//       full_matrix_.data(),
+//       device_data_,
+//       program_args_.FullMatrixSize() * sizeof(int),
+//       cudaMemcpyDeviceToHost
+//   );
+//   time_intervals_.RecordEnd("copy_from_device");
+// }
 
 void CudaPrefixSumSolver::Compute() {
-  CopyDataFromHostToDevice();
+  // CopyDataFromHostToDevice();
   RunKernel();
-  CopyDataFromDeviceToHost();
+  // CopyDataFromDeviceToHost();
 }
 
 void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {

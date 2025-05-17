@@ -5,59 +5,78 @@
 #include <string>
 
 #include "common/logger.hpp"
+#include "common/program_args.hpp"
 
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/single_tile_kernel.cuh"
 #include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
-void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
+SingleTileKernelLauncher::SingleTileKernelLauncher(
+    const ProgramArgs &program_args
+)
+    : program_args_{program_args} {
+  AllocateDeviceMemory();
+  launch_params_ = CreateKernelLaunchParams(device_array_, program_args_);
+}
 
-  CheckProvidedTileSize(launch_params);
+SingleTileKernelLauncher::~SingleTileKernelLauncher() { FreeDeviceMemory(); }
+
+void SingleTileKernelLauncher::AllocateDeviceMemory() {
+  cudaMalloc(&device_array_, program_args_.FullMatrixSize() * sizeof(int));
+}
+
+void SingleTileKernelLauncher::FreeDeviceMemory() {
+  if (device_array_) {
+    cudaFree(device_array_);
+    device_array_ = nullptr;
+  }
+}
+
+void SingleTileKernelLauncher::Launch() {
+
+  CheckProvidedTileSize();
 
   // Set max dynamic shared memory and prefer shared over L1
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(SingleTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
-  dim3 block_dim = GetBlockDim(launch_params);
-  dim3 grid_dim = GetGridDim(launch_params);
-  size_t shared_mem_size = GetSharedMemSize(launch_params);
+  dim3 block_dim = GetBlockDim();
+  dim3 grid_dim = GetGridDim();
+  size_t shared_mem_size = GetSharedMemSize();
 
   // Launch the kernel
-  SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
+  SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params_
+  );
 
   // Validate
   CheckErrors();
 }
 
-dim3 SingleTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
-  return dim3(1, 1, 1);
-}
+dim3 SingleTileKernelLauncher::GetGridDim() { return dim3(1, 1, 1); }
 
-dim3 SingleTileKernelLauncher::GetBlockDim(
-    const KernelLaunchParams &launch_params
-) {
-  if (launch_params.sub_tile_size.num_rows == 0 ||
-      launch_params.sub_tile_size.num_cols == 0) {
+dim3 SingleTileKernelLauncher::GetBlockDim() {
+  if (launch_params_.sub_tile_size.num_rows == 0 ||
+      launch_params_.sub_tile_size.num_cols == 0) {
     throw std::invalid_argument("Sub-tile size dimensions must be non-zero");
   }
 
   uint32_t num_tile_rows = static_cast<uint32_t>(
-      launch_params.array.size.num_rows / launch_params.sub_tile_size.num_rows
+      launch_params_.array.size.num_rows /
+      launch_params_.sub_tile_size.num_rows
   );
   uint32_t num_tile_cols = static_cast<uint32_t>(
-      launch_params.array.size.num_cols / launch_params.sub_tile_size.num_cols
+      launch_params_.array.size.num_cols /
+      launch_params_.sub_tile_size.num_cols
   );
 
   return dim3(num_tile_cols, num_tile_rows, 1);
 }
 
-size_t SingleTileKernelLauncher::GetSharedMemSize(
-    const KernelLaunchParams &launch_params
-) {
-  return static_cast<size_t>(launch_params.array.size.num_rows) *
-         static_cast<size_t>(launch_params.array.size.num_cols) * sizeof(int);
+size_t SingleTileKernelLauncher::GetSharedMemSize() {
+  return static_cast<size_t>(launch_params_.array.size.num_rows) *
+         static_cast<size_t>(launch_params_.array.size.num_cols) * sizeof(int);
 }
 
 void SingleTileKernelLauncher::CheckErrors() {
@@ -73,17 +92,15 @@ void SingleTileKernelLauncher::CheckErrors() {
   }
 }
 
-void SingleTileKernelLauncher::CheckProvidedTileSize(
-    const KernelLaunchParams &launch_params
-) {
-  if (launch_params.array.size != launch_params.tile_size) {
+void SingleTileKernelLauncher::CheckProvidedTileSize() {
+  if (launch_params_.array.size != launch_params_.tile_size) {
     std::cout << std::endl;
-    std::string tile_size = std::to_string(launch_params.tile_size.num_rows) +
+    std::string tile_size = std::to_string(launch_params_.tile_size.num_rows) +
                             "x" +
-                            std::to_string(launch_params.tile_size.num_cols);
+                            std::to_string(launch_params_.tile_size.num_cols);
     std::string full_matrix_size =
-        std::to_string(launch_params.array.size.num_rows) + "x" +
-        std::to_string(launch_params.array.size.num_cols) + ".";
+        std::to_string(launch_params_.array.size.num_rows) + "x" +
+        std::to_string(launch_params_.array.size.num_cols) + ".";
     Logger::Log(
         LogLevel::WARNING,
         "Specified tile size of " + tile_size +

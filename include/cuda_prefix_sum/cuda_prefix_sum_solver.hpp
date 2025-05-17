@@ -31,7 +31,7 @@ public:
       // KernelLaunchFunction kernel_launch_func
   );
 
-  ~CudaPrefixSumSolver();
+  // ~CudaPrefixSumSolver();
 
   void PrintFullMatrix(std::string title = "") override;
   void PopulateFullMatrix() override;
@@ -52,12 +52,12 @@ private:
 
   std::chrono::steady_clock::time_point start_time_;
   std::chrono::steady_clock::time_point end_time_;
-  int *device_data_ = nullptr;
+  // int *device_data_ = nullptr;
 
-  void AllocateDeviceMemory();
-  void CopyDataFromHostToDevice();
-  void CopyDataFromDeviceToHost();
+  // void AllocateDeviceMemory();
+  // void CopyDataFromHostToDevice();
+  // void CopyDataFromDeviceToHost();
   void RunKernel();
-  void FreeDeviceMemory();
+  // void FreeDeviceMemory();
 
 };

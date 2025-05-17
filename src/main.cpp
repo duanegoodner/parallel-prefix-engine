@@ -70,7 +70,6 @@ int main(int argc, char *argv[]) {
 
   RegisterAllSolvers();
 
-    // auto solver = MakeSolver(program_args);
   auto solver = PrefixSumSolverFactory::Create(program_args);
 
   auto local_mat = GenerateRandomMatrix<int>(
