@@ -5,11 +5,18 @@
 
 class MultiTileKernelLauncher : public KernelLauncher {
 public:
-  void Launch(const KernelLaunchParams &params) override;
+  MultiTileKernelLauncher(const ProgramArgs &program_args);
+  ~MultiTileKernelLauncher();
+  void Launch(int* data_array) override;
 
 private:
-  dim3 GetBlockDim(const KernelLaunchParams &launch_params);
-  dim3 GetGridDim(const KernelLaunchParams &launch_params);
-  size_t GetSharedMemPerBlock(const KernelLaunchParams &launch_params);
+  const ProgramArgs &program_args_;
+  int* right_tile_edge_buffer_ = nullptr;
+  int* bottom_tile_edge_buffer_ = nullptr;
+  void AllocateTileEdgeBuffers();
+  void FreeTileEdgeBuffers();
+  dim3 GetBlockDim();
+  dim3 GetGridDim();
+  size_t GetSharedMemPerBlock();
   void CheckErrors();
 };

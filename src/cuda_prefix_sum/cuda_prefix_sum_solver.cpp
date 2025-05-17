@@ -76,7 +76,7 @@ void CudaPrefixSumSolver::RunKernel() {
   time_intervals_.RecordStart("compute");
   auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
   // kernel_launch_func_(launch_params);
-  kernel_launcher_->Launch(launch_params);
+  kernel_launcher_->Launch(device_data_);
   cudaDeviceSynchronize();
   time_intervals_.RecordEnd("compute");
 }

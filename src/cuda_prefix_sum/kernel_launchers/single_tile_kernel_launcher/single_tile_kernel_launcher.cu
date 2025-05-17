@@ -11,18 +11,25 @@
 #include "cuda_prefix_sum/internal/single_tile_kernel.cuh"
 #include "cuda_prefix_sum/single_tile_kernel_launcher.cuh"
 
-void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
+SingleTileKernelLauncher::SingleTileKernelLauncher(
+    const ProgramArgs &program_args
+)
+    : program_args_{program_args} {}
 
-  CheckProvidedTileSize(launch_params);
+void SingleTileKernelLauncher::Launch(int *data_array) {
+
+  CheckProvidedTileSize();
 
   // Set max dynamic shared memory and prefer shared over L1
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(SingleTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
-  dim3 block_dim = GetBlockDim(launch_params);
-  dim3 grid_dim = GetGridDim(launch_params);
-  size_t shared_mem_size = GetSharedMemSize(launch_params);
+  dim3 block_dim = GetBlockDim();
+  dim3 grid_dim = GetGridDim();
+  size_t shared_mem_size = GetSharedMemSize();
+
+  auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
 
   // Launch the kernel
   SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);
@@ -31,33 +38,30 @@ void SingleTileKernelLauncher::Launch(const KernelLaunchParams &launch_params) {
   CheckErrors();
 }
 
-dim3 SingleTileKernelLauncher::GetGridDim(const KernelLaunchParams &) {
-  return dim3(1, 1, 1);
-}
+dim3 SingleTileKernelLauncher::GetGridDim() { return dim3(1, 1, 1); }
 
-dim3 SingleTileKernelLauncher::GetBlockDim(
-    const KernelLaunchParams &launch_params
-) {
-  if (launch_params.sub_tile_size.num_rows == 0 ||
-      launch_params.sub_tile_size.num_cols == 0) {
+dim3 SingleTileKernelLauncher::GetBlockDim() {
+  if (program_args_.SubTileSize2D().num_rows == 0 ||
+      program_args_.SubTileSize2D().num_cols == 0) {
     throw std::invalid_argument("Sub-tile size dimensions must be non-zero");
   }
 
   uint32_t num_tile_rows = static_cast<uint32_t>(
-      launch_params.array.size.num_rows / launch_params.sub_tile_size.num_rows
+      program_args_.FullMatrixSize2D().num_rows /
+      program_args_.SubTileSize2D().num_rows
   );
   uint32_t num_tile_cols = static_cast<uint32_t>(
-      launch_params.array.size.num_cols / launch_params.sub_tile_size.num_cols
+      program_args_.FullMatrixSize2D().num_cols /
+      program_args_.SubTileSize2D().num_cols
   );
 
   return dim3(num_tile_cols, num_tile_rows, 1);
 }
 
-size_t SingleTileKernelLauncher::GetSharedMemSize(
-    const KernelLaunchParams &launch_params
-) {
-  return static_cast<size_t>(launch_params.array.size.num_rows) *
-         static_cast<size_t>(launch_params.array.size.num_cols) * sizeof(int);
+size_t SingleTileKernelLauncher::GetSharedMemSize() {
+  return static_cast<size_t>(program_args_.FullMatrixSize2D().num_rows) *
+         static_cast<size_t>(program_args_.FullMatrixSize2D().num_cols) *
+         sizeof(int);
 }
 
 void SingleTileKernelLauncher::CheckErrors() {
@@ -73,17 +77,15 @@ void SingleTileKernelLauncher::CheckErrors() {
   }
 }
 
-void SingleTileKernelLauncher::CheckProvidedTileSize(
-    const KernelLaunchParams &launch_params
-) {
-  if (launch_params.array.size != launch_params.tile_size) {
+void SingleTileKernelLauncher::CheckProvidedTileSize() {
+  if (program_args_.FullMatrixSize2D() != program_args_.TileSize2D()) {
     std::cout << std::endl;
-    std::string tile_size = std::to_string(launch_params.tile_size.num_rows) +
-                            "x" +
-                            std::to_string(launch_params.tile_size.num_cols);
+    std::string tile_size =
+        std::to_string(program_args_.TileSize2D().num_rows) + "x" +
+        std::to_string(program_args_.TileSize2D().num_cols);
     std::string full_matrix_size =
-        std::to_string(launch_params.array.size.num_rows) + "x" +
-        std::to_string(launch_params.array.size.num_cols) + ".";
+        std::to_string(program_args_.FullMatrixSize2D().num_rows) + "x" +
+        std::to_string(program_args_.FullMatrixSize2D().num_cols) + ".";
     Logger::Log(
         LogLevel::WARNING,
         "Specified tile size of " + tile_size +

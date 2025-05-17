@@ -2,16 +2,6 @@
 
 #include "common/program_args.hpp"
 
-// Non-member operator==
-inline bool operator==(const ArraySize2D& lhs, const ArraySize2D& rhs) {
-  return lhs.num_rows == rhs.num_rows && lhs.num_cols == rhs.num_cols;
-}
-
-inline bool operator!=(const ArraySize2D& lhs, const ArraySize2D& rhs) {
-  return !(lhs == rhs);
-}
-
-
 struct KernelArray {
   int *d_address;
   ArraySize2D size;

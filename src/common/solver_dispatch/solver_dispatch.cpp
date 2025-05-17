@@ -33,12 +33,12 @@ std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args) {
              static const std::unordered_map<std::string, LauncherCreator>
                  kernel_map = {
                      {"single_tile",
-                      [] {
-                        return std::make_unique<SingleTileKernelLauncher>();
+                      [args] {
+                        return std::make_unique<SingleTileKernelLauncher>(args);
                       }},
                      {"multi_tile",
-                      [] {
-                        return std::make_unique<MultiTileKernelLauncher>();
+                      [args] {
+                        return std::make_unique<MultiTileKernelLauncher>(args);
                       }},
                      // Add more kernels here
                  };

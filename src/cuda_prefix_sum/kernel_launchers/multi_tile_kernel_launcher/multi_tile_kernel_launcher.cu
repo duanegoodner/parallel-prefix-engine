@@ -7,51 +7,79 @@
 #include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 
-void MultiTileKernelLauncher::Launch(
-    const KernelLaunchParams &launch_params
-) {
+MultiTileKernelLauncher::MultiTileKernelLauncher(
+    const ProgramArgs &program_args
+)
+    : program_args_{program_args} {
+  AllocateTileEdgeBuffers();
+}
+
+MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
+
+void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
+  cudaMalloc(
+      &right_tile_edge_buffer_,
+      program_args_.FullMatrixSize2D().num_rows * GetGridDim().x * sizeof(int)
+  );
+  cudaMalloc(
+      &bottom_tile_edge_buffer_,
+      program_args_.FullMatrixSize2D().num_cols * GetGridDim().y * sizeof(int)
+  );
+}
+
+void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
+  if (right_tile_edge_buffer_) {
+    cudaFree(right_tile_edge_buffer_);
+    right_tile_edge_buffer_ = nullptr;
+  }
+  if (bottom_tile_edge_buffer_) {
+    cudaFree(bottom_tile_edge_buffer_);
+    bottom_tile_edge_buffer_ = nullptr;
+  }
+}
+
+void MultiTileKernelLauncher::Launch(int *data_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(MultiTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
-  dim3 block_dim = GetBlockDim(launch_params);
-  dim3 grid_dim = GetGridDim(launch_params);
-  size_t shared_mem_size = GetSharedMemPerBlock(launch_params);
+  dim3 block_dim = GetBlockDim();
+  dim3 grid_dim = GetGridDim();
+  size_t shared_mem_size = GetSharedMemPerBlock();
+
+  auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
 
   MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(launch_params);
 
   CheckErrors();
 }
 
-dim3 MultiTileKernelLauncher::GetGridDim(
-    const KernelLaunchParams &launch_params
-) {
-  auto num_block_rows =
-      launch_params.array.size.num_rows / launch_params.tile_size.num_rows;
+dim3 MultiTileKernelLauncher::GetGridDim() {
 
-  auto num_block_cols =
-      launch_params.array.size.num_cols / launch_params.tile_size.num_cols;
+  auto num_block_rows = program_args_.FullMatrixSize2D().num_rows /
+                        program_args_.TileSize2D().num_rows;
+
+  auto num_block_cols = program_args_.FullMatrixSize2D().num_cols /
+                        program_args_.TileSize2D().num_cols;
 
   return dim3(num_block_cols, num_block_rows, 1);
 }
 
-dim3 MultiTileKernelLauncher::GetBlockDim(
-    const KernelLaunchParams &launch_params
-) {
-  auto num_thread_rows =
-      launch_params.tile_size.num_rows / launch_params.sub_tile_size.num_rows;
+dim3 MultiTileKernelLauncher::GetBlockDim() {
+  auto num_thread_rows = program_args_.TileSize2D().num_rows /
+                         program_args_.SubTileSize2D().num_rows;
 
-  auto num_thread_cols =
-      launch_params.tile_size.num_cols / launch_params.sub_tile_size.num_cols;
+  auto num_thread_cols = program_args_.TileSize2D().num_cols /
+                         program_args_.SubTileSize2D().num_cols;
 
   return dim3(num_thread_cols, num_thread_rows, 1);
 }
 
-size_t MultiTileKernelLauncher::GetSharedMemPerBlock(
-    const KernelLaunchParams &launch_params
-) {
-  return static_cast<size_t>(launch_params.array.size.num_rows) *
-         static_cast<size_t>(launch_params.array.size.num_cols) * sizeof(int);
+size_t MultiTileKernelLauncher::GetSharedMemPerBlock() {
+
+  return static_cast<size_t>(program_args_.TileSize2D().num_rows) *
+         static_cast<size_t>(program_args_.TileSize2D().num_cols) *
+         sizeof(int);
 }
 
 void MultiTileKernelLauncher::CheckErrors() {

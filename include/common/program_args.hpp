@@ -22,6 +22,15 @@ struct ArraySize2D {
   int num_cols;
 };
 
+// Non-member operator==
+inline bool operator==(const ArraySize2D& lhs, const ArraySize2D& rhs) {
+  return lhs.num_rows == rhs.num_rows && lhs.num_cols == rhs.num_cols;
+}
+
+inline bool operator!=(const ArraySize2D& lhs, const ArraySize2D& rhs) {
+  return !(lhs == rhs);
+}
+
 class ProgramArgs {
 public:
   ProgramArgs() = default;
@@ -66,15 +75,15 @@ public:
   }
 
   // Convenience methods to help avoid errors
-  ArraySize2D FullMatrixSize2D() {
+  ArraySize2D FullMatrixSize2D() const {
     return ArraySize2D{
         .num_rows = full_matrix_dim_[0],
         .num_cols = full_matrix_dim_[1]};
   }
-  ArraySize2D TileSize2D() {
+  ArraySize2D TileSize2D() const {
     return ArraySize2D{.num_rows = tile_dim_[0], .num_cols = tile_dim_[1]};
   }
-  ArraySize2D SubtileSize2D() {
+  ArraySize2D SubTileSize2D() const {
     if (!sub_tile_dim_.has_value()) {
       throw std::runtime_error("sub_tile_dim_ is not set.");
     }
