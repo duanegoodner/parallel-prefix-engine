@@ -13,8 +13,8 @@ std::unique_ptr<KernelLauncher> CreateCudaKernelLauncher(const ProgramArgs& args
     using LauncherCreator = std::function<std::unique_ptr<KernelLauncher>()>;
 
     static const std::unordered_map<std::string, LauncherCreator> kernel_map = {
-        { "single_tile", [args] { return std::make_unique<SingleTileKernelLauncher>(args); } },
-        { "multi_tile",  [args] { return std::make_unique<MultiTileKernelLauncher>(args); } }
+        { "single_tile", [] { return std::make_unique<SingleTileKernelLauncher>(); } },
+        { "multi_tile",  [] { return std::make_unique<MultiTileKernelLauncher>(); } }
         // Add more kernel launchers here as needed
     };
 

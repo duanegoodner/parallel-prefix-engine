@@ -13,7 +13,7 @@
 // void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }
 
 class DummyKernelLauncher : public KernelLauncher {
-  void Launch() override {}
+  void Launch(const KernelLaunchParams &params) override {}
 };
 
 ProgramArgs GenerateProgramArgsForTest(
@@ -45,7 +45,7 @@ protected:
       std::make_unique<DummyKernelLauncher>();
 
   std::unique_ptr<KernelLauncher> single_tile_kernel_launcher_ =
-      std::make_unique<SingleTileKernelLauncher>(program_args_);
+      std::make_unique<SingleTileKernelLauncher>();
 };
 
 TEST_F(CudaPrefixSumSolverSingleTileTest, Init) {

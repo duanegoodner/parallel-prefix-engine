@@ -10,19 +10,12 @@
 
 class SingleTileKernelLauncher : public KernelLauncher {
 public:
-  SingleTileKernelLauncher(const ProgramArgs& program_args);
-  ~SingleTileKernelLauncher();
-  void Launch() override;
+  void Launch(const KernelLaunchParams &launch_params) override;
 
 private:
-  int *device_array_ = nullptr;
-  KernelLaunchParams launch_params_;
-  const ProgramArgs &program_args_;
-  void AllocateDeviceMemory();
-  void FreeDeviceMemory();
-  dim3 GetBlockDim();
-  dim3 GetGridDim();
-  size_t GetSharedMemSize();
+  dim3 GetBlockDim(const KernelLaunchParams &launch_params);
+  dim3 GetGridDim(const KernelLaunchParams &launch_params);
+  size_t GetSharedMemSize(const KernelLaunchParams &launch_params);
   void CheckErrors();
-  void CheckProvidedTileSize();
+  void CheckProvidedTileSize(const KernelLaunchParams &launch_params);
 };

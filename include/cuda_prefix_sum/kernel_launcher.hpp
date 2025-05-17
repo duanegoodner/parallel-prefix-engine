@@ -7,5 +7,5 @@ class KernelLauncher {
 public:
   virtual ~KernelLauncher() = default;
 
-  virtual void Launch() = 0;
+  virtual void Launch(const KernelLaunchParams& params) = 0;
 };
