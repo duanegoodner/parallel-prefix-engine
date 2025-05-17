@@ -33,8 +33,8 @@ protected:
 
   MpiCartesianGrid grid_ = MpiCartesianGrid(
       mpi_environment_.rank(),
-      program_args_.GridDim()[0],
-      program_args_.GridDim()[1]
+      program_args_.TileGridDim()[0],
+      program_args_.TileGridDim()[1]
   );
 };
 

@@ -37,7 +37,7 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(
 CudaPrefixSumSolver::~CudaPrefixSumSolver() { FreeDeviceMemory(); }
 
 void CudaPrefixSumSolver::AllocateDeviceMemory() {
-  cudaMalloc(&device_data_, program_args_.FullMatrixSize() * sizeof(int));
+  cudaMalloc(&device_data_, program_args_.FullMatrixSize1D() * sizeof(int));
 }
 
 void CudaPrefixSumSolver::FreeDeviceMemory() {
@@ -66,7 +66,7 @@ void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
   cudaMemcpy(
       device_data_,
       full_matrix_.data(),
-      program_args_.FullMatrixSize() * sizeof(int),
+      program_args_.FullMatrixSize1D() * sizeof(int),
       cudaMemcpyHostToDevice
   );
   time_intervals_.RecordEnd("copy_to_device");
@@ -86,7 +86,7 @@ void CudaPrefixSumSolver::CopyDataFromDeviceToHost() {
   cudaMemcpy(
       full_matrix_.data(),
       device_data_,
-      program_args_.FullMatrixSize() * sizeof(int),
+      program_args_.FullMatrixSize1D() * sizeof(int),
       cudaMemcpyDeviceToHost
   );
   time_intervals_.RecordEnd("copy_from_device");

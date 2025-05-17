@@ -14,9 +14,9 @@ TEST_F(ProgramArgsTest, DefaultInit) {
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
-  EXPECT_EQ(program_args.FullMatrixSize(), 16);
-  EXPECT_EQ(program_args.GridDim()[0], 1);
-  EXPECT_EQ(program_args.GridDim()[1], 1);
+  EXPECT_EQ(program_args.FullMatrixSize1D(), 16);
+  EXPECT_EQ(program_args.TileGridDim()[0], 1);
+  EXPECT_EQ(program_args.TileGridDim()[1], 1);
   EXPECT_EQ(program_args.orig_argc(), 0);
   EXPECT_EQ(program_args.orig_argv(), nullptr);
   EXPECT_FALSE(program_args.cuda_kernel().has_value());
@@ -46,9 +46,9 @@ TEST_F(ProgramArgsTest, TestInitForMPI) {
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "mpi");
   EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
-  EXPECT_EQ(program_args.FullMatrixSize(), 36);
-  EXPECT_EQ(program_args.GridDim()[0], 2);
-  EXPECT_EQ(program_args.GridDim()[1], 2);
+  EXPECT_EQ(program_args.FullMatrixSize1D(), 36);
+  EXPECT_EQ(program_args.TileGridDim()[0], 2);
+  EXPECT_EQ(program_args.TileGridDim()[1], 2);
   EXPECT_FALSE(program_args.sub_tile_dim().has_value());
   EXPECT_FALSE(program_args.cuda_kernel().has_value());
 }
@@ -77,9 +77,9 @@ TEST_F(ProgramArgsTest, TestInitForCuda) {
   EXPECT_EQ(program_args.seed(), 1234);
   EXPECT_EQ(program_args.backend(), "cuda");
   EXPECT_EQ(program_args.log_level(), LogLevel::OFF);
-  EXPECT_EQ(program_args.FullMatrixSize(), 36);
-  EXPECT_EQ(program_args.GridDim()[0], 1);
-  EXPECT_EQ(program_args.GridDim()[1], 1);
+  EXPECT_EQ(program_args.FullMatrixSize1D(), 36);
+  EXPECT_EQ(program_args.TileGridDim()[0], 1);
+  EXPECT_EQ(program_args.TileGridDim()[1], 1);
   EXPECT_EQ(program_args.sub_tile_dim().value()[0], 3);
   EXPECT_EQ(program_args.sub_tile_dim().value()[1], 3);
   EXPECT_EQ(program_args.cuda_kernel(), "single_tile");

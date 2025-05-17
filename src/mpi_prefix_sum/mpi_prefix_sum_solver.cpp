@@ -27,8 +27,8 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
     , program_args_(program_args)
     , grid_(MpiCartesianGrid(
           mpi_environment_.rank(),
-          program_args_.GridDim()[0],
-          program_args_.GridDim()[1]
+          program_args_.TileGridDim()[0],
+          program_args_.TileGridDim()[1]
       ))
     , full_matrix_(PrefixSumBlockMatrix(0, 0))
     , assigned_matrix_(PrefixSumBlockMatrix(

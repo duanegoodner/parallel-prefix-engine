@@ -17,6 +17,11 @@
 
 #include "common/logger.hpp"
 
+struct ArraySize2D {
+  int num_rows;
+  int num_cols;
+};
+
 class ProgramArgs {
 public:
   ProgramArgs() = default;
@@ -32,25 +37,26 @@ public:
       char **orig_argv
   );
 
-   int seed() const { return seed_; }
-   const std::string &backend() const { return backend_; }
-   LogLevel log_level() const { return log_level_; }
-   const std::vector<int> &full_matrix_dim() const {
-    return full_matrix_dim_;
-  }
-   const std::vector<int> &tile_dim() const { return tile_dim_; }
-   const std::optional<std::vector<int>> &sub_tile_dim() const {
+  int seed() const { return seed_; }
+
+  const std::string &backend() const { return backend_; }
+
+  LogLevel log_level() const { return log_level_; }
+
+  const std::vector<int> &full_matrix_dim() const { return full_matrix_dim_; }
+
+  const std::vector<int> &tile_dim() const { return tile_dim_; }
+
+  const std::optional<std::vector<int>> &sub_tile_dim() const {
     return sub_tile_dim_;
   }
 
-   std::optional<std::string> cuda_kernel() const {
-    return cuda_kernel_;
-  }
+  std::optional<std::string> cuda_kernel() const { return cuda_kernel_; }
 
-   int orig_argc() const { return orig_argc_; }
-   char **orig_argv() const { return orig_argv_; }
+  int orig_argc() const { return orig_argc_; }
+  char **orig_argv() const { return orig_argv_; }
 
-   int FullMatrixSize() const {
+  int FullMatrixSize1D() const {
     return std::accumulate(
         full_matrix_dim_.begin(),
         full_matrix_dim_.end(),
@@ -59,7 +65,25 @@ public:
     );
   }
 
-   std::vector<int> GridDim() const {
+  // Convenience methods to help avoid errors
+  ArraySize2D FullMatrixSize2D() {
+    return ArraySize2D{
+        .num_rows = full_matrix_dim_[0],
+        .num_cols = full_matrix_dim_[1]};
+  }
+  ArraySize2D TileSize2D() {
+    return ArraySize2D{.num_rows = tile_dim_[0], .num_cols = tile_dim_[1]};
+  }
+  ArraySize2D SubtileSize2D() {
+    if (!sub_tile_dim_.has_value()) {
+      throw std::runtime_error("sub_tile_dim_ is not set.");
+    }
+    return ArraySize2D{
+        .num_rows = sub_tile_dim_.value()[0],
+        .num_cols = sub_tile_dim_.value()[1]};
+  }
+
+  std::vector<int> TileGridDim() const {
     std::vector<int> result(full_matrix_dim_.size());
     std::transform(
         full_matrix_dim_.begin(),
@@ -71,7 +95,7 @@ public:
     return result;
   }
 
-   int ElementsPerTile() const {
+  int ElementsPerTile() const {
     return std::accumulate(
         tile_dim().begin(),
         tile_dim().end(),
