@@ -18,23 +18,23 @@ MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
 
 void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
   cudaMalloc(
-      &right_tile_edge_buffer_,
+      &right_tile_edge_buffers_,
       program_args_.FullMatrixSize2D().num_rows * GetGridDim().x * sizeof(int)
   );
   cudaMalloc(
-      &bottom_tile_edge_buffer_,
+      &bottom_tile_edge_buffers_,
       program_args_.FullMatrixSize2D().num_cols * GetGridDim().y * sizeof(int)
   );
 }
 
 void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
-  if (right_tile_edge_buffer_) {
-    cudaFree(right_tile_edge_buffer_);
-    right_tile_edge_buffer_ = nullptr;
+  if (right_tile_edge_buffers_) {
+    cudaFree(right_tile_edge_buffers_);
+    right_tile_edge_buffers_ = nullptr;
   }
-  if (bottom_tile_edge_buffer_) {
-    cudaFree(bottom_tile_edge_buffer_);
-    bottom_tile_edge_buffer_ = nullptr;
+  if (bottom_tile_edge_buffers_) {
+    cudaFree(bottom_tile_edge_buffers_);
+    bottom_tile_edge_buffers_ = nullptr;
   }
 }
 
@@ -49,9 +49,18 @@ void MultiTileKernelLauncher::Launch(int *data_array) {
 
   auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
 
-  MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(launch_params);
+  MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(
+      launch_params,
+      right_tile_edge_buffers_,
+      bottom_tile_edge_buffers_
+  );
 
   CheckErrors();
+
+  
+
+
+
 }
 
 dim3 MultiTileKernelLauncher::GetGridDim() {

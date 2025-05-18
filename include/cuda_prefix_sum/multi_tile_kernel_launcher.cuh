@@ -11,8 +11,8 @@ public:
 
 private:
   const ProgramArgs &program_args_;
-  int* right_tile_edge_buffer_ = nullptr;
-  int* bottom_tile_edge_buffer_ = nullptr;
+  int* right_tile_edge_buffers_ = nullptr;
+  int* bottom_tile_edge_buffers_ = nullptr;
   void AllocateTileEdgeBuffers();
   void FreeTileEdgeBuffers();
   dim3 GetBlockDim();
