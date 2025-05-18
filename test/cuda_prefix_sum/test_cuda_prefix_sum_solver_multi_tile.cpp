@@ -38,7 +38,7 @@ protected:
   );
 
   std::unique_ptr<KernelLauncher> multi_tile_launcher_ =
-      std::make_unique<MultiTileKernelLauncher>();
+      std::make_unique<MultiTileKernelLauncher>(program_args_);
 };
 
 TEST_F(CudaPrefixSumSolverMultiTileTest, Init) {
