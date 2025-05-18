@@ -1,5 +1,6 @@
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
+#include "common/array_size_2d.hpp"
 #include "common/program_args.hpp"
 
 #include <stdexcept>  // Required for std::runtime_error

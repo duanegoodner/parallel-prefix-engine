@@ -7,6 +7,7 @@ struct KernelArray {
   ArraySize2D size;
 };
 
+
 struct KernelLaunchParams {
   KernelArray array;
   ArraySize2D tile_size;

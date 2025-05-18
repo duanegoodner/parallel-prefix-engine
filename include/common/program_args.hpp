@@ -15,12 +15,10 @@
 #include <string>
 #include <vector>
 
+#include "common/array_size_2d.hpp"
 #include "common/logger.hpp"
 
-struct ArraySize2D {
-  int num_rows;
-  int num_cols;
-};
+
 
 // Non-member operator==
 inline bool operator==(const ArraySize2D& lhs, const ArraySize2D& rhs) {

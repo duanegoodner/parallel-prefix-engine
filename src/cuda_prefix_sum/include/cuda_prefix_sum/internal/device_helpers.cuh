@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/array_size_2d.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
 //
