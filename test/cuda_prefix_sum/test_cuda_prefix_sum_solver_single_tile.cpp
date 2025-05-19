@@ -17,9 +17,9 @@ class DummyKernelLauncher : public KernelLauncher {
 };
 
 ProgramArgs GenerateProgramArgsForTest(
-    std::vector<int> full_matrix_dim,
-    std::vector<int> tile_dim,
-    std::vector<int> subtile_dim
+    std::vector<size_t> full_matrix_dim,
+    std::vector<size_t> tile_dim,
+    std::vector<size_t> subtile_dim
 ) {
   return ProgramArgs(
       1234,
@@ -36,9 +36,9 @@ ProgramArgs GenerateProgramArgsForTest(
 
 class CudaPrefixSumSolverSingleTileTest : public ::testing::Test {
 protected:
-  std::vector<int> full_matrix_dim_ = std::vector<int>({4, 4});
-  std::vector<int> tile_dim_ = std::vector<int>({4, 4});
-  std::vector<int> subtile_dim_ = std::vector<int>({2, 2});
+  std::vector<size_t> full_matrix_dim_ = std::vector<size_t>({4, 4});
+  std::vector<size_t> tile_dim_ = std::vector<size_t>({4, 4});
+  std::vector<size_t> subtile_dim_ = std::vector<size_t>({2, 2});
   ProgramArgs program_args_ =
       GenerateProgramArgsForTest(full_matrix_dim_, tile_dim_, subtile_dim_);
   std::unique_ptr<KernelLauncher> dummy_kernel_launcher_ =

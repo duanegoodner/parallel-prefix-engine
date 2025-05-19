@@ -1,8 +1,8 @@
 #pragma once
 
 struct ArraySize2D {
-  int num_rows;
-  int num_cols;
+  size_t num_rows;
+  size_t num_cols;
 };
 
 // Non-member operator==

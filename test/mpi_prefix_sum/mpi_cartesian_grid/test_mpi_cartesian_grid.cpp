@@ -8,10 +8,10 @@
 class MpiCartesianGridTest : public ::testing::Test {
 protected:
 
-  std::vector<int> full_matrix_dim_ = std::vector<int>({6, 6});
-  std::vector<int> grid_dim_ = std::vector<int>({2, 2});
-  std::vector<int> tile_dim_ = std::vector<int>({3, 3});
-  std::optional<std::vector<int>> maybe_subtile_dim = std::nullopt;
+  std::vector<size_t> full_matrix_dim_ = std::vector<size_t>({6, 6});
+  std::vector<size_t> grid_dim_ = std::vector<size_t>({2, 2});
+  std::vector<size_t> tile_dim_ = std::vector<size_t>({3, 3});
+  std::optional<std::vector<size_t>> maybe_subtile_dim = std::nullopt;
   std::optional<std::string> maybe_kernel = std::nullopt;
 
   ProgramArgs program_args_ = ProgramArgs(

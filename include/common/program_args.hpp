@@ -29,9 +29,9 @@ public:
       int seed,
       std::string backend,
       LogLevel log_level,
-      std::vector<int> full_matrix_dim,
-      std::vector<int> tile_dim,
-      std::optional<std::vector<int>> sub_tile_dim,
+      std::vector<size_t> full_matrix_dim,
+      std::vector<size_t> tile_dim,
+      std::optional<std::vector<size_t>> sub_tile_dim,
       std::optional<std::string> cuda_kernel,
       int orig_argc,
       char **orig_argv
@@ -43,11 +43,11 @@ public:
 
   LogLevel log_level() const { return log_level_; }
 
-  const std::vector<int> &full_matrix_dim() const { return full_matrix_dim_; }
+  const std::vector<size_t> &full_matrix_dim() const { return full_matrix_dim_; }
 
-  const std::vector<int> &tile_dim() const { return tile_dim_; }
+  const std::vector<size_t> &tile_dim() const { return tile_dim_; }
 
-  const std::optional<std::vector<int>> &sub_tile_dim() const {
+  const std::optional<std::vector<size_t>> &sub_tile_dim() const {
     return sub_tile_dim_;
   }
 
@@ -56,12 +56,12 @@ public:
   int orig_argc() const { return orig_argc_; }
   char **orig_argv() const { return orig_argv_; }
 
-  int FullMatrixSize1D() const {
+  size_t FullMatrixSize1D() const {
     return std::accumulate(
         full_matrix_dim_.begin(),
         full_matrix_dim_.end(),
         1,
-        std::multiplies<int>()
+        std::multiplies<size_t>()
     );
   }
 
@@ -83,24 +83,24 @@ public:
         .num_cols = sub_tile_dim_.value()[1]};
   }
 
-  std::vector<int> TileGridDim() const {
-    std::vector<int> result(full_matrix_dim_.size());
+  std::vector<size_t> TileGridDim() const {
+    std::vector<size_t> result(full_matrix_dim_.size());
     std::transform(
         full_matrix_dim_.begin(),
         full_matrix_dim_.end(),
         tile_dim_.begin(),
         result.begin(),
-        [](int x, int y) { return x / y; }
+        [](size_t x, size_t y) { return x / y; }
     );
     return result;
   }
 
-  int ElementsPerTile() const {
+  size_t ElementsPerTile() const {
     return std::accumulate(
         tile_dim().begin(),
         tile_dim().end(),
         1,
-        std::multiplies<int>()
+        std::multiplies<size_t>()
     );
   }
 
@@ -117,9 +117,9 @@ private:
   std::string backend_ = "mpi";
   LogLevel log_level_ = LogLevel::WARNING;
 
-  std::vector<int> full_matrix_dim_ = {4, 4};
-  std::vector<int> tile_dim_ = {4, 4};
-  std::optional<std::vector<int>> sub_tile_dim_;
+  std::vector<size_t> full_matrix_dim_ = {4, 4};
+  std::vector<size_t> tile_dim_ = {4, 4};
+  std::optional<std::vector<size_t>> sub_tile_dim_;
   std::optional<std::string> cuda_kernel_;
 
   int orig_argc_ = 0;
