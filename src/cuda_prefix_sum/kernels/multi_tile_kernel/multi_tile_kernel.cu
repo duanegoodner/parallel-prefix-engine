@@ -13,7 +13,7 @@ __global__ void MultiTileKernel(
 ) {
   extern __shared__ int shared_mem[];
 
-  KernelArray shared_array{.d_address = shared_mem, .size = params.tile_size};
+  KernelArrayView shared_array{.d_address = shared_mem, .size = params.tile_size};
 
   CopyFromGlobalToShared(params.array, shared_array, params.sub_tile_size);
   __syncthreads();

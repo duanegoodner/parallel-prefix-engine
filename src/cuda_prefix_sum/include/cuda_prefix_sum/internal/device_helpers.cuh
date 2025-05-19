@@ -72,7 +72,7 @@ static __device__ void PrintThreadAndBlockIndices() {
 }
 
 static __device__ void PrintSubTileContents(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size,
     const int tile_row_index = 0,
     const int tile_col_index = 0,
@@ -96,8 +96,8 @@ static __device__ void PrintSubTileContents(
 }
 
 static __device__ void CopyFromGlobalToShared(
-    const KernelArray global_array,
-    KernelArray shared_array,
+    const KernelArrayView global_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -114,8 +114,8 @@ static __device__ void CopyFromGlobalToShared(
 }
 
 static __device__ void CopyFromSharedToGlobal(
-    const KernelArray shared_array,
-    KernelArray global_array,
+    const KernelArrayView shared_array,
+    KernelArrayView global_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -133,7 +133,7 @@ static __device__ void CopyFromSharedToGlobal(
 
 // Prints the contents of a thread's assigned subtile from shared memory.
 // Only active for a specific blockIdx & threadIdx.
-static __device__ void PrintKernelArray(KernelArray array, const char *label) {
+static __device__ void PrintKernelArray(KernelArrayView array, const char *label) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
     for (int row = 0; row < array.size.num_rows; ++row) {
@@ -150,7 +150,7 @@ static __device__ void PrintKernelArray(KernelArray array, const char *label) {
 }
 
 static __device__ void CombineElementInto(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ElementCoords other_element,
     const ElementCoords cur_element
 ) {
@@ -159,7 +159,7 @@ static __device__ void CombineElementInto(
 }
 
 static __device__ void ComputeLocalRowWisePrefixSums(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
   __syncthreads();
@@ -174,7 +174,7 @@ static __device__ void ComputeLocalRowWisePrefixSums(
 }
 
 static __device__ void ComputeLocalColWisePrefixSums(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -189,7 +189,7 @@ static __device__ void ComputeLocalColWisePrefixSums(
 }
 
 static __device__ void CollectRightEdges(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -231,7 +231,7 @@ static __device__ void CollectRightEdges(
 }
 
 static __device__ void CollectBottomEdges(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
   // Each thread iterates over each col in its sub_tile
@@ -273,7 +273,7 @@ static __device__ void CollectBottomEdges(
 }
 
 static __device__ void CopyTileRightEdgesToGlobalBuffer(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     int *right_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
@@ -295,7 +295,7 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
 }
 
 static __device__ void CopyTileBottomEdgesToGlobalBuffer(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     int *bottom_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
@@ -321,7 +321,7 @@ static __device__ void CopyTileBottomEdgesToGlobalMemory(
 ) {}
 
 static __device__ void ComputeSharedMemArrayPrefixSum(
-    KernelArray shared_array,
+    KernelArrayView shared_array,
     ArraySize2D sub_tile_size
 ) {
   ComputeLocalRowWisePrefixSums(shared_array, sub_tile_size);

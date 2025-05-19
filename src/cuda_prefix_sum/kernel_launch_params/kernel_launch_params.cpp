@@ -19,7 +19,7 @@ KernelLaunchParams CreateKernelLaunchParams(
   ArraySize2D tile_size(args.tile_dim()[0], args.tile_dim()[1]);
   ArraySize2D sub_tile_size(subtile[0], subtile[1]);
 
-  KernelArray kernel_array{
+  KernelArrayView kernel_array{
       .d_address = d_arr,
       .size = ArraySize2D(args.full_matrix_dim()[0], args.full_matrix_dim()[1])
   };

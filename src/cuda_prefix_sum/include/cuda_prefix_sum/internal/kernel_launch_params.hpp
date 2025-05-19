@@ -7,7 +7,7 @@
 
 
 struct KernelLaunchParams {
-  KernelArray array;
+  KernelArrayView array;
   ArraySize2D tile_size;
   ArraySize2D sub_tile_size;
 };
