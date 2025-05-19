@@ -9,10 +9,13 @@ struct KernelArrayView {
   ArraySize2D size;
 };
 
-struct KernelArray {
-  int *d_address;
-  ArraySize2D size;
+class KernelArray {
+public:
+  KernelArray(ArraySize2D size);
+  ~KernelArray();
+  KernelArrayView View() const;
 
-//   KernelArray(ArraySize2D size);
-//   KernelArrayView View() const;
+private:
+  int *d_address_ = nullptr;
+  ArraySize2D size_;
 };
