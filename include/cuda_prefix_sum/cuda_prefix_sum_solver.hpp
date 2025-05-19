@@ -17,6 +17,7 @@
 #include "common/program_args.hpp"
 #include "common/time_utils.hpp"
 
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/kernel_launcher.hpp"
 
@@ -47,7 +48,7 @@ private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
   TimeIntervals time_intervals_;
-  // KernelLaunchFunction kernel_launch_func_;
+  KernelArray device_array_;
   std::unique_ptr<KernelLauncher> kernel_launcher_;
 
   std::chrono::steady_clock::time_point start_time_;

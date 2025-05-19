@@ -23,6 +23,7 @@ target_link_libraries(prefix_sum_cuda
         CLI11::CLI11
     PRIVATE
         cuda_solver_registration
+        kernel_array
         kernel_launch_params
         my_default_flags
         CUDA::cudart                       

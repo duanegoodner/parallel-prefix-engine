@@ -4,7 +4,7 @@
 
 #include "common/program_args.hpp"
 
-// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/cuda_prefix_sum_solver.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/kernel_launcher.hpp"
@@ -13,7 +13,7 @@
 // void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }
 
 class DummyKernelLauncher : public KernelLauncher {
-  void Launch(int* data_array) override {}
+  void Launch(const KernelArray &device_array) override {}
 };
 
 ProgramArgs GenerateProgramArgsForTest(

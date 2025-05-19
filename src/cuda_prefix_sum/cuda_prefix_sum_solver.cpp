@@ -7,7 +7,7 @@
 
 #include "common/matrix_init.hpp"
 
-// #include "cuda_prefix_sum/cuda_prefix_sum_solver.cuh"
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/kernel_launcher.hpp"
 
@@ -21,7 +21,10 @@ CudaPrefixSumSolver::CudaPrefixSumSolver(
     // KernelLaunchFunction kernel_launch_func
 )
     : program_args_(program_args)
-    , kernel_launcher_(std::move(kernel_launcher)) {
+    , kernel_launcher_(std::move(kernel_launcher))
+    , device_array_{
+          {program_args_.FullMatrixSize2D().num_rows,
+           program_args_.FullMatrixSize2D().num_cols}} {
   PopulateFullMatrix();
   AllocateDeviceMemory();
   std::vector<std::string> time_interval_names{
@@ -74,9 +77,9 @@ void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
 
 void CudaPrefixSumSolver::RunKernel() {
   time_intervals_.RecordStart("compute");
-  // auto launch_params = CreateKernelLaunchParams(device_data_, program_args_);
-  // kernel_launch_func_(launch_params);
-  kernel_launcher_->Launch(device_data_);
+  // auto launch_params = CreateKernelLaunchParams(device_data_,
+  // program_args_); kernel_launch_func_(launch_params);
+  kernel_launcher_->Launch(device_array_);
   cudaDeviceSynchronize();
   time_intervals_.RecordEnd("compute");
 }

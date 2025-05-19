@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
@@ -38,7 +39,7 @@ void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
   }
 }
 
-void MultiTileKernelLauncher::Launch(int *data_array) {
+void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(MultiTileKernel, kMaxSharedMemBytes);
 
@@ -47,7 +48,7 @@ void MultiTileKernelLauncher::Launch(int *data_array) {
   dim3 grid_dim = GetGridDim();
   size_t shared_mem_size = GetSharedMemPerBlock();
 
-  auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
+  auto launch_params = CreateKernelLaunchParams(device_array, program_args_);
 
   MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(
       launch_params,

@@ -13,6 +13,6 @@ struct KernelLaunchParams {
 };
 
 KernelLaunchParams CreateKernelLaunchParams(
-    int *d_arr,
+    const KernelArray &device_array,
     const ProgramArgs &program_args
 );
