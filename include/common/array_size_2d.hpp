@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 struct ArraySize2D {
   size_t num_rows;
   size_t num_cols;

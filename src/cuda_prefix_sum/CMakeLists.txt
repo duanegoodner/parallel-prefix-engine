@@ -1,5 +1,6 @@
 # CUDA prefix sum library target
 
+add_subdirectory(kernel_array)
 add_subdirectory(kernel_launch_params)
 add_subdirectory(kernel_launchers)
 add_subdirectory(kernels)

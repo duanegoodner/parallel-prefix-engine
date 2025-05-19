@@ -1,11 +1,9 @@
 #pragma once
 
+#include "common/array_size_2d.hpp"
 #include "common/program_args.hpp"
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 
-struct KernelArray {
-  int *d_address;
-  ArraySize2D size;
-};
 
 
 struct KernelLaunchParams {
