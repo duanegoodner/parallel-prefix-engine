@@ -67,7 +67,8 @@ void CudaPrefixSumSolver::WarmUp() {
 void CudaPrefixSumSolver::CopyDataFromHostToDevice() {
   time_intervals_.RecordStart("copy_to_device");
   cudaMemcpy(
-      device_data_,
+      // device_data_,
+      device_array_.d_address(),
       full_matrix_.data(),
       program_args_.FullMatrixSize1D() * sizeof(int),
       cudaMemcpyHostToDevice
@@ -88,7 +89,8 @@ void CudaPrefixSumSolver::CopyDataFromDeviceToHost() {
   time_intervals_.RecordStart("copy_from_device");
   cudaMemcpy(
       full_matrix_.data(),
-      device_data_,
+      // device_data_,
+      device_array_.d_address(),
       program_args_.FullMatrixSize1D() * sizeof(int),
       cudaMemcpyDeviceToHost
   );

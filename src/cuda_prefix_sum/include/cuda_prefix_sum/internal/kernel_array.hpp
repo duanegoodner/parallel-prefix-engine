@@ -14,6 +14,7 @@ public:
   KernelArray(ArraySize2D size);
   ~KernelArray();
   KernelArrayView View() const;
+  int *d_address();
 
 private:
   int *d_address_ = nullptr;

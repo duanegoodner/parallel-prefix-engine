@@ -29,3 +29,5 @@ KernelArray::~KernelArray() {
 KernelArrayView KernelArray::View() const {
   return KernelArrayView{d_address_, size_};
 }
+
+int* KernelArray::d_address() {return d_address_; }
