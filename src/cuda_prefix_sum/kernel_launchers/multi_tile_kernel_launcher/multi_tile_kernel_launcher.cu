@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
@@ -10,35 +11,11 @@
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
 )
-    : program_args_{program_args} {
-  AllocateTileEdgeBuffers();
-}
+    : program_args_{program_args}
+    , right_tile_edge_buffers_{{program_args_.FullMatrixSize2D().num_rows, GetGridDim().x }}
+    , bottom_tile_edge_buffers_{{GetGridDim().y, program_args_.FullMatrixSize2D().num_cols}} {}
 
-MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
-
-void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
-  cudaMalloc(
-      &right_tile_edge_buffers_,
-      program_args_.FullMatrixSize2D().num_rows * GetGridDim().x * sizeof(int)
-  );
-  cudaMalloc(
-      &bottom_tile_edge_buffers_,
-      program_args_.FullMatrixSize2D().num_cols * GetGridDim().y * sizeof(int)
-  );
-}
-
-void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
-  if (right_tile_edge_buffers_) {
-    cudaFree(right_tile_edge_buffers_);
-    right_tile_edge_buffers_ = nullptr;
-  }
-  if (bottom_tile_edge_buffers_) {
-    cudaFree(bottom_tile_edge_buffers_);
-    bottom_tile_edge_buffers_ = nullptr;
-  }
-}
-
-void MultiTileKernelLauncher::Launch(int *data_array) {
+void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(MultiTileKernel, kMaxSharedMemBytes);
 
@@ -47,20 +24,15 @@ void MultiTileKernelLauncher::Launch(int *data_array) {
   dim3 grid_dim = GetGridDim();
   size_t shared_mem_size = GetSharedMemPerBlock();
 
-  auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
+  auto launch_params = CreateKernelLaunchParams(device_array, program_args_);
 
   MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(
       launch_params,
-      right_tile_edge_buffers_,
-      bottom_tile_edge_buffers_
+      right_tile_edge_buffers_.View(),
+      bottom_tile_edge_buffers_.View()
   );
 
   CheckErrors();
-
-  
-
-
-
 }
 
 dim3 MultiTileKernelLauncher::GetGridDim() {

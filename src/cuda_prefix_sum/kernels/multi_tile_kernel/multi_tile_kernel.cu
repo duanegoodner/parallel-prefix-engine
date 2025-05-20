@@ -2,18 +2,19 @@
 
 #include <cuda_runtime.h>
 
+#include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/device_helpers.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
 
 __global__ void MultiTileKernel(
     KernelLaunchParams params,
-    int *right_edges_buffer,
-    int *bottom_edges_buffer
+    KernelArrayView right_edges_buffer,
+    KernelArrayView bottom_edges_buffer
 ) {
   extern __shared__ int shared_mem[];
 
-  KernelArray shared_array{.d_address = shared_mem, .size = params.tile_size};
+  KernelArrayView shared_array{.d_address = shared_mem, .size = params.tile_size};
 
   CopyFromGlobalToShared(params.array, shared_array, params.sub_tile_size);
   __syncthreads();

@@ -24,7 +24,7 @@ __global__ void SingleTileKernel(
   // __syncthreads();
 
   // Declare shared memory
-  KernelArray array_a{.d_address = shared_mem, .size = params.tile_size};
+  KernelArrayView array_a{.d_address = shared_mem, .size = params.tile_size};
   // __syncthreads();
 
   // === Phase 1: Load input from global memory to shared memory ===

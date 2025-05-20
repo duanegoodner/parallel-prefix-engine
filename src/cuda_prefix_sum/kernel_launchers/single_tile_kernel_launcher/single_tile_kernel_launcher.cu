@@ -16,7 +16,7 @@ SingleTileKernelLauncher::SingleTileKernelLauncher(
 )
     : program_args_{program_args} {}
 
-void SingleTileKernelLauncher::Launch(int *data_array) {
+void SingleTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   CheckProvidedTileSize();
 
@@ -29,7 +29,9 @@ void SingleTileKernelLauncher::Launch(int *data_array) {
   dim3 grid_dim = GetGridDim();
   size_t shared_mem_size = GetSharedMemSize();
 
-  auto launch_params = CreateKernelLaunchParams(data_array, program_args_);
+
+
+  auto launch_params = CreateKernelLaunchParams(device_array, program_args_);
 
   // Launch the kernel
   SingleTileKernel<<<grid_dim, block_dim, shared_mem_size, 0>>>(launch_params);

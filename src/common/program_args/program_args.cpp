@@ -14,9 +14,9 @@ ProgramArgs::ProgramArgs(
     int seed,
     std::string backend,
     LogLevel log_level,
-    std::vector<int> full_matrix_dim,
-    std::vector<int> tile_dim,
-    std::optional<std::vector<int>> sub_tile_dim,
+    std::vector<size_t> full_matrix_dim,
+    std::vector<size_t> tile_dim,
+    std::optional<std::vector<size_t>> sub_tile_dim,
     std::optional<std::string> cuda_kernel,
     int orig_argc,
     char **orig_argv

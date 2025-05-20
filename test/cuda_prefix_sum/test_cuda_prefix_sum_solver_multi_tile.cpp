@@ -18,9 +18,9 @@ protected:
   int random_seed_ = 1234;
   std::string backend_ = "cuda";
   LogLevel log_level_ = LogLevel::OFF;
-  std::vector<int> full_matrix_dim_ = std::vector<int>({8, 8});
-  std::vector<int> tile_dim_ = std::vector<int>({4, 4});
-  std::vector<int> subtile_dim_ = std::vector<int>({2, 2});
+  std::vector<size_t> full_matrix_dim_ = std::vector<size_t>({8, 8});
+  std::vector<size_t> tile_dim_ = std::vector<size_t>({4, 4});
+  std::vector<size_t> subtile_dim_ = std::vector<size_t>({2, 2});
   std::string kernel_ = "multi_tile";
   int orig_argc_ = 1;
   char **orig_argv_ = nullptr;

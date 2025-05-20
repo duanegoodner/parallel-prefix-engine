@@ -18,11 +18,11 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
   int seed = 1234;
   std::string backend = "mpi";
   std::string log_level = "warning";
-  std::vector<int> full_matrix_dim = {4, 4};
-  std::vector<int> tile_dim = {2, 2};
+  std::vector<size_t> full_matrix_dim = {4, 4};
+  std::vector<size_t> tile_dim = {2, 2};
 
   // Optional CUDA-specific args
-  std::optional<std::vector<int>> sub_tile_dim;
+  std::optional<std::vector<size_t>> sub_tile_dim;
   std::optional<std::string> cuda_kernel;
 
   // Registered CLI options
@@ -92,7 +92,7 @@ ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
     }
 
     if (!subtile_option->count()) {
-      sub_tile_dim = std::vector<int>{2, 2};  // Default subtile size
+      sub_tile_dim = std::vector<size_t>{2, 2};  // Default subtile size
     }
   }
 
