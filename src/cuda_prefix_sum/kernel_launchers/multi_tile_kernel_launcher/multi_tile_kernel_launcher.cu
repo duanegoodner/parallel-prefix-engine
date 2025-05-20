@@ -15,32 +15,6 @@ MultiTileKernelLauncher::MultiTileKernelLauncher(
     , right_tile_edge_buffers_{{program_args_.FullMatrixSize2D().num_rows, GetGridDim().x }}
     , bottom_tile_edge_buffers_{{GetGridDim().y, program_args_.FullMatrixSize2D().num_cols}} {}
 
-// MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
-
-// void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
-//   cudaMalloc(
-//       &right_tile_edge_buffers_,
-//       program_args_.FullMatrixSize2D().num_rows * GetGridDim().x *
-//       sizeof(int)
-//   );
-//   cudaMalloc(
-//       &bottom_tile_edge_buffers_,
-//       program_args_.FullMatrixSize2D().num_cols * GetGridDim().y *
-//       sizeof(int)
-//   );
-// }
-
-// void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
-//   if (right_tile_edge_buffers_) {
-//     cudaFree(right_tile_edge_buffers_);
-//     right_tile_edge_buffers_ = nullptr;
-//   }
-//   if (bottom_tile_edge_buffers_) {
-//     cudaFree(bottom_tile_edge_buffers_);
-//     bottom_tile_edge_buffers_ = nullptr;
-//   }
-// }
-
 void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(MultiTileKernel, kMaxSharedMemBytes);

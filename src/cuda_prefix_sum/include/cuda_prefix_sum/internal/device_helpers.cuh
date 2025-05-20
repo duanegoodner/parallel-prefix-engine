@@ -298,7 +298,6 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
 static __device__ void CopyTileBottomEdgesToGlobalBuffer(
     KernelArrayView shared_array,
     KernelArrayView bottom_edges_buffer,
-    // int *bottom_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.y == blockDim.y - 1) {
