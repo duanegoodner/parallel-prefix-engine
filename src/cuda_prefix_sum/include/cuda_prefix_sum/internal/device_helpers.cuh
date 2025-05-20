@@ -133,7 +133,7 @@ static __device__ void CopyFromSharedToGlobal(
 
 // Prints the contents of a thread's assigned subtile from shared memory.
 // Only active for a specific blockIdx & threadIdx.
-static __device__ void PrintKernelArray(KernelArrayView array, const char *label) {
+static __device__ void PrintKernelArrayView(KernelArrayView array, const char *label) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {
     printf("%s:\n", label);
     for (int row = 0; row < array.size.num_rows; ++row) {
@@ -287,7 +287,7 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
       auto buffer_index_1d = ArrayIndex1D(
           buffer_row,
           buffer_col,
-          sub_tile_size.num_cols * blockDim.x * gridDim.x
+          right_edges_buffer.size.num_cols
       );
       right_edges_buffer.d_address[buffer_index_1d] =
           shared_array.d_address[coords.SharedArrayIndex1D()];
@@ -309,7 +309,7 @@ static __device__ void CopyTileBottomEdgesToGlobalBuffer(
       auto buffer_index_1d = ArrayIndex1D(
           buffer_row,
           buffer_col,
-          sub_tile_size.num_cols * blockDim.x * gridDim.x
+          bottom_edges_buffer.size.num_cols
       );
       bottom_edges_buffer.d_address[buffer_index_1d] =
           shared_array.d_address[coords.SharedArrayIndex1D()];
