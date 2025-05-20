@@ -11,33 +11,35 @@
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
 )
-    : program_args_{program_args} {
-  AllocateTileEdgeBuffers();
-}
+    : program_args_{program_args}
+    , right_tile_edge_buffers_{{program_args_.FullMatrixSize2D().num_rows, GetGridDim().x }}
+    , bottom_tile_edge_buffers_{{GetGridDim().y, program_args_.FullMatrixSize2D().num_cols}} {}
 
-MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
+// MultiTileKernelLauncher::~MultiTileKernelLauncher() { FreeTileEdgeBuffers(); }
 
-void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
-  cudaMalloc(
-      &right_tile_edge_buffers_,
-      program_args_.FullMatrixSize2D().num_rows * GetGridDim().x * sizeof(int)
-  );
-  cudaMalloc(
-      &bottom_tile_edge_buffers_,
-      program_args_.FullMatrixSize2D().num_cols * GetGridDim().y * sizeof(int)
-  );
-}
+// void MultiTileKernelLauncher::AllocateTileEdgeBuffers() {
+//   cudaMalloc(
+//       &right_tile_edge_buffers_,
+//       program_args_.FullMatrixSize2D().num_rows * GetGridDim().x *
+//       sizeof(int)
+//   );
+//   cudaMalloc(
+//       &bottom_tile_edge_buffers_,
+//       program_args_.FullMatrixSize2D().num_cols * GetGridDim().y *
+//       sizeof(int)
+//   );
+// }
 
-void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
-  if (right_tile_edge_buffers_) {
-    cudaFree(right_tile_edge_buffers_);
-    right_tile_edge_buffers_ = nullptr;
-  }
-  if (bottom_tile_edge_buffers_) {
-    cudaFree(bottom_tile_edge_buffers_);
-    bottom_tile_edge_buffers_ = nullptr;
-  }
-}
+// void MultiTileKernelLauncher::FreeTileEdgeBuffers() {
+//   if (right_tile_edge_buffers_) {
+//     cudaFree(right_tile_edge_buffers_);
+//     right_tile_edge_buffers_ = nullptr;
+//   }
+//   if (bottom_tile_edge_buffers_) {
+//     cudaFree(bottom_tile_edge_buffers_);
+//     bottom_tile_edge_buffers_ = nullptr;
+//   }
+// }
 
 void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
@@ -52,16 +54,11 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(
       launch_params,
-      right_tile_edge_buffers_,
-      bottom_tile_edge_buffers_
+      right_tile_edge_buffers_.View(),
+      bottom_tile_edge_buffers_.View()
   );
 
   CheckErrors();
-
-  
-
-
-
 }
 
 dim3 MultiTileKernelLauncher::GetGridDim() {

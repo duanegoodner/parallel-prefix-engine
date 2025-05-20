@@ -274,7 +274,8 @@ static __device__ void CollectBottomEdges(
 
 static __device__ void CopyTileRightEdgesToGlobalBuffer(
     KernelArrayView shared_array,
-    int *right_edges_buffer,
+    KernelArrayView right_edges_buffer,
+    // int *right_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.x == blockDim.x - 1) {
@@ -288,7 +289,7 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
           buffer_col,
           sub_tile_size.num_cols * blockDim.x * gridDim.x
       );
-      right_edges_buffer[buffer_index_1d] =
+      right_edges_buffer.d_address[buffer_index_1d] =
           shared_array.d_address[coords.SharedArrayIndex1D()];
     }
   }
@@ -296,7 +297,8 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
 
 static __device__ void CopyTileBottomEdgesToGlobalBuffer(
     KernelArrayView shared_array,
-    int *bottom_edges_buffer,
+    KernelArrayView bottom_edges_buffer,
+    // int *bottom_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.y == blockDim.y - 1) {
@@ -310,7 +312,7 @@ static __device__ void CopyTileBottomEdgesToGlobalBuffer(
           buffer_col,
           sub_tile_size.num_cols * blockDim.x * gridDim.x
       );
-      bottom_edges_buffer[buffer_index_1d] =
+      bottom_edges_buffer.d_address[buffer_index_1d] =
           shared_array.d_address[coords.SharedArrayIndex1D()];
     }
   }
