@@ -7,7 +7,7 @@
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
 
-__global__ void MultiTileKernel(
+__global__ void FirstPass(
     KernelLaunchParams params,
     KernelArrayView right_edges_buffer,
     KernelArrayView bottom_edges_buffer

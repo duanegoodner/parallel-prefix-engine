@@ -13,10 +13,11 @@ private:
   const ProgramArgs &program_args_;
   KernelArray right_tile_edge_buffers_;
   KernelArray bottom_tile_edge_buffers_;
-  // int* right_tile_edge_buffers_ = nullptr;
-  // int* bottom_tile_edge_buffers_ = nullptr;
-  dim3 GetBlockDim();
-  dim3 GetGridDim();
-  size_t GetSharedMemPerBlock();
+  dim3 FirstPassBlockDim();
+  dim3 FirstPassGridDim();
+  size_t FirstPassSharedMemPerBlock();
+  dim3 SecondPassBlockDim();
+  dim3 SecondPassGridDim();
+  size_t SecondPassSharedMemPerBlock();
   void CheckErrors();
 };
