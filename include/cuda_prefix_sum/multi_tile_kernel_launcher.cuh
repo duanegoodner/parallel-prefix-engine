@@ -12,11 +12,21 @@ public:
 private:
   const ProgramArgs &program_args_;
   KernelArray right_tile_edge_buffers_;
+  KernelArray right_tile_edge_buffers_ps_;
   KernelArray bottom_tile_edge_buffers_;
-  // int* right_tile_edge_buffers_ = nullptr;
-  // int* bottom_tile_edge_buffers_ = nullptr;
-  dim3 GetBlockDim();
-  dim3 GetGridDim();
-  size_t GetSharedMemPerBlock();
+  KernelArray bottom_tile_edge_buffers_ps_;
+  size_t buffer_sum_method_cutoff_ = 1024;
+  size_t mult_block_buffer_sum_chunk_size_ = 512;
+
+  dim3 FirstPassBlockDim();
+  dim3 FirstPassGridDim();
+  size_t FirstPassSharedMemPerBlock();
+  void LaunchRowWisePrefixSum(
+      const int *d_input,
+      int *d_output,
+      ArraySize2D size
+      // int chunk_size = 512
+  );
+  void EdgeBufferRowWisePrefixSum();
   void CheckErrors();
 };

@@ -13,6 +13,7 @@ target_include_directories(cuda_kernel_launcher_selector
 )
 target_link_libraries(cuda_kernel_launcher_selector
     PRIVATE
+        my_default_flags
         single_tile_kernel_launcher
         multi_tile_kernel_launcher
         CUDA::cudart                       

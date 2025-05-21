@@ -5,5 +5,5 @@ target_include_directories(kernel_launch_params
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 
-target_link_libraries(kernel_launch_params PRIVATE my_default_flags)
+target_link_libraries(kernel_launch_params PRIVATE kernel_array my_default_flags)
 
