@@ -34,31 +34,14 @@ __global__ void RowWiseScanSingleBlock(
   } else if (tid < size.num_cols) {
     out[row * size.num_cols + tid] = temp[tid - 1];
   }
-
-  __syncthreads();
-
-  KernelArrayView right_edge_buffers{const_cast<int *>(in), size};
-  KernelArrayView result_array{out, size};
-
-  if (blockIdx.x == 0 && blockIdx.y == 0) {
-    PrintKernelArrayView(
-        right_edge_buffers,
-        "right edge buffers before row-wise prefix sum"
-    );
-    PrintKernelArrayView(
-        result_array,
-        "right edge buffers after row-wise prefix sum"
-    );
-  }
 }
 
 // === Multi-block (chunked) scan for long rows ===
-// Phase 1: Local block scan (inclusive)
+// Phase 1: Local block scan (inclusive, then convert to exclusive)
 __global__ void RowWiseScanMultiBlockPhase1(
     const int *__restrict__ in,
     int *__restrict__ out,
     int *__restrict__ block_sums,
-    // int num_cols,
     ArraySize2D size,
     int chunk_size
 ) {
@@ -86,14 +69,21 @@ __global__ void RowWiseScanMultiBlockPhase1(
     __syncthreads();
   }
 
-  // Store scan result
-  if (chunk_start + tid < size.num_cols)
-    out[global_idx] = temp[tid];
+  // Convert to exclusive and store result
+  if (chunk_start + tid < size.num_cols) {
+    if (tid == 0) {
+      out[global_idx] = 0;
+    } else {
+      out[global_idx] = temp[tid - 1];
+    }
+  }
 
-  // Store block sum (last element)
-  if (tid == chunk_size - 1 || chunk_start + tid == size.num_cols - 1)
+  // Store inclusive block sum (last value of inclusive scan)
+  if (tid == chunk_size - 1 || chunk_start + tid == size.num_cols - 1) {
     block_sums[row * gridDim.x + blockIdx.x] = temp[tid];
+  }
 }
+
 
 // Phase 2: Add scanned block sums to partial results
 __global__ void RowWiseScanMultiBlockPhase2(

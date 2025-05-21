@@ -15,16 +15,17 @@ private:
   KernelArray right_tile_edge_buffers_ps_;
   KernelArray bottom_tile_edge_buffers_;
   KernelArray bottom_tile_edge_buffers_ps_;
+  size_t buffer_sum_method_cutoff_ = 1024;
+  size_t mult_block_buffer_sum_chunk_size_ = 512;
+
   dim3 FirstPassBlockDim();
   dim3 FirstPassGridDim();
   size_t FirstPassSharedMemPerBlock();
   void LaunchRowWisePrefixSum(
       const int *d_input,
       int *d_output,
-      // int num_rows,
-      // int num_cols,
-      ArraySize2D size,
-      int chunk_size = 512
+      ArraySize2D size
+      // int chunk_size = 512
   );
   void EdgeBufferRowWisePrefixSum();
   void CheckErrors();

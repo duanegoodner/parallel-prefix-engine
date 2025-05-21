@@ -2,6 +2,7 @@
 
 #include "common/array_size_2d.hpp"
 
+#include "cuda_prefix_sum/internal/kernel_array_view.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 
 //
@@ -37,15 +38,6 @@ struct ElementCoords {
 
   __forceinline__ __device__ int shared_col() const {
     return threadIdx.x * subtile_size.num_cols + local_col;
-  }
-
-  __forceinline__ __device__ int GlobalArrayIndex1D(int global_width) const {
-    return ArrayIndex1D(global_row(), global_col(), global_width);
-  }
-
-  __forceinline__ __device__ int SharedArrayIndex1D() const {
-    int tile_width = blockDim.x * subtile_size.num_cols;
-    return ArrayIndex1D(shared_row(), shared_col(), tile_width);
   }
 };
 
@@ -88,8 +80,7 @@ static __device__ void PrintSubTileContents(
       for (int local_col = 0; local_col < sub_tile_size.num_cols;
            ++local_col) {
         auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
-        auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-        printf(" %d", shared_array.d_address[shared_mem_index_1d]);
+        printf(" %d", shared_array.At(local_row, local_col));
       }
       printf("\n");
     }
@@ -105,11 +96,8 @@ static __device__ void CopyFromGlobalToShared(
   for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
     for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
-      auto global_index_1d =
-          coords.GlobalArrayIndex1D(global_array.size.num_cols);
-      auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-      shared_array.d_address[shared_mem_index_1d] =
-          global_array.d_address[global_index_1d];
+      shared_array.At(coords.shared_row(), coords.shared_col()) =
+          global_array.At(coords.global_row(), coords.global_col());
     }
   }
 }
@@ -123,11 +111,8 @@ static __device__ void CopyFromSharedToGlobal(
   for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
     for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
-      auto global_index_1d =
-          coords.GlobalArrayIndex1D(global_array.size.num_cols);
-      auto shared_mem_index_1d = coords.SharedArrayIndex1D();
-      global_array.d_address[global_index_1d] =
-          shared_array.d_address[shared_mem_index_1d];
+      global_array.At(coords.global_row(), coords.global_col()) =
+          shared_array.At(coords.shared_row(), coords.shared_col());
     }
   }
 }
@@ -158,8 +143,8 @@ static __device__ void CombineElementInto(
     const ElementCoords other_element,
     const ElementCoords cur_element
 ) {
-  shared_array.d_address[cur_element.SharedArrayIndex1D()] +=
-      shared_array.d_address[other_element.SharedArrayIndex1D()];
+  shared_array.At(cur_element.shared_row(), cur_element.shared_col()) +=
+      shared_array.At(other_element.shared_row(), other_element.shared_col());
 }
 
 static __device__ void ComputeLocalRowWisePrefixSums(
@@ -214,13 +199,7 @@ static __device__ void CollectRightEdges(
       // accumulator
       int src_shared_array_col = src_thread_idx_x * sub_tile_size.num_cols +
                                  sub_tile_size.num_cols - 1;
-      int src_shared_array_idx_1d = ArrayIndex1D(
-          shared_array_row,
-          src_shared_array_col,
-          shared_array.size.num_cols
-      );
-
-      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+      accumulator += shared_array.At(shared_array_row, src_shared_array_col);
     }
 
     // wait until all threads have read all upstream edge vals in local_row
@@ -229,7 +208,7 @@ static __device__ void CollectRightEdges(
     // iterate over each element in local row, and add accumulator val to it
     for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
-      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+      shared_array.At(coords.shared_row(), coords.shared_col()) += accumulator;
     }
   }
 }
@@ -256,13 +235,7 @@ static __device__ void CollectBottomEdges(
       // accumulator
       int src_shared_array_row = src_thread_idx_y * sub_tile_size.num_rows +
                                  sub_tile_size.num_rows - 1;
-      int src_shared_array_idx_1d = ArrayIndex1D(
-          src_shared_array_row,
-          shared_array_col,
-          shared_array.size.num_cols
-      );
-
-      accumulator += shared_array.d_address[src_shared_array_idx_1d];
+      accumulator += shared_array.At(src_shared_array_row, shared_array_col);
     }
 
     // wait until all threads have read all upstream edge vals in current col
@@ -271,7 +244,8 @@ static __device__ void CollectBottomEdges(
     // iterate over each element in local col, and add accumulator val to it
     for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
-      shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
+      shared_array.At(coords.shared_row(), coords.shared_col()) += accumulator;
+      // shared_array.d_address[coords.SharedArrayIndex1D()] += accumulator;
     }
   }
 }
@@ -279,7 +253,6 @@ static __device__ void CollectBottomEdges(
 static __device__ void CopyTileRightEdgesToGlobalBuffer(
     KernelArrayView shared_array,
     KernelArrayView right_edges_buffer,
-    // int *right_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.x == blockDim.x - 1) {
@@ -288,13 +261,8 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
     for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
       auto buffer_row = coords.global_row();
-      auto buffer_index_1d = ArrayIndex1D(
-          buffer_row,
-          buffer_col,
-          right_edges_buffer.size.num_cols
-      );
-      right_edges_buffer.d_address[buffer_index_1d] =
-          shared_array.d_address[coords.SharedArrayIndex1D()];
+      right_edges_buffer.At(buffer_row, buffer_col) =
+          shared_array.At(coords.shared_row(), coords.shared_col());
     }
   }
 }
@@ -310,13 +278,8 @@ static __device__ void CopyTileBottomEdgesToGlobalBuffer(
     for (int local_col = 0; local_col < sub_tile_size.num_cols; ++local_col) {
       auto coords = GetElementCoords(local_row, local_col, sub_tile_size);
       auto buffer_col = coords.global_col();
-      auto buffer_index_1d = ArrayIndex1D(
-          buffer_row,
-          buffer_col,
-          bottom_edges_buffer.size.num_cols
-      );
-      bottom_edges_buffer.d_address[buffer_index_1d] =
-          shared_array.d_address[coords.SharedArrayIndex1D()];
+      bottom_edges_buffer.At(buffer_row, buffer_col) =
+          shared_array.At(coords.shared_row(), coords.shared_col());
     }
   }
 }

@@ -8,8 +8,11 @@ target_include_directories(kernel_array
 
 target_link_libraries(
     kernel_array PRIVATE
-    CUDA::cudart
-    cuda_headers
     my_default_flags)
+
+target_link_libraries(
+    kernel_array PUBLIC
+    CUDA::cudart
+    cuda_headers)
 
 
