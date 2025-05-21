@@ -15,6 +15,7 @@ public:
   ~KernelArray();
   KernelArrayView View() const;
   int *d_address();
+  ArraySize2D size() {return size_; }
 
 private:
   int *d_address_ = nullptr;

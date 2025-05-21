@@ -40,10 +40,10 @@ __global__ void FirstPass(
   );
   __syncthreads();
 
-  if (blockIdx.x == 0 && blockIdx.y == 0) {
-    PrintKernelArrayView(right_edges_buffer, "right_edges_buffer");
-    PrintKernelArrayView(bottom_edges_buffer, "bottom_edges_buffer");
-  }
+//   if (blockIdx.x == 0 && blockIdx.y == 0) {
+//     PrintKernelArrayView(right_edges_buffer, "right_edges_buffer");
+//     PrintKernelArrayView(bottom_edges_buffer, "bottom_edges_buffer");
+//   }
 
   __syncthreads();
 }
