@@ -3,107 +3,112 @@
 
 // === Single-block exclusive scan (Hillis-Steele) for a single row ===
 __global__ void RowWiseScanSingleBlock(
-    const int *__restrict__ in,
-    int *__restrict__ out,
+    const int *__restrict__ in_ptr,
+    int *__restrict__ out_ptr,
     ArraySize2D size
 ) {
-  
-  
-  extern __shared__ int temp[];
-  int row = blockIdx.x;
-  int tid = threadIdx.x;
+  KernelArrayViewConst in{in_ptr, size};
+  KernelArrayView out{out_ptr, size};
 
-  if (tid >= size.num_cols)
+  extern __shared__ int temp[];
+  KernelArrayView shared_temp{temp, {1, size.num_cols}};
+
+  int row_index = blockIdx.x;
+  int col_index = threadIdx.x;
+
+  if (col_index >= size.num_cols)
     return;
 
   // Load input to shared memory
-  temp[tid] = in[row * size.num_cols + tid];
+  shared_temp.At(0, col_index) = in.At(row_index, col_index);
   __syncthreads();
 
   // Inclusive Hillis-Steele scan
   for (int offset = 1; offset < size.num_cols; offset *= 2) {
-    int val = 0;
-    if (tid >= offset)
-      val = temp[tid - offset];
+    int val =
+        (col_index >= offset) ? shared_temp.At(0, col_index - offset) : 0;
     __syncthreads();
-    temp[tid] += val;
+    shared_temp.At(0, col_index) += val;
     __syncthreads();
   }
 
   // Convert to exclusive scan
-  if (tid == 0) {
-    out[row * size.num_cols + tid] = 0;
-  } else if (tid < size.num_cols) {
-    out[row * size.num_cols + tid] = temp[tid - 1];
-  }
-
+  out.At(row_index, col_index) =
+      (col_index == 0) ? 0 : shared_temp.At(0, col_index - 1);
 }
 
 // === Multi-block (chunked) scan for long rows ===
 // Phase 1: Local block scan (inclusive, then convert to exclusive)
 __global__ void RowWiseScanMultiBlockPhase1(
-    const int *__restrict__ in,
-    int *__restrict__ out,
-    int *__restrict__ block_sums,
+    const int *__restrict__ in_ptr,
+    int *__restrict__ out_ptr,
+    int *__restrict__ block_sums_ptr,
     ArraySize2D size,
     int chunk_size
 ) {
-  extern __shared__ int temp[];
   int row = blockIdx.y;
+  int num_chunks = gridDim.x;
   int chunk_start = blockIdx.x * chunk_size;
-  int tid = threadIdx.x;
-  int global_idx = row * size.num_cols + chunk_start + tid;
+  int col_offset = threadIdx.x;
+  int global_col = chunk_start + col_offset;
 
-  // Load input
-  if (chunk_start + tid < size.num_cols)
-    temp[tid] = in[global_idx];
-  else
-    temp[tid] = 0;
+  KernelArrayViewConst in{in_ptr, size};
+  KernelArrayView out{out_ptr, size};
 
+  KernelArrayView block_sums_view{
+      block_sums_ptr,
+      {size.num_rows, static_cast<size_t>(num_chunks)}
+  };
+
+  extern __shared__ int temp[];
+  KernelArrayView shared_temp{temp, {1, static_cast<size_t>(chunk_size)}};
+
+  // Load to shared
+  if (global_col < size.num_cols) {
+    shared_temp.At(0, col_offset) = in.At(row, global_col);
+  } else {
+    shared_temp.At(0, col_offset) = 0;
+  }
   __syncthreads();
 
-  // Inclusive scan within block
+  // Inclusive scan in shared memory
   for (int offset = 1; offset < chunk_size; offset *= 2) {
-    int val = 0;
-    if (tid >= offset)
-      val = temp[tid - offset];
+    int val =
+        (col_offset >= offset) ? shared_temp.At(0, col_offset - offset) : 0;
     __syncthreads();
-    temp[tid] += val;
+    shared_temp.At(0, col_offset) += val;
     __syncthreads();
   }
 
-  // Convert to exclusive and store result
-  if (chunk_start + tid < size.num_cols) {
-    if (tid == 0) {
-      out[global_idx] = 0;
-    } else {
-      out[global_idx] = temp[tid - 1];
-    }
+  // Convert to exclusive scan and write result
+  if (global_col < size.num_cols) {
+    ConvertInclusiveToExclusiveRow(out, shared_temp, row, col_offset);
   }
 
-  // Store inclusive block sum (last value of inclusive scan)
-  if (tid == chunk_size - 1 || chunk_start + tid == size.num_cols - 1) {
-    block_sums[row * gridDim.x + blockIdx.x] = temp[tid];
+  // Store full sum for this block
+  if (col_offset == chunk_size - 1 || global_col == size.num_cols - 1) {
+    block_sums_view.At(row, blockIdx.x) = shared_temp.At(0, col_offset);
   }
 }
 
-
 // Phase 2: Add scanned block sums to partial results
 __global__ void RowWiseScanMultiBlockPhase2(
-    int *__restrict__ out,
-    const int *__restrict__ scanned_block_sums,
+    int *__restrict__ out_ptr,
+    const int *__restrict__ scanned_block_sums_ptr,
     ArraySize2D size,
     int chunk_size
 ) {
+  KernelArrayView out{out_ptr, size};
+
   int row = blockIdx.y;
   int chunk_id = blockIdx.x;
-  int tid = threadIdx.x;
-
+  int col_offset = threadIdx.x;
   int chunk_start = chunk_id * chunk_size;
-  int global_idx = row * size.num_cols + chunk_start + tid;
+  int global_col = chunk_start + col_offset;
 
-  int offset = scanned_block_sums[row * gridDim.x + chunk_id];
-  if (chunk_id > 0 && chunk_start + tid < size.num_cols) {
-    out[global_idx] += offset;
-  }
+  if (chunk_id == 0 || global_col >= size.num_cols)
+    return;
+
+  int offset = scanned_block_sums_ptr[row * gridDim.x + chunk_id];
+  out.At(row, global_col) += offset;
 }
