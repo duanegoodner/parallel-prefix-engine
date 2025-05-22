@@ -1,12 +1,14 @@
 #include "cuda_prefix_sum/internal/device_helpers.cuh"
+#include "cuda_prefix_sum/internal/hillis_steele_row_kernel.cuh"
 
 // === Single-block exclusive scan (Hillis-Steele) for a single row ===
 __global__ void RowWiseScanSingleBlock(
     const int *__restrict__ in,
     int *__restrict__ out,
-    // int num_cols
     ArraySize2D size
 ) {
+  
+  
   extern __shared__ int temp[];
   int row = blockIdx.x;
   int tid = threadIdx.x;
@@ -34,6 +36,7 @@ __global__ void RowWiseScanSingleBlock(
   } else if (tid < size.num_cols) {
     out[row * size.num_cols + tid] = temp[tid - 1];
   }
+
 }
 
 // === Multi-block (chunked) scan for long rows ===
@@ -89,7 +92,6 @@ __global__ void RowWiseScanMultiBlockPhase1(
 __global__ void RowWiseScanMultiBlockPhase2(
     int *__restrict__ out,
     const int *__restrict__ scanned_block_sums,
-    // int num_cols,
     ArraySize2D size,
     int chunk_size
 ) {

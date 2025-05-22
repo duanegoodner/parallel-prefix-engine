@@ -48,7 +48,6 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
       right_tile_edge_buffers_.d_address(),
       right_tile_edge_buffers_ps_.d_address(),
       right_tile_edge_buffers_.size()
-      // FirstPassGridDim().x
   );
 
   right_tile_edge_buffers_ps_.DebugPrintOnHost(
@@ -103,7 +102,6 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
     const int *d_input,
     int *d_output,
     ArraySize2D size
-    // int chunk_size
 ) {
   if (size.num_cols <= buffer_sum_method_cutoff_) {
     dim3 block(size.num_cols);

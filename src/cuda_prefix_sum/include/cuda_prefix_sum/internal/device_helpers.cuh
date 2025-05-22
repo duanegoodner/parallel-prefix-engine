@@ -8,9 +8,9 @@
 //
 // Row-major 1D index calculation
 //
-__forceinline__ __device__ int ArrayIndex1D(int row, int col, int num_cols) {
-  return row * num_cols + col;
-}
+// __forceinline__ __device__ int ArrayIndex1D(int row, int col, int num_cols) {
+//   return row * num_cols + col;
+// }
 
 //
 // ElementCoords:
@@ -129,7 +129,8 @@ static __device__ void PrintKernelArrayView(
       for (int col = 0; col < array.size.num_cols; ++col) {
         printf(
             "%d\t",
-            array.d_address[ArrayIndex1D(row, col, array.size.num_cols)]
+            array.At(row, col)
+            // array.d_address[ArrayIndex1D(row, col, array.size.num_cols)]
         );
       }
       printf("\n");
@@ -284,9 +285,7 @@ static __device__ void CopyTileBottomEdgesToGlobalBuffer(
   }
 }
 
-static __device__ void CopyTileBottomEdgesToGlobalMemory(
-    int *bottom_edges_buffer
-) {}
+
 
 static __device__ void ComputeSharedMemArrayPrefixSum(
     KernelArrayView shared_array,
@@ -303,3 +302,19 @@ static __device__ void ComputeSharedMemArrayPrefixSum(
 
   CollectBottomEdges(shared_array, sub_tile_size);
 }
+
+// Device function to convert an inclusive scan to exclusive for a single row.
+// The caller is responsible for ensuring shared_temp contains valid data.
+__forceinline__ __device__ void ConvertInclusiveToExclusiveRow(
+    KernelArrayView out,
+    KernelArrayView shared_temp,
+    int row_index,
+    int col_index
+) {
+  if (col_index == 0) {
+    out.At(row_index, col_index) = 0;
+  } else {
+    out.At(row_index, col_index) = shared_temp.At(row_index, col_index - 1);
+  }
+}
+
