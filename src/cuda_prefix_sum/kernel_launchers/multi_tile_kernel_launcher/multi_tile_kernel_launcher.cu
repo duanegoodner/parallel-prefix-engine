@@ -10,6 +10,7 @@
 #include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/multi_block_prefix_sum_helpers.cuh"
 #include "cuda_prefix_sum/internal/row_scan_multi_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/row_scan_single_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
@@ -138,49 +139,64 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
         size
     );
   } else {
-    ArraySize2D original_size = size;
-
-    // Phase 1: scan chunks
-    size_t num_chunks =
-        (size.num_cols + mult_block_buffer_sum_chunk_size_ - 1) /
-        mult_block_buffer_sum_chunk_size_;
-    dim3 grid_phase1(num_chunks, size.num_rows);
-    dim3 block_phase1(mult_block_buffer_sum_chunk_size_);
-    size_t shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
-
-    int *d_block_sums;
-    cudaMalloc(&d_block_sums, sizeof(int) * size.num_rows * num_chunks);
-
-    rmulti::
-        RowScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
-            d_input,
-            d_output,
-            d_block_sums,
-            size,
-            mult_block_buffer_sum_chunk_size_
-        );
-
-    // Phase 1.5: scan block sums
-    int *d_scanned_block_sums;
-    cudaMalloc(
-        &d_scanned_block_sums,
-        sizeof(int) * size.num_rows * num_chunks
-    );
-
-    // Recursively scan block sums row-wise
-    ArraySize2D block_sum_size{size.num_rows, num_chunks};
-    LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums, block_sum_size);
-
-    // Phase 2: apply scanned sums
-    rmulti::RowScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+    multi_block_prefix_sum::Launch(
+        d_input,
         d_output,
-        d_scanned_block_sums,
-        original_size,
-        mult_block_buffer_sum_chunk_size_
+        size,
+        mult_block_buffer_sum_chunk_size_,
+        /*row_major=*/true,
+        rmulti::RowScanMultiBlockPhase1,
+        rmulti::RowScanMultiBlockPhase2,
+        [this](const int *in, int *out, ArraySize2D sz) {
+          LaunchRowWisePrefixSum(in, out, sz);
+        }
     );
 
-    cudaFree(d_block_sums);
-    cudaFree(d_scanned_block_sums);
+    // ArraySize2D original_size = size;
+
+    // // Phase 1: scan chunks
+    // size_t num_chunks =
+    //     (size.num_cols + mult_block_buffer_sum_chunk_size_ - 1) /
+    //     mult_block_buffer_sum_chunk_size_;
+    // dim3 grid_phase1(num_chunks, size.num_rows);
+    // dim3 block_phase1(mult_block_buffer_sum_chunk_size_);
+    // size_t shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
+
+    // int *d_block_sums;
+    // cudaMalloc(&d_block_sums, sizeof(int) * size.num_rows * num_chunks);
+
+    // rmulti::
+    //     RowScanMultiBlockPhase1<<<grid_phase1, block_phase1,
+    //     shared_bytes>>>(
+    //         d_input,
+    //         d_output,
+    //         d_block_sums,
+    //         size,
+    //         mult_block_buffer_sum_chunk_size_
+    //     );
+
+    // // Phase 1.5: scan block sums
+    // int *d_scanned_block_sums;
+    // cudaMalloc(
+    //     &d_scanned_block_sums,
+    //     sizeof(int) * size.num_rows * num_chunks
+    // );
+
+    // // Recursively scan block sums row-wise
+    // ArraySize2D block_sum_size{size.num_rows, num_chunks};
+    // LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums,
+    // block_sum_size);
+
+    // // Phase 2: apply scanned sums
+    // rmulti::RowScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+    //     d_output,
+    //     d_scanned_block_sums,
+    //     original_size,
+    //     mult_block_buffer_sum_chunk_size_
+    // );
+
+    // cudaFree(d_block_sums);
+    // cudaFree(d_scanned_block_sums);
   }
 }
 
@@ -199,47 +215,63 @@ void MultiTileKernelLauncher::LaunchColWisePrefixSum(
         size
     );
   } else {
-    ArraySize2D original_size = size;
 
-    // Phase 1: scan column chunks
-    size_t num_chunks =
-        (size.num_rows + mult_block_buffer_sum_chunk_size_ - 1) /
-        mult_block_buffer_sum_chunk_size_;
-    dim3 grid_phase1(size.num_cols, num_chunks); // one block per (col, chunk)
-    dim3 block_phase1(mult_block_buffer_sum_chunk_size_);
-    size_t shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
-
-    int *d_block_sums;
-    cudaMalloc(&d_block_sums, sizeof(int) * size.num_cols * num_chunks);
-
-    cmulti::ColScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
+    multi_block_prefix_sum::Launch(
         d_input,
         d_output,
-        d_block_sums,
         size,
-        mult_block_buffer_sum_chunk_size_
+        mult_block_buffer_sum_chunk_size_,
+        false,
+        cmulti::ColScanMultiBlockPhase1,
+        cmulti::ColScanMultiBlockPhase2,
+        [this](const int *in, int *out, ArraySize2D sz) {
+          LaunchColWisePrefixSum(in, out, sz);
+        }
+
     );
+    // ArraySize2D original_size = size;
 
-    // Phase 1.5: scan block sums column-wise
-    int *d_scanned_block_sums;
-    cudaMalloc(
-        &d_scanned_block_sums,
-        sizeof(int) * size.num_cols * num_chunks
-    );
+    // // Phase 1: scan column chunks
+    // size_t num_chunks =
+    //     (size.num_rows + mult_block_buffer_sum_chunk_size_ - 1) /
+    //     mult_block_buffer_sum_chunk_size_;
+    // dim3 grid_phase1(size.num_cols, num_chunks); // one block per (col,
+    // chunk) dim3 block_phase1(mult_block_buffer_sum_chunk_size_); size_t
+    // shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
 
-    // Transpose to reuse row-wise scan logic (or implement column-wise scan recursively)
-    ArraySize2D block_sum_size{num_chunks, size.num_cols};
-    LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums, block_sum_size);
+    // int *d_block_sums;
+    // cudaMalloc(&d_block_sums, sizeof(int) * size.num_cols * num_chunks);
 
-    // Phase 2: apply scanned sums
-    cmulti::ColScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
-        d_output,
-        d_scanned_block_sums,
-        original_size,
-        mult_block_buffer_sum_chunk_size_
-    );
+    // cmulti::ColScanMultiBlockPhase1<<<grid_phase1, block_phase1,
+    // shared_bytes>>>(
+    //     d_input,
+    //     d_output,
+    //     d_block_sums,
+    //     size,
+    //     mult_block_buffer_sum_chunk_size_
+    // );
 
-    cudaFree(d_block_sums);
-    cudaFree(d_scanned_block_sums);
+    // // Phase 1.5: scan block sums column-wise
+    // int *d_scanned_block_sums;
+    // cudaMalloc(
+    //     &d_scanned_block_sums,
+    //     sizeof(int) * size.num_cols * num_chunks
+    // );
+
+    // // Transpose to reuse row-wise scan logic (or implement column-wise scan
+    // recursively) ArraySize2D block_sum_size{num_chunks, size.num_cols};
+    // LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums,
+    // block_sum_size);
+
+    // // Phase 2: apply scanned sums
+    // cmulti::ColScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+    //     d_output,
+    //     d_scanned_block_sums,
+    //     original_size,
+    //     mult_block_buffer_sum_chunk_size_
+    // );
+
+    // cudaFree(d_block_sums);
+    // cudaFree(d_scanned_block_sums);
   }
 }
