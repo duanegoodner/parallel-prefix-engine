@@ -15,8 +15,8 @@ private:
   KernelArray right_tile_edge_buffers_ps_;
   KernelArray bottom_tile_edge_buffers_;
   KernelArray bottom_tile_edge_buffers_ps_;
-  size_t buffer_sum_method_cutoff_ = 1024;
-  size_t mult_block_buffer_sum_chunk_size_ = 512;
+  size_t buffer_sum_method_cutoff_ = 8;
+  size_t mult_block_buffer_sum_chunk_size_ = 4;
 
   dim3 FirstPassBlockDim();
   dim3 FirstPassGridDim();
