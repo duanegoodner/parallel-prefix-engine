@@ -1,16 +1,16 @@
-add_library(hillis_steele_row_kernel hillis_steele_row_kernel.cu)
+add_library(row_scan_multi_block_kernel row_scan_multi_block.cu)
 
 target_include_directories(
-    hillis_steele_row_kernel
+    row_scan_multi_block_kernel
     PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_include_directories(hillis_steele_row_kernel
+target_include_directories(row_scan_multi_block_kernel
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
-target_link_libraries(hillis_steele_row_kernel
+target_link_libraries(row_scan_multi_block_kernel
     PRIVATE
         CUDA::cudart
         cuda_headers

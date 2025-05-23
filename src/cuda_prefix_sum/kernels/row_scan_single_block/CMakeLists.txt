@@ -1,22 +1,18 @@
-add_library(
-    multi_tile_kernel
-    multi_tile_kernel.cu
-    )
+add_library(row_scan_single_block_kernel row_scan_single_block.cu)
 
 target_include_directories(
-    multi_tile_kernel
+    row_scan_single_block_kernel
     PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_include_directories(multi_tile_kernel
+target_include_directories(row_scan_single_block_kernel
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
-target_link_libraries(multi_tile_kernel
+target_link_libraries(row_scan_single_block_kernel
     PRIVATE
         CUDA::cudart
         cuda_headers
-        kernel_launch_params
         my_default_flags
 )

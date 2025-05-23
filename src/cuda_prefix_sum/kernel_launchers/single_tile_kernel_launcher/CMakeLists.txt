@@ -13,7 +13,7 @@ target_include_directories(single_tile_kernel_launcher
 
 target_link_libraries(single_tile_kernel_launcher
     PRIVATE
-        single_tile_kernel
+        sub_tile_kernels
         CUDA::cudart
         cuda_headers
         kernel_launch_params
