@@ -29,10 +29,6 @@ struct KernelArrayViewConst {
     return row * size.num_cols + col;
   }
 
-//   __device__ __host__ int &At(int row, int col) {
-//     return d_address[Index1D(row, col)];
-//   }
-
   __device__ __host__ const int &At(int row, int col) const {
     return d_address[Index1D(row, col)];
   }

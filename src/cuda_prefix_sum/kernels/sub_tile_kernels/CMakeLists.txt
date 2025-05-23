@@ -1,19 +1,19 @@
 add_library(
-    multi_tile_kernel
-    multi_tile_kernel.cu
+    sub_tile_kernels
+    sub_tile_kernels.cu
     )
 
 target_include_directories(
-    multi_tile_kernel
+    sub_tile_kernels
     PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_include_directories(multi_tile_kernel
+target_include_directories(sub_tile_kernels
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
-target_link_libraries(multi_tile_kernel
+target_link_libraries(sub_tile_kernels
     PRIVATE
         CUDA::cudart
         cuda_headers

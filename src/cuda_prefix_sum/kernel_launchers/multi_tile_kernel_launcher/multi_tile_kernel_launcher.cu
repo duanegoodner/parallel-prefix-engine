@@ -9,8 +9,10 @@
 #include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
-#include "cuda_prefix_sum/internal/multi_tile_kernel.cuh"
+#include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
+
+namespace sk = subtile_kernels;
 
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
@@ -23,7 +25,7 @@ MultiTileKernelLauncher::MultiTileKernelLauncher(
 
 void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
-  ConfigureSharedMemoryForKernel(FirstPass, kMaxSharedMemBytes);
+  ConfigureSharedMemoryForKernel(sk::MultiTileKernel, kMaxSharedMemBytes);
 
   // Prepare launch configuration
   dim3 block_dim = FirstPassBlockDim();
@@ -32,7 +34,7 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   auto launch_params = CreateKernelLaunchParams(device_array, program_args_);
 
-  FirstPass<<<grid_dim, block_dim, shared_mem_size>>>(
+  sk::MultiTileKernel<<<grid_dim, block_dim, shared_mem_size>>>(
       launch_params,
       right_tile_edge_buffers_.View(),
       bottom_tile_edge_buffers_.View()

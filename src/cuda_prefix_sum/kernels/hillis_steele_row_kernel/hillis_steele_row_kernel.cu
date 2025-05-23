@@ -1,6 +1,8 @@
 #include "cuda_prefix_sum/internal/device_helpers.cuh"
 #include "cuda_prefix_sum/internal/hillis_steele_row_kernel.cuh"
 
+namespace dh = device_helpers;
+
 // === Single-block exclusive scan (Hillis-Steele) for a single row ===
 __global__ void RowWiseScanSingleBlock(
     const int *__restrict__ in_ptr,
@@ -13,28 +15,18 @@ __global__ void RowWiseScanSingleBlock(
   extern __shared__ int temp[];
   KernelArrayView shared_temp{temp, {1, size.num_cols}};
 
-  int row_index = blockIdx.x;
-  int col_index = threadIdx.x;
-
-  if (col_index >= size.num_cols)
+  if (dh::blockrow::ColIndex() >= size.num_cols)
     return;
 
   // Load input to shared memory
-  shared_temp.At(0, col_index) = in.At(row_index, col_index);
+  dh::blockrow::LoadGlobalArrayToSharedArray(in, shared_temp, 0);
   __syncthreads();
 
   // Inclusive Hillis-Steele scan
-  for (int offset = 1; offset < size.num_cols; offset *= 2) {
-    int val =
-        (col_index >= offset) ? shared_temp.At(0, col_index - offset) : 0;
-    __syncthreads();
-    shared_temp.At(0, col_index) += val;
-    __syncthreads();
-  }
+  dh::blockrow::InclusiveHillsSteeleScan(shared_temp, size.num_cols);
 
   // Convert to exclusive scan
-  out.At(row_index, col_index) =
-      (col_index == 0) ? 0 : shared_temp.At(0, col_index - 1);
+  dh::blockrow::ConvertInclusiveToExclusive(shared_temp, 0, out);
 }
 
 // === Multi-block (chunked) scan for long rows ===
@@ -46,7 +38,7 @@ __global__ void RowWiseScanMultiBlockPhase1(
     ArraySize2D size,
     int chunk_size
 ) {
-  int row = blockIdx.y;
+  //   int row = blockIdx.y;
   int num_chunks = gridDim.x;
   int chunk_start = blockIdx.x * chunk_size;
   int col_offset = threadIdx.x;
@@ -65,7 +57,8 @@ __global__ void RowWiseScanMultiBlockPhase1(
 
   // Load to shared
   if (global_col < size.num_cols) {
-    shared_temp.At(0, col_offset) = in.At(row, global_col);
+    shared_temp.At(0, col_offset) =
+        in.At(dh::blockrow::chunks::RowIndex(), global_col);
   } else {
     shared_temp.At(0, col_offset) = 0;
   }
@@ -82,12 +75,20 @@ __global__ void RowWiseScanMultiBlockPhase1(
 
   // Convert to exclusive scan and write result
   if (global_col < size.num_cols) {
-    ConvertInclusiveToExclusiveRow(out, shared_temp, row, col_offset);
+    dh::ConvertInclusiveToExclusiveRow(
+        out,
+        shared_temp,
+        dh::blockrow::chunks::RowIndex(),
+        col_offset
+    );
   }
 
   // Store full sum for this block
   if (col_offset == chunk_size - 1 || global_col == size.num_cols - 1) {
-    block_sums_view.At(row, blockIdx.x) = shared_temp.At(0, col_offset);
+    block_sums_view.At(
+        dh::blockrow::chunks::RowIndex(),
+        dh::blockrow::chunks::RowIndex()
+    ) = shared_temp.At(0, col_offset);
   }
 }
 
