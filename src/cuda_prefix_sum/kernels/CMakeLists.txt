@@ -1,2 +1,5 @@
-add_subdirectory(hillis_steele_row_kernel)
-add_subdirectory(sub_tile_kernels)
+add_subdirectory(col_scan_multi_block)
+add_subdirectory(col_scan_single_block)
+add_subdirectory(row_scan_multi_block)
+add_subdirectory(row_scan_single_block)
+add_subdirectory(sub_tile)

@@ -5,14 +5,17 @@
 
 #include "common/array_size_2d.hpp"
 
-#include "cuda_prefix_sum/internal/hillis_steele_row_kernel.cuh"
 #include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/row_scan_multi_block_kernel.cuh"
+#include "cuda_prefix_sum/internal/row_scan_single_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 
 namespace sk = subtile_kernels;
+namespace rsingle = row_scan_single_block;
+namespace rmulti = row_scan_multi_block;
 
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
@@ -109,7 +112,7 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
     dim3 block(size.num_cols);
     dim3 grid(size.num_rows);
     size_t shared_bytes = size.num_cols * sizeof(int);
-    RowWiseScanSingleBlock<<<grid, block, shared_bytes>>>(
+    rsingle::RowScanSingleBlockKernel<<<grid, block, shared_bytes>>>(
         d_input,
         d_output,
         size
@@ -128,7 +131,7 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
     int *d_block_sums;
     cudaMalloc(&d_block_sums, sizeof(int) * size.num_rows * num_chunks);
 
-    RowWiseScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
+    rmulti::RowScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
         d_input,
         d_output,
         d_block_sums,
@@ -148,7 +151,7 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
     LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums, block_sum_size);
 
     // Phase 2: apply scanned sums
-    RowWiseScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+    rmulti::RowScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
         d_output,
         d_scanned_block_sums,
         original_size,

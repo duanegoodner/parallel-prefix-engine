@@ -22,7 +22,7 @@ target_link_libraries(
     program_args
     prefix_sum_mpi
     prefix_sum_cuda
-    single_tile_kernel
+    sub_tile_kernels
     single_tile_kernel_launcher
     time_utils
     my_default_flags
@@ -54,7 +54,9 @@ target_link_libraries(
     program_args
     prefix_sum_mpi
     prefix_sum_cuda
-    multi_tile_kernel
+    sub_tile_kernels
+    row_scan_single_block_kernel
+    row_scan_multi_block_kernel
     multi_tile_kernel_launcher
     time_utils
     my_default_flags

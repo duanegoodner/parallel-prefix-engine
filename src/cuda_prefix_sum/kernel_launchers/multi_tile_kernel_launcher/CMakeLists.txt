@@ -13,8 +13,9 @@ target_include_directories(multi_tile_kernel_launcher
 
 target_link_libraries(multi_tile_kernel_launcher
     PRIVATE
-        hillis_steele_row_kernel
-        multi_tile_kernel
+        sub_tile_kernels
+        row_scan_single_block_kernel
+        row_scan_multi_block_kernel
         CUDA::cudart
         cuda_headers
         kernel_launch_params
