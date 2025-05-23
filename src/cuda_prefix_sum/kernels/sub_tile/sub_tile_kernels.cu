@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include "cuda_prefix_sum/internal/device_helpers.cuh"
+// #include "cuda_prefix_sum/internal/device_helpers.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
 
