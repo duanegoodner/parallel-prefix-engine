@@ -25,8 +25,12 @@ private:
       const int *d_input,
       int *d_output,
       ArraySize2D size
-      // int chunk_size = 512
   );
-  void EdgeBufferRowWisePrefixSum();
+  void LaunchColWisePrefixSum(
+      const int *d_input,
+      int *d_output,
+      ArraySize2D size
+  );
+
   void CheckErrors();
 };

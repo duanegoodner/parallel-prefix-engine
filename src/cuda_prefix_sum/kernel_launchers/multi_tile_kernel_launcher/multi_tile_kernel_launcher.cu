@@ -5,6 +5,8 @@
 
 #include "common/array_size_2d.hpp"
 
+#include "cuda_prefix_sum/internal/col_scan_multi_block_kernel.cuh"
+#include "cuda_prefix_sum/internal/col_scan_single_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
@@ -16,6 +18,8 @@
 namespace sk = subtile_kernels;
 namespace rsingle = row_scan_single_block;
 namespace rmulti = row_scan_multi_block;
+namespace csingle = col_scan_single_block;
+namespace cmulti = col_scan_multi_block;
 
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
@@ -57,6 +61,22 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   right_tile_edge_buffers_ps_.DebugPrintOnHost(
       "right edges after row-wise exclusive prefix sum"
+  );
+
+  CheckErrors();
+
+  bottom_tile_edge_buffers_.DebugPrintOnHost(
+      "bottom edges buffer before row-wise exclusive prefix sum"
+  );
+
+  LaunchColWisePrefixSum(
+      bottom_tile_edge_buffers_.d_address(),
+      bottom_tile_edge_buffers_ps_.d_address(),
+      bottom_tile_edge_buffers_.size()
+  );
+
+  bottom_tile_edge_buffers_ps_.DebugPrintOnHost(
+      "bottom edges buffer after row-wise exclusive prefix sum"
   );
 
   CheckErrors();
@@ -131,13 +151,14 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
     int *d_block_sums;
     cudaMalloc(&d_block_sums, sizeof(int) * size.num_rows * num_chunks);
 
-    rmulti::RowScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
-        d_input,
-        d_output,
-        d_block_sums,
-        size,
-        mult_block_buffer_sum_chunk_size_
-    );
+    rmulti::
+        RowScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
+            d_input,
+            d_output,
+            d_block_sums,
+            size,
+            mult_block_buffer_sum_chunk_size_
+        );
 
     // Phase 1.5: scan block sums
     int *d_scanned_block_sums;
@@ -152,6 +173,66 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
 
     // Phase 2: apply scanned sums
     rmulti::RowScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+        d_output,
+        d_scanned_block_sums,
+        original_size,
+        mult_block_buffer_sum_chunk_size_
+    );
+
+    cudaFree(d_block_sums);
+    cudaFree(d_scanned_block_sums);
+  }
+}
+
+void MultiTileKernelLauncher::LaunchColWisePrefixSum(
+    const int *d_input,
+    int *d_output,
+    ArraySize2D size
+) {
+  if (size.num_rows <= buffer_sum_method_cutoff_) {
+    dim3 block(size.num_rows);
+    dim3 grid(size.num_cols);
+    size_t shared_bytes = size.num_rows * sizeof(int);
+    csingle::ColScanSingleBlockKernel<<<grid, block, shared_bytes>>>(
+        d_input,
+        d_output,
+        size
+    );
+  } else {
+    ArraySize2D original_size = size;
+
+    // Phase 1: scan column chunks
+    size_t num_chunks =
+        (size.num_rows + mult_block_buffer_sum_chunk_size_ - 1) /
+        mult_block_buffer_sum_chunk_size_;
+    dim3 grid_phase1(size.num_cols, num_chunks); // one block per (col, chunk)
+    dim3 block_phase1(mult_block_buffer_sum_chunk_size_);
+    size_t shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
+
+    int *d_block_sums;
+    cudaMalloc(&d_block_sums, sizeof(int) * size.num_cols * num_chunks);
+
+    cmulti::ColScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
+        d_input,
+        d_output,
+        d_block_sums,
+        size,
+        mult_block_buffer_sum_chunk_size_
+    );
+
+    // Phase 1.5: scan block sums column-wise
+    int *d_scanned_block_sums;
+    cudaMalloc(
+        &d_scanned_block_sums,
+        sizeof(int) * size.num_cols * num_chunks
+    );
+
+    // Transpose to reuse row-wise scan logic (or implement column-wise scan recursively)
+    ArraySize2D block_sum_size{num_chunks, size.num_cols};
+    LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums, block_sum_size);
+
+    // Phase 2: apply scanned sums
+    cmulti::ColScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
         d_output,
         d_scanned_block_sums,
         original_size,
