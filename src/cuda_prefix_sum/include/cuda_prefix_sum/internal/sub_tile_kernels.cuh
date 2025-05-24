@@ -12,6 +12,12 @@ __global__ void MultiTileKernel(
     KernelArrayView bottom_edges_buffer
 );
 
+__global__ void ApplyTileGlobalOffsets(
+    KernelLaunchParams params,
+    KernelArrayViewConst right_edge_prefixes,
+    KernelArrayViewConst bottom_edge_prefixes
+);
+
 //
 // ElementCoords:
 // Encapsulates per-element indexing logic for a thread's subtile,
