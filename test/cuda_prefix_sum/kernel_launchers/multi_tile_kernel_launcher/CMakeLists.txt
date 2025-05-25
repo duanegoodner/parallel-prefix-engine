@@ -13,6 +13,7 @@ target_link_libraries(
     CUDA::cudart
     cuda_headers
     my_default_flags
+    program_args
     sub_tile_kernels
     row_scan_single_block_kernel
     row_scan_multi_block_kernel

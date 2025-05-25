@@ -12,10 +12,10 @@ public:
   KernelArray(ArraySize2D size);
   ~KernelArray();
   KernelArrayView View() const;
-  KernelArrayViewConst ViewConst() const;
+  KernelArrayViewConst ConstView() const;
   int *d_address();
   ArraySize2D size() {return size_; }
-  void DebugPrintOnHost(const std::string& label);
+  void DebugPrintOnHost(const std::string& label) const;
 
 private:
   int *d_address_ = nullptr;

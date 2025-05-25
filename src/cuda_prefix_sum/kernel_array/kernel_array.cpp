@@ -32,9 +32,13 @@ KernelArrayView KernelArray::View() const {
   return KernelArrayView{d_address_, size_};
 }
 
+KernelArrayViewConst KernelArray::ConstView() const {
+  return KernelArrayViewConst{d_address_, size_};
+}
+
 int *KernelArray::d_address() { return d_address_; }
 
-void KernelArray::DebugPrintOnHost(const std::string& label) {
+void KernelArray::DebugPrintOnHost(const std::string &label) const {
   std::vector<int> host_data(size_.num_rows * size_.num_cols);
   cudaMemcpy(
       host_data.data(),
@@ -43,11 +47,11 @@ void KernelArray::DebugPrintOnHost(const std::string& label) {
       cudaMemcpyDeviceToHost
   );
 
-   std::cout << label << ":" << std::endl;
-    for (size_t row = 0; row < size_.num_rows; ++row) {
-        for (size_t col = 0; col < size_.num_cols; ++col) {
-            std::cout << host_data[row * size_.num_cols + col] << "\t";
-        }
-        std::cout << std::endl;
+  std::cout << label << ":" << std::endl;
+  for (size_t row = 0; row < size_.num_rows; ++row) {
+    for (size_t col = 0; col < size_.num_cols; ++col) {
+      std::cout << host_data[row * size_.num_cols + col] << "\t";
     }
+    std::cout << std::endl;
+  }
 }

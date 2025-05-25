@@ -28,6 +28,9 @@ __forceinline__ __device__ void LoadGlobalToSharedColumn(
       global_array.At(RowIndexInCol(), ColIndex());
 }
 
+// Apply results of row-scanned right-edge prefixes
+// __forceinline__ __device__ void 
+
 // Inclusive Hillis-Steele scan down the column in shared memory
 __forceinline__ __device__ void InclusiveScanDownColumn(
     KernelArrayView shared_temp,

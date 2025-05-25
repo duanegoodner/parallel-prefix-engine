@@ -50,6 +50,8 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   CheckErrors();
 
+  device_array.DebugPrintOnHost("global array after tile prefix sums");
+
   right_tile_edge_buffers_.DebugPrintOnHost(
       "right edges buffer before row-wise exclusive prefix sum"
   );
@@ -67,7 +69,7 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   CheckErrors();
 
   bottom_tile_edge_buffers_.DebugPrintOnHost(
-      "bottom edges buffer before row-wise exclusive prefix sum"
+      "bottom edges buffer before col-wise exclusive prefix sum"
   );
 
   LaunchColWisePrefixSum(
@@ -77,10 +79,18 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   );
 
   bottom_tile_edge_buffers_ps_.DebugPrintOnHost(
-      "bottom edges buffer after row-wise exclusive prefix sum"
+      "bottom edges buffer after col-wise exclusive prefix sum"
   );
 
   CheckErrors();
+
+  sk::ApplyTileGlobalOffsets<<<FirstPassGridDim(), FirstPassBlockDim()>>>(
+      launch_params,
+      right_tile_edge_buffers_ps_.ConstView(),
+      bottom_tile_edge_buffers_ps_.ConstView()
+  );
+
+  device_array.DebugPrintOnHost("global array after adding offsets");
 }
 
 dim3 MultiTileKernelLauncher::FirstPassGridDim() {
