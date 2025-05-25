@@ -49,7 +49,7 @@ protected:
   );
 };
 
-TEST_F(MultiTileKernelLauncherTest, AllOnedInput) {
+TEST_F(MultiTileKernelLauncherTest, AllOnesInput) {
   auto kernel_launcher = MultiTileKernelLauncher(program_args_);
   std::vector<int> host_vector =
       std::vector<int>(program_args_.FullMatrixSize1D(), 1);

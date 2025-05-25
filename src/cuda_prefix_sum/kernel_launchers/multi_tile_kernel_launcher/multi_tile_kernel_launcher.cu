@@ -167,23 +167,26 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
 void MultiTileKernelLauncher::LaunchColWisePrefixSum(
     const int *d_input,
     int *d_output,
-    ArraySize2D size
+    ArraySize2D bottom_edge_buffer_size
 ) {
-  if (size.num_rows <= buffer_sum_method_cutoff_) {
-    dim3 block(size.num_rows);
-    dim3 grid(size.num_cols);
-    size_t shared_bytes = size.num_rows * sizeof(int);
+  if (bottom_edge_buffer_size.num_rows <= buffer_sum_method_cutoff_) {
+    dim3 block(bottom_edge_buffer_size.num_rows);
+    dim3 grid(bottom_edge_buffer_size.num_cols);
+    size_t shared_bytes = bottom_edge_buffer_size.num_rows * sizeof(int);
     csingle::ColScanSingleBlockKernel<<<grid, block, shared_bytes>>>(
         d_input,
         d_output,
-        size
+        bottom_edge_buffer_size,
+        right_tile_edge_buffers_ps_.d_address(),
+        right_tile_edge_buffers_ps_.size(),
+        program_args_.TileSize2D()
     );
   } else {
 
     multi_block_prefix_sum::Launch(
         d_input,
         d_output,
-        size,
+        bottom_edge_buffer_size,
         mult_block_buffer_sum_chunk_size_,
         /*row_major=*/false,
         cmulti::ColScanMultiBlockPhase1,
