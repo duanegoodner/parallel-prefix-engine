@@ -12,8 +12,8 @@ namespace col_scan_single_block {
       const int *__restrict__ input_ptr,
       int *__restrict__ output_ptr,
       ArraySize2D scan_array_size,
-      const int *__restrict__ rowscan_result_ptr,
-      ArraySize2D rowscan_result_array_size,
+      const int *__restrict__ row_prefix_ptr,
+      ArraySize2D row_prefix_array_size,
       ArraySize2D tile_size
   );
 

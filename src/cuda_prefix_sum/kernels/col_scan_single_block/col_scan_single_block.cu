@@ -11,8 +11,8 @@ namespace col_scan_single_block {
       const int *__restrict__ input_ptr,
       int *__restrict__ output_ptr,
       ArraySize2D scan_array_size,
-      const int *__restrict__ rowscan_result_ptr,
-      ArraySize2D rowscan_result_array_size,
+      const int *__restrict__ row_prefix_ptr,
+      ArraySize2D row_prefix_array_size,
       ArraySize2D tile_size
   ) {
     // One thread per row, one block per column
@@ -22,8 +22,8 @@ namespace col_scan_single_block {
     KernelArrayViewConst input_array_view{input_ptr, scan_array_size};
     KernelArrayView output_array_view{output_ptr, scan_array_size};
     KernelArrayViewConst rowscan_result{
-        rowscan_result_ptr,
-        rowscan_result_array_size
+        row_prefix_ptr,
+        row_prefix_array_size
     };
 
     extern __shared__ int shared_mem_single_col_ptr[];
