@@ -8,37 +8,47 @@
 namespace col_scan_single_block {
 
   __global__ void ColScanSingleBlockKernel(
-      const int *__restrict__ in_ptr,
-      int *__restrict__ out_ptr,
-      ArraySize2D bottom_edge_buffer_size,
+      const int *__restrict__ input_ptr,
+      int *__restrict__ output_ptr,
+      ArraySize2D scan_array_size,
       const int *__restrict__ rowscan_result_ptr,
-      ArraySize2D right_edge_buffer_size,
+      ArraySize2D rowscan_result_array_size,
       ArraySize2D tile_size
   ) {
     // One thread per row, one block per column
-    if (RowIndexInCol() >= bottom_edge_buffer_size.num_rows)
+    if (ColScanArrayRow() >= scan_array_size.num_rows)
       return;
 
-    KernelArrayViewConst in{in_ptr, bottom_edge_buffer_size};
-    KernelArrayView out{out_ptr, bottom_edge_buffer_size};
+    KernelArrayViewConst input_array_view{input_ptr, scan_array_size};
+    KernelArrayView output_array_view{output_ptr, scan_array_size};
     KernelArrayViewConst rowscan_result{
         rowscan_result_ptr,
-        right_edge_buffer_size
+        rowscan_result_array_size
     };
 
-    extern __shared__ int temp[];
-    KernelArrayView shared_temp{temp, {bottom_edge_buffer_size.num_rows, 1}};
+    extern __shared__ int shared_mem_single_col_ptr[];
+    KernelArrayView shared_mem_single_col_view{
+        shared_mem_single_col_ptr,
+        {scan_array_size.num_rows, 1}
+    };
 
-    LoadGlobalToSharedColumn(in, shared_temp);
+    LoadColFromGlobalToSharedMem(input_array_view, shared_mem_single_col_view);
     __syncthreads();
 
-    ApplyRightEdgeResult(rowscan_result, shared_temp, tile_size);
+    ApplyRowScanResult(
+        rowscan_result,
+        shared_mem_single_col_view,
+        tile_size
+    );
     __syncthreads();
 
-    InclusiveScanDownColumn(shared_temp, bottom_edge_buffer_size.num_rows);
+    InclusiveScanDownColumn(
+        shared_mem_single_col_view,
+        scan_array_size.num_rows
+    );
     __syncthreads();
 
-    ConvertToExclusiveAndStore(shared_temp, out);
+    ConvertToExclusiveAndStore(shared_mem_single_col_view, output_array_view);
   }
 
 } // namespace col_scan_single_block
