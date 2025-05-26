@@ -16,39 +16,39 @@ namespace col_scan_single_block {
       ArraySize2D tile_size
   ) {
     // One thread per row, one block per column
-    if (ColScanArrayRow() >= scan_array_size.num_rows)
+    if (LocalRowIndex() >= scan_array_size.num_rows)
       return;
 
-    KernelArrayViewConst input_array_view{input_ptr, scan_array_size};
-    KernelArrayView output_array_view{output_ptr, scan_array_size};
-    KernelArrayViewConst rowscan_result{
+    KernelArrayViewConst input_view{input_ptr, scan_array_size};
+    KernelArrayView output_view{output_ptr, scan_array_size};
+    KernelArrayViewConst row_prefix_view{
         row_prefix_ptr,
         row_prefix_array_size
     };
 
-    extern __shared__ int shared_mem_single_col_ptr[];
-    KernelArrayView shared_mem_single_col_view{
-        shared_mem_single_col_ptr,
+    extern __shared__ int shared_col_buffer_ptr[];
+    KernelArrayView shared_col_view{
+        shared_col_buffer_ptr,
         {scan_array_size.num_rows, 1}
     };
 
-    LoadColFromGlobalToSharedMem(input_array_view, shared_mem_single_col_view);
+    LoadColumnToShared(input_view, shared_col_view);
     __syncthreads();
 
-    ApplyRowScanResult(
-        rowscan_result,
-        shared_mem_single_col_view,
+    InjectRowPrefixAdjustment(
+        row_prefix_view,
+        shared_col_view,
         tile_size
     );
     __syncthreads();
 
     InclusiveScanDownColumn(
-        shared_mem_single_col_view,
+        shared_col_view,
         scan_array_size.num_rows
     );
     __syncthreads();
 
-    ConvertToExclusiveAndStore(shared_mem_single_col_view, output_array_view);
+    StoreExclusiveResultToGlobal(shared_col_view, output_view);
   }
 
 } // namespace col_scan_single_block

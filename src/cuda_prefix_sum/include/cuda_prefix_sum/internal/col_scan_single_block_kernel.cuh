@@ -18,11 +18,11 @@ namespace col_scan_single_block {
   );
 
   // Returns current column index (blockIdx.x corresponds to one column)
-  __forceinline__ __device__ int ColScanArrayCol() { return blockIdx.x; }
+  __forceinline__ __device__ int GlobalColIndex() { return blockIdx.x; }
 
   // Returns current row index within column (threadIdx.x steps down the
   // column)
-  __forceinline__ __device__ int ColScanArrayRow() { return threadIdx.x; }
+  __forceinline__ __device__ int LocalRowIndex() { return threadIdx.x; }
 
   __forceinline__ __device__ int GlobalTileCol(ArraySize2D tile_size) {
     return blockIdx.x / tile_size.num_cols;
@@ -33,22 +33,22 @@ namespace col_scan_single_block {
   }
 
   // Load input from global to shared memory column-wise
-  __forceinline__ __device__ void LoadColFromGlobalToSharedMem(
+  __forceinline__ __device__ void LoadColumnToShared(
       KernelArrayViewConst global_array,
       KernelArrayView shared_array
   ) {
-    shared_array.At(ColScanArrayRow(), 0) =
-        global_array.At(ColScanArrayRow(), ColScanArrayCol());
+    shared_array.At(LocalRowIndex(), 0) =
+        global_array.At(LocalRowIndex(), GlobalColIndex());
   }
 
   // Apply results of row-scanned right-edge prefixes
-  __forceinline__ __device__ void ApplyRowScanResult(
+  __forceinline__ __device__ void InjectRowPrefixAdjustment(
       KernelArrayViewConst right_edge_ps_array,
-      KernelArrayView shared_mem_single_col_view,
+      KernelArrayView shared_col_view,
       ArraySize2D tile_size
   ) {
 
-    shared_mem_single_col_view.At(ColScanArrayRow(), 0) +=
+    shared_col_view.At(LocalRowIndex(), 0) +=
         right_edge_ps_array.At(
             GlobalTileRow(tile_size),
             GlobalTileCol(tile_size)
@@ -57,29 +57,29 @@ namespace col_scan_single_block {
 
   // Inclusive Hillis-Steele scan down the column in shared memory
   __forceinline__ __device__ void InclusiveScanDownColumn(
-      KernelArrayView shared_mem_single_col_view,
+      KernelArrayView shared_col_view,
       int num_rows
   ) {
     for (int offset = 1; offset < num_rows; offset *= 2) {
       int val =
-          (ColScanArrayRow() >= offset)
-              ? shared_mem_single_col_view.At(ColScanArrayRow() - offset, 0)
+          (LocalRowIndex() >= offset)
+              ? shared_col_view.At(LocalRowIndex() - offset, 0)
               : 0;
       __syncthreads();
-      shared_mem_single_col_view.At(ColScanArrayRow(), 0) += val;
+      shared_col_view.At(LocalRowIndex(), 0) += val;
       __syncthreads();
     }
   }
 
   // Convert inclusive to exclusive and write to output
-  __forceinline__ __device__ void ConvertToExclusiveAndStore(
-      KernelArrayView shared_mem_single_col_view,
+  __forceinline__ __device__ void StoreExclusiveResultToGlobal(
+      KernelArrayView shared_col_view,
       KernelArrayView output
   ) {
-    output.At(ColScanArrayRow(), ColScanArrayCol()) =
-        (ColScanArrayRow() == 0)
+    output.At(LocalRowIndex(), GlobalColIndex()) =
+        (LocalRowIndex() == 0)
             ? 0
-            : shared_mem_single_col_view.At(ColScanArrayRow() - 1, 0);
+            : shared_col_view.At(LocalRowIndex() - 1, 0);
   }
 
 } // namespace col_scan_single_block
