@@ -28,6 +28,14 @@ RowMajorKernelArray::~RowMajorKernelArray() {
   }
 }
 
+size_t RowMajorKernelArray::Index1D(size_t row, size_t col) {
+  return row * size_.num_cols + col;
+}
+
+int RowMajorKernelArray::At(size_t row, size_t col) {
+  return d_address_[Index1D(row, col)];
+}
+
 RowMajorKernelArrayView RowMajorKernelArray::View() const {
   return RowMajorKernelArrayView{d_address_, size_};
 }

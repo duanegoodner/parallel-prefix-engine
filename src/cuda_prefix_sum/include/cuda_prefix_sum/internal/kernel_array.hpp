@@ -11,6 +11,7 @@ class RowMajorKernelArray {
 public:
   RowMajorKernelArray(ArraySize2D size);
   ~RowMajorKernelArray();
+  int At(size_t row, size_t col);
   RowMajorKernelArrayView View() const;
   RowMajorKernelArrayViewConst ConstView() const;
   int *d_address();
@@ -18,6 +19,7 @@ public:
   void DebugPrintOnHost(const std::string& label) const;
 
 private:
+  size_t Index1D(size_t row, size_t col);
   int *d_address_ = nullptr;
   ArraySize2D size_;
 };
