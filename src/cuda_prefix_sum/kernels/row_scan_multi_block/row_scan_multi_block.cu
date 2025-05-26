@@ -13,11 +13,11 @@ namespace row_scan_multi_block {
       ArraySize2D size,
       int chunk_size
   ) {
-    KernelArrayViewConst in{in_ptr, size};
-    KernelArrayView out{out_ptr, size};
+    RowMajorKernelArrayViewConst in{in_ptr, size};
+    RowMajorKernelArrayView out{out_ptr, size};
 
     extern __shared__ int temp[];
-    KernelArrayView shared_temp{temp, {1, static_cast<size_t>(chunk_size)}};
+    RowMajorKernelArrayView shared_temp{temp, {1, static_cast<size_t>(chunk_size)}};
 
     // Load to shared
     if (GlobalCol(chunk_size) < size.num_cols) {
@@ -59,8 +59,8 @@ namespace row_scan_multi_block {
       ArraySize2D size,
       int chunk_size
   ) {
-    KernelArrayView out{out_ptr, size};
-    KernelArrayViewConst scanned_block_sums{
+    RowMajorKernelArrayView out{out_ptr, size};
+    RowMajorKernelArrayViewConst scanned_block_sums{
         scanned_block_sums_ptr,
         {size.num_rows, static_cast<size_t>(NumChunks())}
     };

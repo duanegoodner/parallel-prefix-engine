@@ -10,11 +10,11 @@
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 
-KernelArray PrepareKernelArray(
+RowMajorKernelArray PrepareRowMajorKernelArray(
     const std::vector<int> &host_vector,
     ArraySize2D array_size
 ) {
-  KernelArray kernel_array{array_size};
+  RowMajorKernelArray kernel_array{array_size};
   cudaMemcpy(
       kernel_array.d_address(),
       host_vector.data(),
@@ -54,7 +54,7 @@ TEST_F(MultiTileKernelLauncherTest, AllOnesInput) {
   std::vector<int> host_vector =
       std::vector<int>(program_args_.FullMatrixSize1D(), 1);
   auto kernel_array =
-      PrepareKernelArray(host_vector, program_args_.FullMatrixSize2D());
+      PrepareRowMajorKernelArray(host_vector, program_args_.FullMatrixSize2D());
   kernel_launcher.Launch(kernel_array);
 }
 

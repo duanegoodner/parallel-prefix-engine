@@ -62,8 +62,8 @@ namespace row_scan_multi_block {
   ///
   /// Usage assumes: shared_temp has dimensions {1, chunk_size}
   __forceinline__ __device__ void ConvertInclusiveToExclusiveRow(
-      KernelArrayView out,
-      KernelArrayView shared_temp,
+      RowMajorKernelArrayView out,
+      RowMajorKernelArrayView shared_temp,
       int row_index,
       int col_index
   ) {

@@ -7,12 +7,12 @@
 
 
 struct KernelLaunchParams {
-  KernelArrayView array;
+  RowMajorKernelArrayView array;
   ArraySize2D tile_size;
   ArraySize2D sub_tile_size;
 };
 
 KernelLaunchParams CreateKernelLaunchParams(
-    const KernelArray &device_array,
+    const RowMajorKernelArray &device_array,
     const ProgramArgs &program_args
 );

@@ -15,11 +15,11 @@ namespace row_scan_single_block {
     if (ColIndex() >= size.num_cols)
       return;
 
-    KernelArrayViewConst in{in_ptr, size};
-    KernelArrayView out{out_ptr, size};
+    RowMajorKernelArrayViewConst in{in_ptr, size};
+    RowMajorKernelArrayView out{out_ptr, size};
 
     extern __shared__ int temp[];
-    KernelArrayView shared_temp{temp, {1, size.num_cols}};
+    RowMajorKernelArrayView shared_temp{temp, {1, size.num_cols}};
 
     LoadRowToShared(in, shared_temp, RowIndex());
     __syncthreads();

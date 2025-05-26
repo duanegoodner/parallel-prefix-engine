@@ -48,7 +48,7 @@ private:
   ProgramArgs program_args_;
   std::vector<int> full_matrix_;
   TimeIntervals time_intervals_;
-  KernelArray device_array_;
+  RowMajorKernelArray device_array_;
   std::unique_ptr<KernelLauncher> kernel_launcher_;
 
   std::chrono::steady_clock::time_point start_time_;

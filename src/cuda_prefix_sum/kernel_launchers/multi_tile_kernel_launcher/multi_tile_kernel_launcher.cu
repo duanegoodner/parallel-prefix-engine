@@ -31,7 +31,7 @@ MultiTileKernelLauncher::MultiTileKernelLauncher(
     , bottom_tile_edge_buffers_{{FirstPassGridDim().y, program_args_.FullMatrixSize2D().num_cols}}
     , bottom_tile_edge_buffers_ps_{{FirstPassGridDim().y, program_args_.FullMatrixSize2D().num_cols}} {}
 
-void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
+void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(sk::MultiTileKernel, kMaxSharedMemBytes);
 

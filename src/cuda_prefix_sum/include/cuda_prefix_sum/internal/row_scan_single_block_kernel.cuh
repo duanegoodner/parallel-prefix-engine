@@ -42,8 +42,8 @@ __forceinline__ __device__ int ColIndex() { return threadIdx.x; }
 /// @param shared_row   A single-row temporary buffer in shared memory
 /// @param row_index    The row of global_array to load (usually `blockIdx.x`)
 __forceinline__ __device__ void LoadRowToShared(
-    KernelArrayViewConst global_array,
-    KernelArrayView shared_row,
+    RowMajorKernelArrayViewConst global_array,
+    RowMajorKernelArrayView shared_row,
     int row_index
 ) {
   shared_row.At(0, ColIndex()) = global_array.At(row_index, ColIndex());
@@ -54,7 +54,7 @@ __forceinline__ __device__ void LoadRowToShared(
 /// @param shared_row The temporary shared memory buffer
 /// @param num_cols   Number of columns to scan
 __forceinline__ __device__ void InclusiveScanHillisSteele(
-    KernelArrayView shared_row,
+    RowMajorKernelArrayView shared_row,
     int num_cols
 ) {
   for (int offset = 1; offset < num_cols; offset *= 2) {
@@ -71,8 +71,8 @@ __forceinline__ __device__ void InclusiveScanHillisSteele(
 /// @param output     The output array in global memory
 /// @param row_index  The destination row in the output array
 __forceinline__ __device__ void ConvertToExclusiveScan(
-    KernelArrayView shared_row,
-    KernelArrayView output,
+    RowMajorKernelArrayView shared_row,
+    RowMajorKernelArrayView output,
     int row_index
 ) {
   int col = ColIndex();

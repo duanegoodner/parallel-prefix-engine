@@ -14,11 +14,11 @@ __global__ void ColScanMultiBlockPhase1(
     ArraySize2D size,
     int chunk_size
 ) {
-  KernelArrayViewConst in{in_ptr, size};
-  KernelArrayView out{out_ptr, size};
+  RowMajorKernelArrayViewConst in{in_ptr, size};
+  RowMajorKernelArrayView out{out_ptr, size};
 
   extern __shared__ int temp[];
-  KernelArrayView shared_temp{temp, {static_cast<size_t>(chunk_size), 1}};
+  RowMajorKernelArrayView shared_temp{temp, {static_cast<size_t>(chunk_size), 1}};
 
   const int col = ColIndex();
   const int global_row = GlobalRow(chunk_size);
@@ -57,8 +57,8 @@ __global__ void ColScanMultiBlockPhase2(
     ArraySize2D size,
     int chunk_size
 ) {
-  KernelArrayView out{out_ptr, size};
-  KernelArrayViewConst scanned_block_sums{
+  RowMajorKernelArrayView out{out_ptr, size};
+  RowMajorKernelArrayViewConst scanned_block_sums{
       scanned_block_sums_ptr,
       {static_cast<size_t>(gridDim.y), size.num_cols}
   };

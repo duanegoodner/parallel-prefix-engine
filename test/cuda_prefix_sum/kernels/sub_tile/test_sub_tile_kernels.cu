@@ -11,11 +11,11 @@
 
 namespace sk = subtile_kernels;
 
-KernelArray PrepareKernelArray(
+RowMajorKernelArray PrepareRowMajorKernelArray(
     const std::vector<int> &host_vector,
     ArraySize2D array_size
 ) {
-  KernelArray kernel_array{array_size};
+  RowMajorKernelArray kernel_array{array_size};
   cudaMemcpy(
       kernel_array.d_address(),
       host_vector.data(),
@@ -31,7 +31,7 @@ void RunSingleTileTest(
     ArraySize2D sub_tile_size
 ) {
 
-  auto kernel_array = PrepareKernelArray(host_vector, array_size);
+  auto kernel_array = PrepareRowMajorKernelArray(host_vector, array_size);
 
   dim3 grid_dim{1, 1, 1};
   dim3 block_dim{
@@ -66,7 +66,7 @@ void RunMultiTileLocalPrefixSumTest(
     ArraySize2D tile_size,
     ArraySize2D sub_tile_size
 ) {
-  auto kernel_array = PrepareKernelArray(host_vector, array_size);
+  auto kernel_array = PrepareRowMajorKernelArray(host_vector, array_size);
   dim3 grid_dim{
       static_cast<uint32_t>(array_size.num_cols / tile_size.num_cols),
       static_cast<uint32_t>(array_size.num_rows / tile_size.num_rows),
@@ -86,8 +86,8 @@ void RunMultiTileLocalPrefixSumTest(
       sub_tile_size
   };
 
-  KernelArray right_edge_buffers{{array_size.num_rows, grid_dim.x}};
-  KernelArray bottom_edge_buffers{{grid_dim.y, array_size.num_cols}};
+  RowMajorKernelArray right_edge_buffers{{array_size.num_rows, grid_dim.x}};
+  RowMajorKernelArray bottom_edge_buffers{{grid_dim.y, array_size.num_cols}};
 
   kernel_array.DebugPrintOnHost("Before running kernel");
 
@@ -101,8 +101,8 @@ void RunMultiTileLocalPrefixSumTest(
   right_edge_buffers.DebugPrintOnHost("Right edges buffer");
   bottom_edge_buffers.DebugPrintOnHost("Bottom edges buffer");
 
-  KernelArray right_edge_buffers_ps{{array_size.num_rows, grid_dim.x}};
-  KernelArray bottom_edge_buffers_ps{{array_size.num_cols, grid_dim.y}};
+  RowMajorKernelArray right_edge_buffers_ps{{array_size.num_rows, grid_dim.x}};
+  RowMajorKernelArray bottom_edge_buffers_ps{{array_size.num_cols, grid_dim.y}};
 }
 
 class SubTileKernelsTest : public ::testing::Test {

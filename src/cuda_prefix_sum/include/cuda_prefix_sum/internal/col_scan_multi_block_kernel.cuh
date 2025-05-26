@@ -39,8 +39,8 @@ __forceinline__ __device__ int GlobalRow(int chunk_size) {
 
 // Convert inclusive to exclusive
 __forceinline__ __device__ void ConvertInclusiveToExclusiveColumn(
-    KernelArrayView out,
-    KernelArrayView shared_temp,
+    RowMajorKernelArrayView out,
+    RowMajorKernelArrayView shared_temp,
     int global_row,
     int local_row
 ) {

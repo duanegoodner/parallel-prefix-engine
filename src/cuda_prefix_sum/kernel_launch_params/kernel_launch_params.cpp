@@ -8,7 +8,7 @@
 #include <stdexcept>  // Required for std::runtime_error
 
 KernelLaunchParams CreateKernelLaunchParams(
-    const KernelArray &device_array,
+    const RowMajorKernelArray &device_array,
     const ProgramArgs &args
 ) {
   if (!args.sub_tile_dim().has_value()) {
@@ -21,7 +21,7 @@ KernelLaunchParams CreateKernelLaunchParams(
   ArraySize2D tile_size(args.tile_dim()[0], args.tile_dim()[1]);
   ArraySize2D sub_tile_size(subtile[0], subtile[1]);
 
-  // KernelArrayView kernel_array{
+  // RowMajorKernelArrayView kernel_array{
   //     .d_address = d_arr,
   //     .size = ArraySize2D(args.full_matrix_dim()[0], args.full_matrix_dim()[1])
   // };

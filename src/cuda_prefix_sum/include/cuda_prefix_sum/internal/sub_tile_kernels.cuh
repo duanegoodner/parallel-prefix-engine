@@ -8,14 +8,14 @@ __global__ void SingleTileKernel(KernelLaunchParams params);
 
 __global__ void MultiTileKernel(
     KernelLaunchParams params,
-    KernelArrayView right_edges_buffer,
-    KernelArrayView bottom_edges_buffer
+    RowMajorKernelArrayView right_edges_buffer,
+    RowMajorKernelArrayView bottom_edges_buffer
 );
 
 __global__ void ApplyTileGlobalOffsets(
     KernelLaunchParams params,
-    KernelArrayViewConst right_edge_prefixes,
-    KernelArrayViewConst bottom_edge_prefixes
+    RowMajorKernelArrayViewConst right_edge_prefixes,
+    RowMajorKernelArrayViewConst bottom_edge_prefixes
 );
 
 //
@@ -71,7 +71,7 @@ static __device__ void PrintThreadAndBlockIndices() {
 }
 
 static __device__ void PrintSubTileContents(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size,
     const int tile_row_index = 0,
     const int tile_col_index = 0,
@@ -94,8 +94,8 @@ static __device__ void PrintSubTileContents(
 }
 
 static __device__ void CopyFromGlobalToShared(
-    const KernelArrayView global_array,
-    KernelArrayView shared_array,
+    const RowMajorKernelArrayView global_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -109,8 +109,8 @@ static __device__ void CopyFromGlobalToShared(
 }
 
 static __device__ void CopyFromSharedToGlobal(
-    const KernelArrayView shared_array,
-    KernelArrayView global_array,
+    const RowMajorKernelArrayView shared_array,
+    RowMajorKernelArrayView global_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -124,7 +124,7 @@ static __device__ void CopyFromSharedToGlobal(
 }
 
 static __device__ void CombineElementInto(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ElementCoords other_element,
     const ElementCoords cur_element
 ) {
@@ -133,7 +133,7 @@ static __device__ void CombineElementInto(
 }
 
 static __device__ void ComputeLocalRowWisePrefixSums(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
   __syncthreads();
@@ -148,7 +148,7 @@ static __device__ void ComputeLocalRowWisePrefixSums(
 }
 
 static __device__ void ComputeLocalColWisePrefixSums(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -163,7 +163,7 @@ static __device__ void ComputeLocalColWisePrefixSums(
 }
 
 static __device__ void CollectRightEdges(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
 
@@ -199,7 +199,7 @@ static __device__ void CollectRightEdges(
 }
 
 static __device__ void CollectBottomEdges(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     const ArraySize2D sub_tile_size
 ) {
   // Each thread iterates over each col in its sub_tile
@@ -236,8 +236,8 @@ static __device__ void CollectBottomEdges(
 }
 
 static __device__ void CopyTileRightEdgesToGlobalBuffer(
-    KernelArrayView shared_array,
-    KernelArrayView right_edges_buffer,
+    RowMajorKernelArrayView shared_array,
+    RowMajorKernelArrayView right_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.x == blockDim.x - 1) {
@@ -253,8 +253,8 @@ static __device__ void CopyTileRightEdgesToGlobalBuffer(
 }
 
 static __device__ void CopyTileBottomEdgesToGlobalBuffer(
-    KernelArrayView shared_array,
-    KernelArrayView bottom_edges_buffer,
+    RowMajorKernelArrayView shared_array,
+    RowMajorKernelArrayView bottom_edges_buffer,
     const ArraySize2D sub_tile_size
 ) {
   if (threadIdx.y == blockDim.y - 1) {
@@ -270,7 +270,7 @@ static __device__ void CopyTileBottomEdgesToGlobalBuffer(
 }
 
 static __device__ void ComputeSharedMemArrayPrefixSum(
-    KernelArrayView shared_array,
+    RowMajorKernelArrayView shared_array,
     ArraySize2D sub_tile_size
 ) {
   ComputeLocalRowWisePrefixSums(shared_array, sub_tile_size);
@@ -287,8 +287,8 @@ static __device__ void ComputeSharedMemArrayPrefixSum(
 
 // Prints the contents of a thread's assigned subtile from shared memory.
 // Only active for a specific blockIdx & threadIdx.
-static __device__ void PrintKernelArrayView(
-    KernelArrayView array,
+static __device__ void PrintRowMajorKernelArrayView(
+    RowMajorKernelArrayView array,
     const char *label
 ) {
   if (threadIdx.x == 0 && threadIdx.y == 0) {

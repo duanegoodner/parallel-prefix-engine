@@ -34,8 +34,8 @@ namespace col_scan_single_block {
 
   // Load input from global to shared memory column-wise
   __forceinline__ __device__ void LoadColumnToShared(
-      KernelArrayViewConst global_array,
-      KernelArrayView shared_array
+      RowMajorKernelArrayViewConst global_array,
+      RowMajorKernelArrayView shared_array
   ) {
     shared_array.At(LocalRowIndex(), 0) =
         global_array.At(LocalRowIndex(), GlobalColIndex());
@@ -43,8 +43,8 @@ namespace col_scan_single_block {
 
   // Apply results of row-scanned right-edge prefixes
   __forceinline__ __device__ void InjectRowPrefixAdjustment(
-      KernelArrayViewConst right_edge_ps_array,
-      KernelArrayView shared_col_view,
+      RowMajorKernelArrayViewConst right_edge_ps_array,
+      RowMajorKernelArrayView shared_col_view,
       ArraySize2D tile_size
   ) {
 
@@ -57,7 +57,7 @@ namespace col_scan_single_block {
 
   // Inclusive Hillis-Steele scan down the column in shared memory
   __forceinline__ __device__ void InclusiveScanDownColumn(
-      KernelArrayView shared_col_view,
+      RowMajorKernelArrayView shared_col_view,
       int num_rows
   ) {
     for (int offset = 1; offset < num_rows; offset *= 2) {
@@ -73,8 +73,8 @@ namespace col_scan_single_block {
 
   // Convert inclusive to exclusive and write to output
   __forceinline__ __device__ void StoreExclusiveResultToGlobal(
-      KernelArrayView shared_col_view,
-      KernelArrayView output
+      RowMajorKernelArrayView shared_col_view,
+      RowMajorKernelArrayView output
   ) {
     output.At(LocalRowIndex(), GlobalColIndex()) =
         (LocalRowIndex() == 0)

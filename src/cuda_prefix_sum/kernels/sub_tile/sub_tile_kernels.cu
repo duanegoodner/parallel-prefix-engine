@@ -18,7 +18,7 @@ namespace subtile_kernels {
     // __syncthreads();
 
     // Declare shared memory
-    KernelArrayView shared_array{
+    RowMajorKernelArrayView shared_array{
         .d_address = shared_mem,
         .size = params.tile_size
     };
@@ -38,12 +38,12 @@ namespace subtile_kernels {
 
   __global__ void MultiTileKernel(
       KernelLaunchParams params,
-      KernelArrayView right_edges_buffer,
-      KernelArrayView bottom_edges_buffer
+      RowMajorKernelArrayView right_edges_buffer,
+      RowMajorKernelArrayView bottom_edges_buffer
   ) {
     extern __shared__ int shared_mem[];
 
-    KernelArrayView shared_array{
+    RowMajorKernelArrayView shared_array{
         .d_address = shared_mem,
         .size = params.tile_size
     };
@@ -72,11 +72,11 @@ namespace subtile_kernels {
 
   __global__ void ApplyTileGlobalOffsets(
       KernelLaunchParams params,
-      KernelArrayViewConst right_edge_prefixes,
-      KernelArrayViewConst bottom_edge_prefixes
+      RowMajorKernelArrayViewConst right_edge_prefixes,
+      RowMajorKernelArrayViewConst bottom_edge_prefixes
   ) {
     ArraySize2D sub_tile_size = params.sub_tile_size;
-    KernelArrayView global_array = params.array;
+    RowMajorKernelArrayView global_array = params.array;
 
     for (int local_row = 0; local_row < sub_tile_size.num_rows; ++local_row) {
       for (int local_col = 0; local_col < sub_tile_size.num_cols;

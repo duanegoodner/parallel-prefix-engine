@@ -13,7 +13,7 @@ class SingleTileKernelLauncher : public KernelLauncher {
 public:
   SingleTileKernelLauncher(const ProgramArgs &program_args);
 
-  void Launch(const KernelArray &device_array) override;
+  void Launch(const RowMajorKernelArray &device_array) override;
 
 private:
   const ProgramArgs &program_args_;

@@ -19,15 +19,15 @@ namespace col_scan_single_block {
     if (LocalRowIndex() >= scan_array_size.num_rows)
       return;
 
-    KernelArrayViewConst input_view{input_ptr, scan_array_size};
-    KernelArrayView output_view{output_ptr, scan_array_size};
-    KernelArrayViewConst row_prefix_view{
+    RowMajorKernelArrayViewConst input_view{input_ptr, scan_array_size};
+    RowMajorKernelArrayView output_view{output_ptr, scan_array_size};
+    RowMajorKernelArrayViewConst row_prefix_view{
         row_prefix_ptr,
         row_prefix_array_size
     };
 
     extern __shared__ int shared_col_buffer_ptr[];
-    KernelArrayView shared_col_view{
+    RowMajorKernelArrayView shared_col_view{
         shared_col_buffer_ptr,
         {scan_array_size.num_rows, 1}
     };
