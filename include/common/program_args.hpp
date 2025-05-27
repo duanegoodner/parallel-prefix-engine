@@ -33,8 +33,9 @@ public:
       std::vector<size_t> tile_dim,
       std::optional<std::vector<size_t>> sub_tile_dim,
       std::optional<std::string> cuda_kernel,
-      int orig_argc,
-      char **orig_argv
+      int orig_argc = 1,
+      char **orig_argv = nullptr,
+      bool print_full_array = false
   );
 
   int seed() const { return seed_; }
@@ -55,6 +56,8 @@ public:
 
   int orig_argc() const { return orig_argc_; }
   char **orig_argv() const { return orig_argv_; }
+
+  bool print_full_array() {return print_full_array_; }
 
   size_t FullMatrixSize1D() const {
     return std::accumulate(
@@ -121,6 +124,7 @@ private:
   std::vector<size_t> tile_dim_ = {4, 4};
   std::optional<std::vector<size_t>> sub_tile_dim_;
   std::optional<std::string> cuda_kernel_;
+  bool print_full_array_;
 
   int orig_argc_ = 0;
   char **orig_argv_ = nullptr;

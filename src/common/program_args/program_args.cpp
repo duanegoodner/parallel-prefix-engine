@@ -19,7 +19,8 @@ ProgramArgs::ProgramArgs(
     std::optional<std::vector<size_t>> sub_tile_dim,
     std::optional<std::string> cuda_kernel,
     int orig_argc,
-    char **orig_argv
+    char **orig_argv,
+    bool print_full_array
 )
     : seed_(seed)
     , backend_(std::move(backend))
@@ -29,7 +30,8 @@ ProgramArgs::ProgramArgs(
     , sub_tile_dim_(std::move(sub_tile_dim))
     , cuda_kernel_(cuda_kernel)
     , orig_argc_(orig_argc)
-    , orig_argv_(orig_argv) {
+    , orig_argv_(orig_argv)
+    , print_full_array_{print_full_array} {
 
   if (!TileAndFullMatrixHaveSameNumDims()) {
     throw std::invalid_argument("full_matrix_dim and tile_dim must have the "

@@ -114,6 +114,15 @@ void CudaPrefixSumSolver::PrintFullMatrix(std::string title) {
   }
 }
 
+void CudaPrefixSumSolver::PrintLowerRightElement(std::string title) {
+  if (!full_matrix_.empty()) {
+    std::cout << title << std::endl;
+    std::cout << full_matrix_.back() << std::endl;
+  } else {
+    std::cout << "Matrix is empty" << std::endl;
+  }
+}
+
 void CudaPrefixSumSolver::StartTimer() {
   time_intervals_.RecordStart("total");
 }
