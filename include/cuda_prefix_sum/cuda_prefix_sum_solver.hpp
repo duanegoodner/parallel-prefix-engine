@@ -35,6 +35,7 @@ public:
   ~CudaPrefixSumSolver();
 
   void PrintFullMatrix(std::string title = "") override;
+  void PrintLowerRightElement(std::string title = "") override;
   void PopulateFullMatrix() override;
   void StartTimer() override;
   void Compute() override;

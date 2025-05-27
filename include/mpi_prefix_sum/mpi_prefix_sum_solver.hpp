@@ -25,19 +25,12 @@
 class MpiPrefixSumSolver : public PrefixSumSolver {
 public:
   MpiPrefixSumSolver(const ProgramArgs &program_args);
-
   void PopulateFullMatrix() override;
-
   void DistributeSubMatrices();
-
   void ComputeAndShareAssigned();
-
   void CollectSubMatrices();
-
   void Compute() override;
-
   int Rank() const { return mpi_environment_.rank(); }
-
   void PrintFullMatrix(std::string title = "") override {
 
     if (mpi_environment_.rank() == 0) {
@@ -45,12 +38,18 @@ public:
       full_matrix_.Print();
     }
   }
-
+  void PrintLowerRightElement(std::string title = "") override {
+    if (mpi_environment_.rank() == 0) {
+      std::cout << title << std::endl;
+      std::cout << full_matrix_.ValueAt(
+          full_matrix_.num_rows() - 1,
+          full_matrix_.num_cols() - 1
+      );
+    }
+  };
   void PrintAssignedMatrix() { assigned_matrix_.Print(); }
-
   void StartTimer() override;
   void StopTimer() override;
-
   void ReportTime() const override;
 
 private:
