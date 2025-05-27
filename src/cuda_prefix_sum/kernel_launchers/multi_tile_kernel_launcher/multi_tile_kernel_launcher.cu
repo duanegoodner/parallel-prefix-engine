@@ -52,43 +52,21 @@ void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
 
   CheckErrors();
 
-  device_array.DebugPrintOnHost("global array after tile prefix sums");
-
-  right_tile_edge_buffers_.DebugPrintOnHost(
-      "right edges buffer before row-wise exclusive prefix sum"
-  );
-
   LaunchRowWisePrefixSum(
       right_tile_edge_buffers_.d_address(),
       right_tile_edge_buffers_ps_.d_address(),
       right_tile_edge_buffers_.size()
   );
 
-  right_tile_edge_buffers_ps_.DebugPrintOnHost(
-      "right edges after row-wise exclusive prefix sum"
-  );
-
   CheckErrors();
-
-  bottom_tile_edge_buffers_.DebugPrintOnHost(
-      "bottom edges buffer before col-wise exclusive prefix sum"
-  );
 
   LaunchRowToColInjection();
   CheckErrors();
-
-  bottom_tile_edge_buffers_.DebugPrintOnHost(
-    "bottom edge buffer after injecting row-wise prefix sum"
-  );
 
   LaunchColWisePrefixSum(
       bottom_tile_edge_buffers_.d_address(),
       bottom_tile_edge_buffers_ps_.d_address(),
       bottom_tile_edge_buffers_.size()
-  );
-
-  bottom_tile_edge_buffers_ps_.DebugPrintOnHost(
-      "bottom edges buffer after col-wise exclusive prefix sum"
   );
 
   CheckErrors();
@@ -99,7 +77,6 @@ void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
       bottom_tile_edge_buffers_ps_.ConstView()
   );
 
-  device_array.DebugPrintOnHost("global array after adding offsets");
 }
 
 dim3 MultiTileKernelLauncher::FirstPassGridDim() {
