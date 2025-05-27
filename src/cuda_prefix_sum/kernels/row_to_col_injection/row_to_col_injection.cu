@@ -3,7 +3,7 @@
 #include "common/array_size_2d.hpp"
 
 #include "cuda_prefix_sum/internal/kernel_array_view.cuh"
-#include "cuda_prefix_sum/internal/row_to_col_injection.cuh"
+#include "cuda_prefix_sum/internal/row_to_col_injection_kernel.cuh"
 
 namespace row_to_col_injection {
   __global__ void RowToColInjection(
@@ -13,6 +13,11 @@ namespace row_to_col_injection {
       ArraySize2D row_prefix_array_size,
       ArraySize2D tile_size
   ) {
+
+    if (ColArrayRow() >= col_array_size.num_rows ||
+        ColArrayCol() >= col_array_size.num_cols)
+      return;
+
     RowMajorKernelArrayView col_array{col_array_ptr, col_array_size};
     RowMajorKernelArrayViewConst row_prefix_array{
         row_prefix_array_ptr,
