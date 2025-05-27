@@ -7,16 +7,16 @@
 class MultiTileKernelLauncher : public KernelLauncher {
 public:
   MultiTileKernelLauncher(const ProgramArgs &program_args);
-  void Launch(const KernelArray &device_array) override;
+  void Launch(const RowMajorKernelArray &device_array) override;
 
 private:
   const ProgramArgs &program_args_;
-  KernelArray right_tile_edge_buffers_;
-  KernelArray right_tile_edge_buffers_ps_;
-  KernelArray bottom_tile_edge_buffers_;
-  KernelArray bottom_tile_edge_buffers_ps_;
-  size_t buffer_sum_method_cutoff_ = 8;
-  size_t mult_block_buffer_sum_chunk_size_ = 4;
+  RowMajorKernelArray right_tile_edge_buffers_;
+  RowMajorKernelArray right_tile_edge_buffers_ps_;
+  RowMajorKernelArray bottom_tile_edge_buffers_;
+  RowMajorKernelArray bottom_tile_edge_buffers_ps_;
+  size_t buffer_sum_method_cutoff_ = 1024;
+  size_t mult_block_buffer_sum_chunk_size_ = 512;
 
   dim3 FirstPassBlockDim();
   dim3 FirstPassGridDim();
@@ -25,8 +25,12 @@ private:
       const int *d_input,
       int *d_output,
       ArraySize2D size
-      // int chunk_size = 512
   );
-  void EdgeBufferRowWisePrefixSum();
+  void LaunchColWisePrefixSum(
+      const int *d_input,
+      int *d_output,
+      ArraySize2D size
+  );
+
   void CheckErrors();
 };

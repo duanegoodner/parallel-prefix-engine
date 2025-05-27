@@ -13,7 +13,7 @@
 // void DummyKernelLauncher(KernelLaunchParams kernel_params) { return; }
 
 class DummyKernelLauncher : public KernelLauncher {
-  void Launch(const KernelArray &device_array) override {}
+  void Launch(const RowMajorKernelArray &device_array) override {}
 };
 
 ProgramArgs GenerateProgramArgsForTest(

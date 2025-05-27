@@ -8,5 +8,5 @@ class KernelLauncher {
 public:
   virtual ~KernelLauncher() = default;
 
-  virtual void Launch(const KernelArray &device_array) = 0;
+  virtual void Launch(const RowMajorKernelArray &device_array) = 0;
 };

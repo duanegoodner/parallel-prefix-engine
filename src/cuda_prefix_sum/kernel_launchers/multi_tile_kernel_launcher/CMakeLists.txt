@@ -14,6 +14,8 @@ target_include_directories(multi_tile_kernel_launcher
 target_link_libraries(multi_tile_kernel_launcher
     PRIVATE
         sub_tile_kernels
+        col_scan_single_block_kernel
+        col_scan_multi_block_kernel
         row_scan_single_block_kernel
         row_scan_multi_block_kernel
         CUDA::cudart

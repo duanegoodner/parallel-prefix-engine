@@ -4,7 +4,7 @@
 
 #include "common/array_size_2d.hpp"
 
-struct KernelArrayView {
+struct RowMajorKernelArrayView {
   int *d_address;
   ArraySize2D size;
 
@@ -21,7 +21,7 @@ struct KernelArrayView {
   }
 };
 
-struct KernelArrayViewConst {
+struct RowMajorKernelArrayViewConst {
   const int *d_address;
   ArraySize2D size;
 

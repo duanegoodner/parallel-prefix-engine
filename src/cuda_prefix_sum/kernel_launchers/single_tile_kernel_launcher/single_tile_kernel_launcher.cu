@@ -18,7 +18,7 @@ SingleTileKernelLauncher::SingleTileKernelLauncher(
 )
     : program_args_{program_args} {}
 
-void SingleTileKernelLauncher::Launch(const KernelArray &device_array) {
+void SingleTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
 
   CheckProvidedTileSize();
 

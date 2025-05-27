@@ -7,26 +7,27 @@
 
 namespace row_scan_single_block {
 
-__global__ void RowScanSingleBlockKernel(
-    const int *__restrict__ in_ptr,
-    int *__restrict__ out_ptr,
-    ArraySize2D size
-) {
-  KernelArrayViewConst in{in_ptr, size};
-  KernelArrayView out{out_ptr, size};
+  __global__ void RowScanSingleBlockKernel(
+      const int *__restrict__ in_ptr,
+      int *__restrict__ out_ptr,
+      ArraySize2D size
+  ) {
+    if (ColIndex() >= size.num_cols)
+      return;
 
-  extern __shared__ int temp[];
-  KernelArrayView shared_temp{temp, {1, size.num_cols}};
+    RowMajorKernelArrayViewConst in{in_ptr, size};
+    RowMajorKernelArrayView out{out_ptr, size};
 
-  if (ColIndex() >= size.num_cols) return;
+    extern __shared__ int temp[];
+    RowMajorKernelArrayView shared_temp{temp, {1, size.num_cols}};
 
-  LoadRowToShared(in, shared_temp, RowIndex());
-  __syncthreads();
+    LoadRowToShared(in, shared_temp, RowIndex());
+    __syncthreads();
 
-  InclusiveScanHillisSteele(shared_temp, size.num_cols);
-  __syncthreads();
+    InclusiveScanHillisSteele(shared_temp, size.num_cols);
+    __syncthreads();
 
-  ConvertToExclusiveScan(shared_temp, out, RowIndex());
-}
+    ConvertToExclusiveScan(shared_temp, out, RowIndex());
+  }
 
 } // namespace row_scan_single_block

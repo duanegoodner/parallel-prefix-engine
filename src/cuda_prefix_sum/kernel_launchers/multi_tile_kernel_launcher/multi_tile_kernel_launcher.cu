@@ -5,9 +5,12 @@
 
 #include "common/array_size_2d.hpp"
 
+#include "cuda_prefix_sum/internal/col_scan_multi_block_kernel.cuh"
+#include "cuda_prefix_sum/internal/col_scan_single_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/kernel_array.hpp"
 #include "cuda_prefix_sum/internal/kernel_config_utils.cuh"
 #include "cuda_prefix_sum/internal/kernel_launch_params.hpp"
+#include "cuda_prefix_sum/internal/multi_block_prefix_sum_helpers.cuh"
 #include "cuda_prefix_sum/internal/row_scan_multi_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/row_scan_single_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
@@ -16,6 +19,8 @@
 namespace sk = subtile_kernels;
 namespace rsingle = row_scan_single_block;
 namespace rmulti = row_scan_multi_block;
+namespace csingle = col_scan_single_block;
+namespace cmulti = col_scan_multi_block;
 
 MultiTileKernelLauncher::MultiTileKernelLauncher(
     const ProgramArgs &program_args
@@ -26,7 +31,7 @@ MultiTileKernelLauncher::MultiTileKernelLauncher(
     , bottom_tile_edge_buffers_{{FirstPassGridDim().y, program_args_.FullMatrixSize2D().num_cols}}
     , bottom_tile_edge_buffers_ps_{{FirstPassGridDim().y, program_args_.FullMatrixSize2D().num_cols}} {}
 
-void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
+void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
   constexpr size_t kMaxSharedMemBytes = 98304;
   ConfigureSharedMemoryForKernel(sk::MultiTileKernel, kMaxSharedMemBytes);
 
@@ -45,6 +50,8 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
 
   CheckErrors();
 
+  device_array.DebugPrintOnHost("global array after tile prefix sums");
+
   right_tile_edge_buffers_.DebugPrintOnHost(
       "right edges buffer before row-wise exclusive prefix sum"
   );
@@ -60,6 +67,30 @@ void MultiTileKernelLauncher::Launch(const KernelArray &device_array) {
   );
 
   CheckErrors();
+
+  bottom_tile_edge_buffers_.DebugPrintOnHost(
+      "bottom edges buffer before col-wise exclusive prefix sum"
+  );
+
+  LaunchColWisePrefixSum(
+      bottom_tile_edge_buffers_.d_address(),
+      bottom_tile_edge_buffers_ps_.d_address(),
+      bottom_tile_edge_buffers_.size()
+  );
+
+  bottom_tile_edge_buffers_ps_.DebugPrintOnHost(
+      "bottom edges buffer after col-wise exclusive prefix sum"
+  );
+
+  CheckErrors();
+
+  sk::ApplyTileGlobalOffsets<<<FirstPassGridDim(), FirstPassBlockDim()>>>(
+      launch_params,
+      right_tile_edge_buffers_ps_.ConstView(),
+      bottom_tile_edge_buffers_ps_.ConstView()
+  );
+
+  device_array.DebugPrintOnHost("global array after adding offsets");
 }
 
 dim3 MultiTileKernelLauncher::FirstPassGridDim() {
@@ -118,47 +149,52 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
         size
     );
   } else {
-    ArraySize2D original_size = size;
-
-    // Phase 1: scan chunks
-    size_t num_chunks =
-        (size.num_cols + mult_block_buffer_sum_chunk_size_ - 1) /
-        mult_block_buffer_sum_chunk_size_;
-    dim3 grid_phase1(num_chunks, size.num_rows);
-    dim3 block_phase1(mult_block_buffer_sum_chunk_size_);
-    size_t shared_bytes = mult_block_buffer_sum_chunk_size_ * sizeof(int);
-
-    int *d_block_sums;
-    cudaMalloc(&d_block_sums, sizeof(int) * size.num_rows * num_chunks);
-
-    rmulti::RowScanMultiBlockPhase1<<<grid_phase1, block_phase1, shared_bytes>>>(
+    multi_block_prefix_sum::Launch(
         d_input,
         d_output,
-        d_block_sums,
         size,
-        mult_block_buffer_sum_chunk_size_
+        mult_block_buffer_sum_chunk_size_,
+        /*row_major=*/true,
+        rmulti::RowScanMultiBlockPhase1,
+        rmulti::RowScanMultiBlockPhase2,
+        [this](const int *in, int *out, ArraySize2D sz) {
+          LaunchRowWisePrefixSum(in, out, sz);
+        }
     );
+  }
+}
 
-    // Phase 1.5: scan block sums
-    int *d_scanned_block_sums;
-    cudaMalloc(
-        &d_scanned_block_sums,
-        sizeof(int) * size.num_rows * num_chunks
-    );
-
-    // Recursively scan block sums row-wise
-    ArraySize2D block_sum_size{size.num_rows, num_chunks};
-    LaunchRowWisePrefixSum(d_block_sums, d_scanned_block_sums, block_sum_size);
-
-    // Phase 2: apply scanned sums
-    rmulti::RowScanMultiBlockPhase2<<<grid_phase1, block_phase1>>>(
+void MultiTileKernelLauncher::LaunchColWisePrefixSum(
+    const int *d_input,
+    int *d_output,
+    ArraySize2D bottom_edge_buffer_size
+) {
+  if (bottom_edge_buffer_size.num_rows <= buffer_sum_method_cutoff_) {
+    dim3 block(bottom_edge_buffer_size.num_rows);
+    dim3 grid(bottom_edge_buffer_size.num_cols);
+    size_t shared_bytes = bottom_edge_buffer_size.num_rows * sizeof(int);
+    csingle::ColScanSingleBlockKernel<<<grid, block, shared_bytes>>>(
+        d_input,
         d_output,
-        d_scanned_block_sums,
-        original_size,
-        mult_block_buffer_sum_chunk_size_
+        bottom_edge_buffer_size,
+        right_tile_edge_buffers_ps_.d_address(),
+        right_tile_edge_buffers_ps_.size(),
+        program_args_.TileSize2D()
     );
+  } else {
 
-    cudaFree(d_block_sums);
-    cudaFree(d_scanned_block_sums);
+    multi_block_prefix_sum::Launch(
+        d_input,
+        d_output,
+        bottom_edge_buffer_size,
+        mult_block_buffer_sum_chunk_size_,
+        /*row_major=*/false,
+        cmulti::ColScanMultiBlockPhase1,
+        cmulti::ColScanMultiBlockPhase2,
+        [this](const int *in, int *out, ArraySize2D sz) {
+          LaunchColWisePrefixSum(in, out, sz);
+        }
+
+    );
   }
 }
