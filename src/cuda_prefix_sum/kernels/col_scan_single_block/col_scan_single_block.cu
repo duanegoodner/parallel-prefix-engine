@@ -21,10 +21,10 @@ namespace col_scan_single_block {
 
     RowMajorKernelArrayViewConst input_view{input_ptr, scan_array_size};
     RowMajorKernelArrayView output_view{output_ptr, scan_array_size};
-    RowMajorKernelArrayViewConst row_prefix_view{
-        row_prefix_ptr,
-        row_prefix_array_size
-    };
+    // RowMajorKernelArrayViewConst row_prefix_view{
+    //     row_prefix_ptr,
+    //     row_prefix_array_size
+    // };
 
     extern __shared__ int shared_col_buffer_ptr[];
     RowMajorKernelArrayView shared_col_view{
@@ -35,12 +35,12 @@ namespace col_scan_single_block {
     LoadColumnToShared(input_view, shared_col_view);
     __syncthreads();
 
-    InjectRowPrefixAdjustment(
-        row_prefix_view,
-        shared_col_view,
-        tile_size
-    );
-    __syncthreads();
+    // InjectRowPrefixAdjustment(
+    // row_prefix_view,
+    //     shared_col_view,
+    //     tile_size
+    // );
+    // __syncthreads();
 
     InclusiveScanDownColumn(
         shared_col_view,

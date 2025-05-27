@@ -21,11 +21,15 @@ private:
   dim3 FirstPassBlockDim();
   dim3 FirstPassGridDim();
   size_t FirstPassSharedMemPerBlock();
+
   void LaunchRowWisePrefixSum(
       const int *d_input,
       int *d_output,
       ArraySize2D size
   );
+
+  void LaunchRowToColInjection();
+
   void LaunchColWisePrefixSum(
       const int *d_input,
       int *d_output,

@@ -57,6 +57,7 @@ target_link_libraries(
     sub_tile_kernels
     row_scan_single_block_kernel
     row_scan_multi_block_kernel
+    row_to_col_injection_kernel
     multi_tile_kernel_launcher
     time_utils
     my_default_flags

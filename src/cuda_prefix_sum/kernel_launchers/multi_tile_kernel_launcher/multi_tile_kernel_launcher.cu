@@ -13,12 +13,14 @@
 #include "cuda_prefix_sum/internal/multi_block_prefix_sum_helpers.cuh"
 #include "cuda_prefix_sum/internal/row_scan_multi_block_kernel.cuh"
 #include "cuda_prefix_sum/internal/row_scan_single_block_kernel.cuh"
+#include "cuda_prefix_sum/internal/row_to_col_injection_kernel.cuh"
 #include "cuda_prefix_sum/internal/sub_tile_kernels.cuh"
 #include "cuda_prefix_sum/multi_tile_kernel_launcher.cuh"
 
 namespace sk = subtile_kernels;
 namespace rsingle = row_scan_single_block;
 namespace rmulti = row_scan_multi_block;
+namespace rtci = row_to_col_injection;
 namespace csingle = col_scan_single_block;
 namespace cmulti = col_scan_multi_block;
 
@@ -50,36 +52,21 @@ void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
 
   CheckErrors();
 
-  device_array.DebugPrintOnHost("global array after tile prefix sums");
-
-  right_tile_edge_buffers_.DebugPrintOnHost(
-      "right edges buffer before row-wise exclusive prefix sum"
-  );
-
   LaunchRowWisePrefixSum(
       right_tile_edge_buffers_.d_address(),
       right_tile_edge_buffers_ps_.d_address(),
       right_tile_edge_buffers_.size()
   );
 
-  right_tile_edge_buffers_ps_.DebugPrintOnHost(
-      "right edges after row-wise exclusive prefix sum"
-  );
-
   CheckErrors();
 
-  bottom_tile_edge_buffers_.DebugPrintOnHost(
-      "bottom edges buffer before col-wise exclusive prefix sum"
-  );
+  LaunchRowToColInjection();
+  CheckErrors();
 
   LaunchColWisePrefixSum(
       bottom_tile_edge_buffers_.d_address(),
       bottom_tile_edge_buffers_ps_.d_address(),
       bottom_tile_edge_buffers_.size()
-  );
-
-  bottom_tile_edge_buffers_ps_.DebugPrintOnHost(
-      "bottom edges buffer after col-wise exclusive prefix sum"
   );
 
   CheckErrors();
@@ -90,7 +77,6 @@ void MultiTileKernelLauncher::Launch(const RowMajorKernelArray &device_array) {
       bottom_tile_edge_buffers_ps_.ConstView()
   );
 
-  device_array.DebugPrintOnHost("global array after adding offsets");
 }
 
 dim3 MultiTileKernelLauncher::FirstPassGridDim() {
@@ -162,6 +148,27 @@ void MultiTileKernelLauncher::LaunchRowWisePrefixSum(
         }
     );
   }
+}
+
+void MultiTileKernelLauncher::LaunchRowToColInjection() {
+
+  constexpr int block_dim_y = 128;
+
+  // Determine how many thread blocks needed along y to cover all rows
+  int grid_dim_y =
+      (bottom_tile_edge_buffers_.size().num_rows + block_dim_y - 1) /
+      block_dim_y;
+  
+  dim3 block_dim(1, block_dim_y);
+  dim3 grid_dim(bottom_tile_edge_buffers_.size().num_cols, grid_dim_y);
+
+  rtci::RowToColInjection<<<grid_dim, block_dim>>>(
+      bottom_tile_edge_buffers_.d_address(),
+      bottom_tile_edge_buffers_.size(),
+      right_tile_edge_buffers_ps_.d_address(),
+      right_tile_edge_buffers_ps_.size(),
+      program_args_.TileSize2D()
+  );
 }
 
 void MultiTileKernelLauncher::LaunchColWisePrefixSum(

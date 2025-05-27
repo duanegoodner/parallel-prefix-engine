@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cuda_runtime.h>
 
 #include "common/array_size_2d.hpp"
@@ -26,6 +27,11 @@ namespace row_to_col_injection {
   __forceinline__ __device__ int GlobalTileCol(ArraySize2D tile_size) {
     return blockIdx.x / tile_size.num_cols;
   }
+
+  __forceinline__ __device__ int PrevTileRowLastRow(ArraySize2D tile_size) {
+  int tile_row = ColArrayRow() / tile_size.num_rows;
+  return max(tile_row * tile_size.num_rows - 1, (size_t) 0);
+}
 
   __forceinline__ __device__ void AdjustColArrayElement(
       RowMajorKernelArrayViewConst row_prefix_array,
