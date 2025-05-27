@@ -5,7 +5,7 @@
 
 struct MpiSolverRegistrar {
     MpiSolverRegistrar() {
-        std::cout << "[mpi] Registering MPI backend...\n";
+        // std::cout << "[mpi] Registering MPI backend...\n";
         PrefixSumSolverFactory::RegisterBackend("mpi",
             [](const ProgramArgs& args) {
                 return std::make_unique<MpiPrefixSumSolver>(args);

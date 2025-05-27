@@ -7,7 +7,7 @@
 
 struct CudaSolverRegistrar {
   CudaSolverRegistrar() {
-    std::cout << "[cuda] Registering CUDA backend...\n";
+    // std::cout << "[cuda] Registering CUDA backend...\n";
     PrefixSumSolverFactory::RegisterBackend("cuda",
       [](const ProgramArgs& args) {
         return std::make_unique<CudaPrefixSumSolver>(

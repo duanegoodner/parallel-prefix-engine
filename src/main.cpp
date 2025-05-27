@@ -40,7 +40,6 @@
 
 #include "cuda_prefix_sum/cuda_solver_registration.hpp"
 
-
 int main(int argc, char *argv[]) {
   auto program_args = ArgParser::Parse(argc, argv);
 
@@ -66,11 +65,11 @@ int main(int argc, char *argv[]) {
           std::to_string(program_args.full_matrix_dim()[0]) + " x " +
           std::to_string(program_args.full_matrix_dim()[1])
   );
-  std::cout << std::endl;
+//   std::cout << std::endl;
 
   RegisterAllSolvers();
 
-    // auto solver = MakeSolver(program_args);
+  // auto solver = MakeSolver(program_args);
   auto solver = PrefixSumSolverFactory::Create(program_args);
 
   auto local_mat = GenerateRandomMatrix<int>(
@@ -79,11 +78,22 @@ int main(int argc, char *argv[]) {
       program_args.seed()
   );
 
-  solver->PrintFullMatrix("Starting matrix");
+  if (program_args.print_full_array()) {
+    solver->PrintFullMatrix("Starting matrix");
+  }
+
   solver->StartTimer();
   solver->Compute();
   solver->StopTimer();
-  solver->PrintFullMatrix("After prefix sum computation");
+
+  if (program_args.print_full_array()) {
+    solver->PrintFullMatrix("After prefix sum computation");
+  } else {
+    solver->PrintLowerRightElement(
+        "Lower right corner element after prefix sum:"
+    );
+  }
+
   solver->ReportTime();
 
   return 0;

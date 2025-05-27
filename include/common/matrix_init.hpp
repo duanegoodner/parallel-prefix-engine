@@ -24,7 +24,7 @@ std::vector<T> GenerateRandomMatrix(
   std::vector<T> mat(num_rows * num_cols);
 
   if constexpr (std::is_integral_v<T>) {
-    std::uniform_int_distribution<T> dist(low, high - 1);
+    std::uniform_int_distribution<T> dist(low, high);
     for (T &val : mat)
       val = dist(rng);
   } else if constexpr (std::is_floating_point_v<T>) {
