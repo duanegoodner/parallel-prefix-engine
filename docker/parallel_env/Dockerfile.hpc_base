@@ -36,11 +36,6 @@ COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
 RUN groupadd -g ${PRIMARY_GID} ${PRIMARY_USER} && \
     useradd -m -s /bin/bash -u ${PRIMARY_UID} -g ${PRIMARY_GID} ${PRIMARY_USER}
 
-# ---  Use this if want PRIMARY_USER to have sudo privileges ---
-# COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
-# RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
-#     && sudo rm -rf /tmp/create_sudo_user
-
 # --- Create project workspace owned by dev user ---
 RUN mkdir -p /home/${PRIMARY_USER}/project && \
     chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/project
