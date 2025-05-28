@@ -32,19 +32,6 @@
             }
         },
         {
-            "name": "safe-release",
-            "displayName": "Release (Optimized)",
-            "description": "Optimized build with CUDA fast math.",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/safe_release",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "ENABLE_DEBUG": "OFF",
-                "ENABLE_O0": "ON",
-                "ENABLE_CUDA_FAST_MATH": "OFF"
-            }
-        },
-        {
             "name": "release-profiling",
             "displayName": "Release with gprof",
             "description": "Optimized build with gprof instrumentation (-pg).",
@@ -81,10 +68,6 @@
         {
             "name": "release",
             "configurePreset": "release"
-        },
-        {
-            "name": "safe-release",
-            "configurePreset": "safe-release"
         },
         {
             "name": "release-profiling",

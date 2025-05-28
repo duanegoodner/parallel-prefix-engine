@@ -37,9 +37,8 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
       )) {
 
   PopulateFullMatrix();
-  std::vector<std::string> time_interval_names = {
-    "warmup", "total", "data_distribute", "compute", "data_gather"
-  };
+  std::vector<std::string> time_interval_names =
+      {"warmup", "total", "data_distribute", "compute", "data_gather"};
   time_intervals_.AttachIntervals(time_interval_names);
 
   // TODO : Error if product of num_tile_rows and num_tile_cols is not equal to
@@ -50,7 +49,6 @@ MpiPrefixSumSolver::MpiPrefixSumSolver(const ProgramArgs &program_args)
 // void MpiPrefixSumSolver::AttachTimeInterval(std::string name) {
 //   time_intervals_[name] = TimeInterval();
 // }
-
 
 void MpiPrefixSumSolver::PopulateFullMatrix() {
   if (mpi_environment_.rank() == 0) {
@@ -106,21 +104,17 @@ void MpiPrefixSumSolver::StartTimer() {
   time_intervals_.RecordStart("total");
 }
 
-void MpiPrefixSumSolver::StopTimer() {
-  time_intervals_.RecordEnd("total");
-}
+void MpiPrefixSumSolver::StopTimer() { time_intervals_.RecordEnd("total"); }
 
 void MpiPrefixSumSolver::ReportTime() const {
 
   auto local_start_time_s = time_intervals_.StartTime("total").count();
   auto local_end_time_s = time_intervals_.EndTime("total").count();
-  auto local_elapsed_time_s =
-      time_intervals_.ElapsedTime("total").count();
+  auto local_elapsed_time_s = time_intervals_.ElapsedTime("total").count();
 
   auto local_data_distribute_time_s =
       time_intervals_.ElapsedTime("data_distribute").count();
-  auto local_compute_time_s =
-      time_intervals_.ElapsedTime("compute").count();
+  auto local_compute_time_s = time_intervals_.ElapsedTime("compute").count();
   auto local_data_gather_time_s =
       time_intervals_.ElapsedTime("data_gather").count();
 
@@ -202,33 +196,50 @@ void MpiPrefixSumSolver::ReportTime() const {
         *std::max_element(all_end_times_s.begin(), all_end_times_s.end());
     double total_time_elapsed_time_s = global_end_time_s - global_start_time_s;
 
-    std::cout << "\n=== Runtime Report ===\n";
+    std::cout << "\n\n=== Runtime Report ===\n";
     std::cout << "Total runtime (wall clock): "
               << total_time_elapsed_time_s * 1000.0 << " ms\n";
 
-    std::cout << "\nPer-rank execution times:\n";
+    std::cout << "\n=== Per-Rank Timing Breakdown (ms) ===\n";
+    std::cout << std::setw(8) << "Rank" << std::setw(15) << "Total"
+              << std::setw(15) << "Distribute" << std::setw(15) << "Compute"
+              << std::setw(15) << "Gather"
+              << "\n";
+
+    std::cout << std::string(68, '-') << "\n";
+
     for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": " << all_elapsed_times_s[i] * 1000.0
-                << " ms\n";
+      std::cout << std::setw(8) << i << std::setw(15) << std::fixed
+                << std::setprecision(4) << all_elapsed_times_s[i] * 1000.0
+                << std::setw(15) << all_data_distribute_times_s[i] * 1000.0
+                << std::setw(15) << all_compute_times_s[i] * 1000.0
+                << std::setw(15) << all_data_gather_times_s[i] * 1000.0
+                << "\n";
     }
 
-    std::cout << "\nPer-rank data distribute times:\n";
-    for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": "
-                << all_data_distribute_times_s[i] * 1000.0 << " ms\n";
-    }
+    // std::cout << "\nPer-rank execution times:\n";
+    // for (int i = 0; i < size; ++i) {
+    //   std::cout << "  Rank " << i << ": " << all_elapsed_times_s[i] * 1000.0
+    //             << " ms\n";
+    // }
 
-    std::cout << "\nPer-rank compute times:\n";
-    for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": " << all_compute_times_s[i] * 1000.0
-                << " ms\n";
-    }
+    // std::cout << "\nPer-rank data distribute times:\n";
+    // for (int i = 0; i < size; ++i) {
+    //   std::cout << "  Rank " << i << ": "
+    //             << all_data_distribute_times_s[i] * 1000.0 << " ms\n";
+    // }
 
-    std::cout << "\nPer-rank data gather times:\n";
-    for (int i = 0; i < size; ++i) {
-      std::cout << "  Rank " << i << ": "
-                << all_data_gather_times_s[i] * 1000.0 << " ms\n";
-    }
+    // std::cout << "\nPer-rank compute times:\n";
+    // for (int i = 0; i < size; ++i) {
+    //   std::cout << "  Rank " << i << ": " << all_compute_times_s[i] * 1000.0
+    //             << " ms\n";
+    // }
+
+    // std::cout << "\nPer-rank data gather times:\n";
+    // for (int i = 0; i < size; ++i) {
+    //   std::cout << "  Rank " << i << ": "
+    //             << all_data_gather_times_s[i] * 1000.0 << " ms\n";
+    // }
 
     std::cout << std::endl;
   }
