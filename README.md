@@ -296,7 +296,8 @@ Once inside the container (e.g., via docker exec -it hpc_mpich /bin/zsh), you ca
 
 - Integrate with the VS Code NVIDIA Nsight Extension, after connecting VS Code to the running container using the Dev Containers extension.
 
-> [!NOTE]  While the VS Code Nsight extension can detect your container and attach to your binary, functionality in the integrated debug terminal is limited (most views show as "unavailable" at this time).
+> [!NOTE]
+> While the VS Code Nsight extension can detect your container and attach to your binary, functionality in the integrated debug terminal is limited (most views show as "unavailable" at this time).
 
 
 ### 🚧 Full Nsight Compute GUI
