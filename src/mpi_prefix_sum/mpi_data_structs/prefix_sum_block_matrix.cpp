@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 
 #include "mpi_prefix_sum/internal/prefix_sum_block_matrix.hpp"
+#include <iostream>
+#include <stdexcept>
 
 PrefixSumBlockMatrix::PrefixSumBlockMatrix(int square_dim)
     : num_rows_(square_dim)
