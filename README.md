@@ -1,6 +1,6 @@
 # Parallel Prefix Engine
 
-***A 2-D Prefix Sum Project in CUDA and MPI***
+***CUDA + MPI Based Framework for Parallel Data Aggregation***
 
 ## Overview
 
