@@ -1,5 +1,5 @@
 # Mark scripts as vendored so GitHub Linguist ignores them
 *.sh linguist-vendored
 
-/scripts/* linguist-vendored
-/docker/* linguist-vendored
+scripts/* linguist-vendored
+docker/* linguist-vendored
