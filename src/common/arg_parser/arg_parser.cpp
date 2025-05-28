@@ -13,7 +13,7 @@
 #include "common/logger.hpp"
 
 ProgramArgs ArgParser::Parse(int argc, char *const argv[]) {
-  CLI::App app{"Distributed prefix sum runner"};
+  CLI::App app{"Parallel prefix sum runner"};
 
   int seed = 1234;
   std::string backend = "mpi";

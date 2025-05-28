@@ -1,3 +1,5 @@
 .vscode/
 
 build/
+
+docker/parallel_env/.env
