@@ -5,7 +5,7 @@
 #include "common/program_args.hpp"
 // #include "cuda_prefix_sum/kernel_launcher.hpp"
 
-std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args);
+// std::unique_ptr<PrefixSumSolver> MakeSolver(ProgramArgs &program_args);
 
 class PrefixSumSolverFactory {
 public:
