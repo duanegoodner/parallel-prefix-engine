@@ -1,0 +1,14 @@
+add_library(zscaffold_solver_registration STATIC
+    zscaffold_solver_registration.cpp
+)
+
+target_include_directories(zscaffold_solver_registration
+    PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+)
+
+target_link_libraries(zscaffold_solver_registration
+    PRIVATE
+        zscaffold::zscaffold_CXX
+)

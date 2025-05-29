@@ -23,13 +23,9 @@
 
 class CudaPrefixSumSolver : public PrefixSumSolver {
 public:
-  // using KernelLaunchFunction =
-  //     void (*)(const KernelLaunchParams);
-
   explicit CudaPrefixSumSolver(
       const ProgramArgs &program_args,
       std::unique_ptr<KernelLauncher> kernel_launcher
-      // KernelLaunchFunction kernel_launch_func
   );
 
   ~CudaPrefixSumSolver();
