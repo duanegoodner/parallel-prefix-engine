@@ -313,6 +313,55 @@ The CUDA implementation in this project is optimized to take full advantage of s
 
 This approach reduces global memory traffic and helps achieve high performance on large input arrays. The kernel structure is designed to minimize synchronization costs and maximize instruction-level parallelism on modern NVIDIA GPUs.
 
+## Adding a New Backend
+
+The project uses a plugin-style backend architecture. To add a new backend, the recommended approach is to copy and adapt the provided scaffolded files under `./include/zscaffold_prefix_sum/` and `./src/zscaffold_prefix_sum/`. This backend is intentionally minimal and serves as a reference implementation.
+
+### 🔧 Files to Create
+
+Replace `zscaffold` with your backend name in these files:
+
+#### Public Headers
+
+```
+include/zscaffold_prefix_sum/zscaffold_prefix_sum_solver.hpp
+include/zscaffold_prefix_sum/zscaffold_solver_registration.hpp
+```
+
+#### Source Files
+
+```
+src/zscaffold_prefix_sum/zscaffold_prefix_sum.cpp
+src/zscaffold_prefix_sum/registration/zscaffold_solver_registration.cpp
+src/zscaffold_prefix_sum/CMakeLists.txt.scaffold
+src/zscaffold_prefix_sum/registration/CMakeLists.txt.scaffold
+```
+
+#### Optional Internal Header Directory
+
+```
+src/zscaffold_prefix_sum/include/zscaffold_prefix_sum/internal/
+```
+This can be used to hold backend-specific helper code, kernels, or utilities.
+
+### ✏️ Files to Modify
+
+The following existing files must be updated to register and dispatch your new backend:
+
+```
+src/CMakeLists.txt
+src/common/solver_dispatch/solver_dispatch.cpp
+src/common/solver_dispatch/CMakeLists.txt
+src/common/arg_parser/arg_parser.cpp
+src/common/arg_parser/CMakeLists.txt
+```
+Look for commented `zscaffold` items in these files to provide guidance on what needs to be added to each file.
+
+### Accessing from Command Line
+
+Once you've implemented your concrete `PrefixSumSolver` and added registration, the new backend can be selected at runtime via the --backend CLI option.
+
+
 ## Potential Enhancements
 This project is functional and performs well on both MPI and CUDA backends, but several enhancements could be explored in the future to further improve performance and scalability:
 
@@ -341,6 +390,8 @@ While basic CUDA error checks are included, deeper integration with tools like c
 - **Hybrid Backends**: For mid-sized arrays, a hybrid approach using both MPI and CUDA (e.g., CUDA per node + MPI between nodes) could deliver even better scalability.
 
 - **Nsight Systems Tracing**: Using Nsight Systems to trace kernel execution and memory transfer patterns may reveal additional optimization opportunities.
+
+- **Simplified Backend Integration**: While the plugin architecture is modular and extensible, adding a new backend currently requires editing several files and maintaining parallel CMake targets. A future improvement could automate or centralize backend registration, reducing boilerplate and improving developer ergonomics for extending the system.
 
 
 

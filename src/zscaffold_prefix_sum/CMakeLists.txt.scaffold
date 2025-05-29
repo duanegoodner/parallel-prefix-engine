@@ -1,0 +1,13 @@
+add_subdirectory(registration)
+
+
+add_library(prefix_sum_zscaffold zscaffold_prefix_sum_solver.cpp)
+
+target_include_directories(prefix_sum_zscaffold PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(prefix_sum_zscaffold PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(
+    prefix_sum_zscaffold PRIVATE
+    program_args
+    time_utils
+    my_default_flags
+    )

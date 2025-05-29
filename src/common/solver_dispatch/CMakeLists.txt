@@ -6,6 +6,7 @@ target_link_libraries(
     PRIVATE
     cuda_solver_registration
     mpi_solver_registration
+    # zscaffold_solver_registration
     my_default_flags
     multi_tile_kernel_launcher
     single_tile_kernel_launcher
