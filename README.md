@@ -1,6 +1,6 @@
 # Parallel Prefix Engine
 
-***CUDA + MPI Based Framework for Parallel Data Aggregation***
+***CUDA + MPI based framework for parallel data aggregation***
 
 ## Overview
 
