@@ -1,0 +1,19 @@
+[workspace]
+authors = ["Duane Goodner <dmgoodner@gmail.com>"]
+channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
+name = "parallel-prefix-engine"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = ">=3.13.5,<3.14"
+modular = ">=25.5.0.dev2025061705,<26"
+pytorch = ">=2.7.0,<3"
+torchvision = ">=0.22.0,<0.23"
+
+
+[pypi-dependencies]
+onnx = "*"
+onnxruntime-gpu = "*"

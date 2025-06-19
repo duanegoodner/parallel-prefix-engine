@@ -30,7 +30,7 @@ RUN apt-get update && \
 
 # --- Optional: entrypoint setup ---
 RUN mkdir -p /usr/local/entrypoints
-COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
+COPY ./docker/hpc_app/entrypoint_simple_persistence.sh /usr/local/entrypoints
 
 # --- Create group and user without sudo ---
 RUN groupadd -g ${PRIMARY_GID} ${PRIMARY_USER} && \
@@ -64,24 +64,32 @@ rm /tmp/Meslo.zip
 
 # ---  Copy final Zsh and p10k configs (as root) ---
 USER root
-COPY image_resources/components/zsh_setup/.zshrc /home/${PRIMARY_USER}/.zshrc
-COPY image_resources/components/zsh_setup/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
+COPY ./docker/hpc_app/.zshrc /home/${PRIMARY_USER}/.zshrc
+COPY ./docker/hpc_app/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
 RUN chown ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.zshrc /home/${PRIMARY_USER}/.p10k.zsh
 USER ${PRIMARY_USER}
 
 
 # ---  Install Miniconda (user scope) ---
-USER ${PRIMARY_USER}
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
-bash /tmp/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 && \
-rm /tmp/miniconda.sh && \
-/home/${PRIMARY_USER}/miniconda3/bin/conda init zsh && \
-echo "conda activate project_env" >> ~/.zshrc && \
-echo "conda activate project_env" >> ~/.bashrc
+# USER ${PRIMARY_USER}
+# RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+# bash /tmp/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 && \
+# rm /tmp/miniconda.sh && \
+# /home/${PRIMARY_USER}/miniconda3/bin/conda init zsh && \
+# echo "conda activate project_env" >> ~/.zshrc && \
+# echo "conda activate project_env" >> ~/.bashrc
 
-COPY ./env.yml /home/${PRIMARY_USER}/env.yml
-RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /home/${PRIMARY_USER}/env.yml
+# COPY ../../environment.yml /tmp/environment.yml
+# RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n project_env -f /tmp/environment.yml
 
+# ---  Install pixi package manager ---
+RUN curl -fsSL https://pixi.sh/install.sh | bash && \
+    echo 'export PATH="$HOME/.pixi/bin:$PATH"' >> ~/.bashrc && \
+    echo 'export PATH="$HOME/.pixi/bin:$PATH"' >> ~/.zshrc
+
+RUN mkdir -p /home/${PRIMARY_USER}/pixi_env
+COPY ../../pixi.toml /home/${PRIMARY_USER}/pixi_env/pixi.toml
+RUN cd /home/${PRIMARY_USER}/pixi_env && /home/${PRIMARY_USER}/.pixi/bin/pixi install
 
 # ---  Ensure we are devuser with WORKDIR = ~/project/ ---
 USER ${PRIMARY_USER}

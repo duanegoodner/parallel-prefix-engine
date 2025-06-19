@@ -13,7 +13,7 @@ services:
               capabilities: [ gpu ]
     build:
       context: ../
-      dockerfile: ./parallel_env/Dockerfile.hpc_base
+      dockerfile: ./docker/Dockerfile.hpc_base
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
@@ -54,7 +54,7 @@ services:
               capabilities: [ gpu ]
     build:
       context: ../
-      dockerfile: ./parallel_env/Dockerfile.hpc_mpich
+      dockerfile: ./docker/Dockerfile.hpc_mpich
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
@@ -89,7 +89,7 @@ services:
               capabilities: [ gpu ]
     build:
       context: ../
-      dockerfile: ./parallel_env/Dockerfile.hpc_openmpi
+      dockerfile: ./docker/Dockerfile.hpc_openmpi
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
